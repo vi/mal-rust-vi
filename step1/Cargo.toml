@@ -1,0 +1,9 @@
+[package]
+name = "malvi_step1"
+version = "0.1.0"
+authors = ["Vitaly _Vi Shukela <vi0oss@gmail.com>"]
+edition = "2018"
+workspace = ".."
+
+[dependencies]
+

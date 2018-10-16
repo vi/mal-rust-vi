@@ -9,7 +9,7 @@ while(< /mnt/src/git/mal/tests/$st*mal >) {
     $fn = $_;
 }
 
-print "fn=$fn\n";
+print "fn = $fn\n";
 
 open F, "<", $fn or die;
 open G, ">", "$st/src/tests.rs" or die;
@@ -19,7 +19,7 @@ my $in = undef;
 my $ctr = 0;
 
 sub esc($) {
-    local $_ = $1;
+    local $_ = shift;
     s!\\!\\\\!g;
     s!"!\\"!g;
     return $_;
@@ -27,20 +27,21 @@ sub esc($) {
 
 while(<F>) {
     chomp;
-    if (m!^;;(.*)!) {
-        print G "// $1\n";
-    } elsif (m!^\;\=\>(.*)!) {
+    if (m!^\;\=\>(.*)!) {
+        my $out = $1;
         print G "#[test]\n";
         print G "fn test$ctr() {\n";
         print G "    super::test_it (\n";
         print G "        \"".esc($in)."\",\n";
-        print G "        \"".esc($1)."\",\n";
+        print G "        Some(\"".esc($out)."\"),\n";
         print G "    );\n";
         print G "}\n\n";
 
         $ctr+=1;
         $in="";
     } elsif (m!^\s*$!) {
+    } elsif (m!^;(.*)!) {
+        print G "// $1\n";
     } else {
         $in = $_;
     }
