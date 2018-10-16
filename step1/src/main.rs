@@ -1,12 +1,13 @@
 #![feature(try_blocks)]
 #![allow(unused)]
 
+
 extern crate malvi_step1 as malvi;
 
-use std::io::{BufRead,Result};
+use std::io::{BufRead};
 use self::malvi::{Malvi,Mal,Ast};
 
-fn main() -> Result<()> {
+fn main() -> malvi::Result<()> {
     let si = ::std::io::stdin();
     let mut si = si.lock();
     let mut line = "".to_string();
@@ -16,7 +17,7 @@ fn main() -> Result<()> {
         if 0 == si.read_line(&mut line)? {
             break;
         }
-        let ret : Result<()> = try {
+        let ret : malvi::Result<()> = try {
             let i = p.read(&line)?;
             let o = p.eval(i)?;
             line = p.print(o)?;

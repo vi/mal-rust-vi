@@ -1,10 +1,11 @@
-prog = { SOI ~ obj* ~ EOI }
+prog = _{ SOI ~ obj* ~ EOI }
+sobj = _{SOI ~ obj ~ EOI}
 obj = _{
 	int
     | "\"" ~ strlit ~ "\""
-    | rbracketed
-    | sbracketed
-    | cbracketed
+    | round
+    | square
+    | curly
     | ident
     | kw
     | atom
@@ -14,9 +15,9 @@ obj = _{
     | unquote
     | spliceunquote
 } 
-rbracketed = { "(" ~ obj* ~ ")" }
-sbracketed = { "[" ~ obj* ~ "]" }
-cbracketed = { "{" ~ obj* ~ "}" }
+round = { "(" ~ obj* ~ ")" }
+square = { "[" ~ obj* ~ "]" }
+curly = { "{" ~ obj* ~ "}" }
 int = @{ "-"? ~ ASCII_DIGIT+ }
 strlit = @{ strlit_char* }
 strlit_char = _{
@@ -36,5 +37,5 @@ quasiquote = { "`" ~ obj }
 unquote = { "~" ~ obj }
 spliceunquote = { "~@" ~ obj }
 
-WHITESPACE = _{ " " | "," }
+WHITESPACE = _{ " " | "," | "\n" }
 COMMENT = _{ ";" ~ ANY* ~ ("\n" | EOI) }

@@ -226,11 +226,39 @@ fn test26() {
 }
 
 // ; Testing reader errors
-// ;; TODO: fix these so they fail correctly
-//  expected ')', got EOF
-//  expected ']', got EOF
-//  expected '"', got EOF
-//  expected ')', got EOF
+
+#[test]
+fn testf1() {
+    super::test_it(
+        "(1 2",
+        None,
+    )
+}
+
+#[test]
+fn testf2() {
+    super::test_it(
+        "\"abc",
+        None,
+    )
+}
+
+#[test]
+fn testf3() {
+    super::test_it(
+        "[1 2",
+        None,
+    )
+}
+
+#[test]
+fn testf4() {
+    super::test_it(
+        "(1 \"abc",
+        None,
+    )
+}
+
 // ; Testing read of quoting
 #[test]
 fn test27() {

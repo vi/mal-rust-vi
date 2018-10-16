@@ -6,4 +6,7 @@ edition = "2018"
 workspace = ".."
 
 [dependencies]
-
+pest = "2.0.1"
+pest-deconstruct = "0.2.0"
+pest_derive = "2.0"
+failure = "0.1.2"

@@ -1,13 +1,32 @@
 #![feature(try_blocks)]
+#![allow(unused)]
+
+extern crate pest;
+#[macro_use]
+extern crate pest_derive;
+#[macro_use]
+extern crate failure;
+
+pub type Result<T> = ::std::result::Result<T, failure::Error>;
+
 
 #[cfg(test)]
 mod tests;
 
-use ::std::rc::Rc;
 
-use ::std::io::{Result}; // lazy error handling
+use ::std::rc::Rc;
+use pest::Parser;
+
+
+pub mod parser {
+    #[derive(Parser)]
+    #[grammar = "mal.pest"]
+    pub struct ParserImpl;
+}
 
 pub struct Ast(Rc<String>);
+
+
 
 
 pub trait Mal {
@@ -26,6 +45,9 @@ impl Malvi {
 }
 impl Mal for Malvi {
     fn read(&self, x:&str) -> Result<Ast> {
+        let p = parser::ParserImpl::parse(parser::Rule::sobj, x)?;
+        println!("{}", p);
+        
         Ok(Ast(Rc::new(x.to_string())))
     }
     fn eval(&mut self, a:Ast)-> Result<Ast> { Ok(a) }
