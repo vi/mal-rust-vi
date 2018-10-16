@@ -5,6 +5,8 @@ extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 #[macro_use]
+extern crate pest_deconstruct;
+#[macro_use]
 extern crate failure;
 
 pub type Result<T> = ::std::result::Result<T, failure::Error>;
@@ -13,16 +15,13 @@ pub type Result<T> = ::std::result::Result<T, failure::Error>;
 #[cfg(test)]
 mod tests;
 
+pub mod parse;
+
 
 use ::std::rc::Rc;
 use pest::Parser;
+use pest_deconstruct::FromPest;
 
-
-pub mod parser {
-    #[derive(Parser)]
-    #[grammar = "mal.pest"]
-    pub struct ParserImpl;
-}
 
 pub struct Ast(Rc<String>);
 
@@ -45,8 +44,11 @@ impl Malvi {
 }
 impl Mal for Malvi {
     fn read(&self, x:&str) -> Result<Ast> {
-        let p = parser::ParserImpl::parse(parser::Rule::sobj, x)?;
-        println!("{}", p);
+        let p = parse::parser::ParserImpl::parse(parse::parser::Rule::obj, x)?
+            .next().unwrap();
+        println!("{:?}", p);
+        let a = parse::ast::Obj::from_pest(p);
+        println!("{:?}", a);
         
         Ok(Ast(Rc::new(x.to_string())))
     }

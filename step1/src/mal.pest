@@ -1,6 +1,6 @@
 prog = _{ SOI ~ obj* ~ EOI }
 sobj = _{SOI ~ obj ~ EOI}
-obj = _{
+obj = {
 	int
     | "\"" ~ strlit ~ "\""
     | round
