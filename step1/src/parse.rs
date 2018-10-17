@@ -70,6 +70,13 @@ pub mod ast {
     }
 
     #[derive(Debug, FromPest)]
+    #[pest(rule = "Rule::deref")]
+    pub struct Deref<'i> {
+        pub span: Span<'i>,
+        pub inner: Box<Obj<'i>>,
+    }
+
+    #[derive(Debug, FromPest)]
     #[pest(rule = "Rule::withmeta")]
     pub struct Withmeta<'i> {
         pub span: Span<'i>,
@@ -113,6 +120,7 @@ pub mod ast {
         Quasiquote(Quasiquote<'i>),
         Unquote(Unquote<'i>),
         Spliceunquote(Spliceunquote<'i>),
+        Deref(Deref<'i>),
         Withmeta(Withmeta<'i>),
     }
 
@@ -139,14 +147,15 @@ pub mod ast {
                 Obj::Spliceunquote(Spliceunquote { inner, .. }) => {
                     Ast::Spliceunquote(Box::new((&(**inner)).into()))
                 }
+                Obj::Deref(Deref { inner, .. }) => Ast::Deref(Box::new((&(**inner)).into())),
                 Obj::Round(Round { items, .. }) => {
                     Ast::Round(items.iter().map(|x| x.into()).collect())
                 }
                 Obj::Square(Square { items, .. }) => {
-                    Ast::Round(items.iter().map(|x| x.into()).collect())
+                    Ast::Square(items.iter().map(|x| x.into()).collect())
                 }
                 Obj::Curly(Curly { items, .. }) => {
-                    Ast::Round(items.iter().map(|x| x.into()).collect())
+                    Ast::Curly(items.iter().map(|x| x.into()).collect())
                 }
                 Obj::Withmeta(Withmeta { inner, meta, .. }) => Ast::Withmeta {
                     value: Box::new((&(**inner)).into()),
@@ -154,5 +163,59 @@ pub mod ast {
                 },
             }
         }
+    }
+
+}
+
+fn writevec(f: &mut std::fmt::Formatter<'_>, v: &[super::Ast], mapmode: bool) {
+    let mut firsttime = true;
+    let mut odd = false;
+    for i in v {
+        if !firsttime {
+            if !mapmode || odd {
+                write!(f, " "); 
+            } else {
+                write!(f, ", ");
+            }
+        }
+        write!(f, "{}", i);
+        firsttime = false;
+        odd = !odd;
+    }
+}
+
+impl ::std::fmt::Display for super::Ast {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
+        use super::Ast::*;
+        match self {
+            Int(x) => write!(f, "{}", x),
+            StrLit(x) =>  write!(f, "\"{}\"", x),
+            Symbol(x) =>  write!(f, "{}", x),
+            Atom(x) =>  write!(f, "{}", x),
+            Nil =>  write!(f, "nil"),
+            Bool(x) =>  write!(f, "{}", x),
+            Quote(x) => write!(f, "(quote {})", x),
+            Quasiquote(x) => write!(f, "(quasiquote {})", x),
+            Unquote(x) => write!(f, "(unquote {})", x),
+            Spliceunquote(x) => write!(f, "(splice-unquote {})", x),
+            Withmeta{value,meta} => write!(f, "(with-meta {} {})", value, meta),
+            Deref(x) => write!(f, "(deref {})", x),
+            Round(x) => {
+                write!(f, "(");
+                writevec(f, x, false);
+                write!(f, ")")
+            },
+            Square(x) => {
+                write!(f, "[");
+                writevec(f, x, false);
+                write!(f, "]")
+            },
+            Curly(x) => {
+                write!(f, "{{");
+                writevec(f, x, true);
+                write!(f, "}}")
+            },
+        };
+        Ok(())
     }
 }

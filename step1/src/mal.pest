@@ -12,8 +12,9 @@ obj = {
     | withmeta
     | quote
     | quasiquote
-    | unquote
     | spliceunquote
+    | unquote
+    | deref
 } 
 round = { "(" ~ obj* ~ ")" }
 square = { "[" ~ obj* ~ "]" }
@@ -29,13 +30,14 @@ symbol = @{ !kw ~ ident_char+ }
 ident_char = _{
 	ASCII_ALPHANUMERIC | "_" | "-" | "+" | "/" | "*" | "."
 }
-kw = { ("true" | "false" | "nil") ~ !ident_char }
+kw = @{ ("true" | "false" | "nil") ~ !ident_char }
 atom = @{ ":" ~ symbol }
 withmeta = { "^" ~ obj ~ obj }
 quote = { "'" ~ obj }
 quasiquote = { "`" ~ obj }
 unquote = { "~" ~ obj }
 spliceunquote = { "~@" ~ obj }
+deref = { "@" ~ obj }
 
 WHITESPACE = _{ " " | "," | "\n" }
 COMMENT = _{ ";" ~ ANY* ~ ("\n" | EOI) }

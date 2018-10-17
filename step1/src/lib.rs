@@ -38,6 +38,7 @@ pub enum Ast {
     Quasiquote(Box<Ast>),
     Unquote(Box<Ast>),
     Spliceunquote(Box<Ast>),
+    Deref(Box<Ast>),
     Withmeta{
         value: Box<Ast>,
         meta: Box<Ast>,
@@ -61,7 +62,7 @@ impl Malvi {
 }
 impl Mal for Malvi {
     fn read(&self, x:&str) -> Result<Ast> {
-        let p = parse::parser::ParserImpl::parse(parse::parser::Rule::obj, x)?
+        let p = parse::parser::ParserImpl::parse(parse::parser::Rule::sobj, x)?
             .next().unwrap();
         let a = parse::ast::Obj::from_pest(p);
         let a : Ast = (&a).into();
@@ -69,7 +70,7 @@ impl Mal for Malvi {
     }
     fn eval(&mut self, a:Ast)-> Result<Ast> { Ok(a) }
     fn print(&self, a:Ast) -> Result<String> {
-        Ok(format!("{:?}", a)) 
+        Ok(format!("{}", a))
     }
 }
 
