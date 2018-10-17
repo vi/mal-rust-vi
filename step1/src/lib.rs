@@ -22,10 +22,27 @@ use ::std::rc::Rc;
 use pest::Parser;
 use pest_deconstruct::FromPest;
 
-
-pub struct Ast(Rc<String>);
-
-
+/// High-level AST
+#[derive(Debug)]
+pub enum Ast {
+    Round(Vec<Ast>),
+    Square(Vec<Ast>),
+    Curly(Vec<Ast>),
+    Int(i64),
+    Symbol(String),
+    Bool(bool),
+    Nil,
+    Atom(String),
+    StrLit(String),
+    Quote(Box<Ast>),
+    Quasiquote(Box<Ast>),
+    Unquote(Box<Ast>),
+    Spliceunquote(Box<Ast>),
+    Withmeta{
+        value: Box<Ast>,
+        meta: Box<Ast>,
+    },
+}
 
 
 pub trait Mal {
@@ -46,14 +63,14 @@ impl Mal for Malvi {
     fn read(&self, x:&str) -> Result<Ast> {
         let p = parse::parser::ParserImpl::parse(parse::parser::Rule::obj, x)?
             .next().unwrap();
-        println!("{:?}", p);
         let a = parse::ast::Obj::from_pest(p);
-        println!("{:?}", a);
-        
-        Ok(Ast(Rc::new(x.to_string())))
+        let a : Ast = (&a).into();
+        Ok(a)
     }
     fn eval(&mut self, a:Ast)-> Result<Ast> { Ok(a) }
-    fn print(&self, a:Ast) -> Result<String> { Ok((*a.0).clone()) }
+    fn print(&self, a:Ast) -> Result<String> {
+        Ok(format!("{:?}", a)) 
+    }
 }
 
 #[cfg(test)]

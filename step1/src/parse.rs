@@ -1,15 +1,14 @@
-
-
 pub mod parser {
     #[derive(Parser)]
     #[grammar = "mal.pest"]
     pub struct ParserImpl;
 }
 
+/// Low-level AST
 pub mod ast {
     use super::parser::Rule;
     use pest::Span;
-    
+
     #[derive(Debug, FromPest)]
     #[pest(rule = "Rule::int")]
     pub struct Int<'i> {
@@ -19,8 +18,8 @@ pub mod ast {
     }
 
     #[derive(Debug, FromPest)]
-    #[pest(rule = "Rule::ident")]
-    pub struct Ident<'i> {
+    #[pest(rule = "Rule::symbol")]
+    pub struct Symbol<'i> {
         pub span: Span<'i>,
     }
 
@@ -106,7 +105,7 @@ pub mod ast {
         Square(Square<'i>),
         Curly(Curly<'i>),
         Int(Int<'i>),
-        Ident(Ident<'i>),
+        Symbol(Symbol<'i>),
         Keyword(Keyword<'i>),
         Atom(Atom<'i>),
         StrLit(StrLit<'i>),
@@ -115,5 +114,45 @@ pub mod ast {
         Unquote(Unquote<'i>),
         Spliceunquote(Spliceunquote<'i>),
         Withmeta(Withmeta<'i>),
+    }
+
+    impl<'a, 'b> From<&'b Obj<'a>> for super::super::Ast {
+        fn from(x: &'b Obj<'a>) -> Self {
+            use super::super::Ast;
+            match x {
+                Obj::Int(Int { value, .. }) => Ast::Int(*value),
+                Obj::StrLit(StrLit { span }) => Ast::StrLit(span.as_str().to_string()),
+                Obj::Symbol(Symbol { span }) => Ast::Symbol(span.as_str().to_string()),
+                Obj::Atom(Atom { span }) => Ast::Atom(span.as_str().to_string()),
+                Obj::Keyword(Keyword { span }) => match span.as_str() {
+                    "nil" => Ast::Nil,
+                    "true" => Ast::Bool(true),
+                    "false" => Ast::Bool(false),
+                    _ => unreachable!(),
+                },
+                Obj::StrLit(StrLit { span }) => Ast::StrLit(span.as_str().to_string()),
+                Obj::Quote(Quote { inner, .. }) => Ast::Quote(Box::new((&(**inner)).into())),
+                Obj::Quasiquote(Quasiquote { inner, .. }) => {
+                    Ast::Quasiquote(Box::new((&(**inner)).into()))
+                }
+                Obj::Unquote(Unquote { inner, .. }) => Ast::Unquote(Box::new((&(**inner)).into())),
+                Obj::Spliceunquote(Spliceunquote { inner, .. }) => {
+                    Ast::Spliceunquote(Box::new((&(**inner)).into()))
+                }
+                Obj::Round(Round { items, .. }) => {
+                    Ast::Round(items.iter().map(|x| x.into()).collect())
+                }
+                Obj::Square(Square { items, .. }) => {
+                    Ast::Round(items.iter().map(|x| x.into()).collect())
+                }
+                Obj::Curly(Curly { items, .. }) => {
+                    Ast::Round(items.iter().map(|x| x.into()).collect())
+                }
+                Obj::Withmeta(Withmeta { inner, meta, .. }) => Ast::Withmeta {
+                    value: Box::new((&(**inner)).into()),
+                    meta: Box::new((&(**meta)).into()),
+                },
+            }
+        }
     }
 }

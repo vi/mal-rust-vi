@@ -6,7 +6,7 @@ obj = {
     | round
     | square
     | curly
-    | ident
+    | symbol
     | kw
     | atom
     | withmeta
@@ -25,12 +25,12 @@ strlit_char = _{
     | "\\" ~ ("x" ~ ASCII_HEX_DIGIT{2})
     | "\\" ~ ANY
 }
-ident = @{ !kw ~ ident_char+ }
+symbol = @{ !kw ~ ident_char+ }
 ident_char = _{
 	ASCII_ALPHANUMERIC | "_" | "-" | "+" | "/" | "*" | "."
 }
 kw = { ("true" | "false" | "nil") ~ !ident_char }
-atom = @{ ":" ~ ident }
+atom = @{ ":" ~ symbol }
 withmeta = { "^" ~ obj ~ obj }
 quote = { "'" ~ obj }
 quasiquote = { "`" ~ obj }
