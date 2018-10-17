@@ -24,7 +24,7 @@ use pest::Parser;
 use pest_deconstruct::FromPest;
 
 /// High-level AST
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub enum Ast {
     Round(Vec<Ast>),
     Square(Vec<Ast>),
@@ -53,7 +53,8 @@ pub trait Mal {
     fn print(&self, a:Ast) -> Result<String>;
 }
 
-type Func = Box<Fn(Ast) -> Result<Ast>>;
+
+type Func = Box<Fn(&[Ast]) -> Result<Ast>>;
 
 pub struct Malvi {
     binding: HashMap<String, Func>,
@@ -61,8 +62,12 @@ pub struct Malvi {
 
 pub mod stdlib {
     use super::{Result,Ast};
-    pub fn id(x: Ast) -> Result<Ast> {
-        Ok(x)
+    pub fn id(x: &[Ast]) -> Result<Ast> {
+        if x.len() == 1 {
+            Ok(x[0].clone())
+        } else {
+            bail!("id funciton must have exactly one argument")
+        }
     }
 }
 
@@ -83,7 +88,29 @@ impl Mal for Malvi {
         let a : Ast = (&a).into();
         Ok(a)
     }
-    fn eval(&mut self, a:Ast)-> Result<Ast> { Ok(a) }
+    fn eval(&mut self, a:Ast)-> Result<Ast> {
+        match a {
+            Ast::Round(inner) => {
+                if inner.is_empty() {
+                    Ok(Ast::Round(vec![]))
+                } else {
+                    let name = &inner[0];
+                    let rest = &inner[1..];
+                    match name {
+                        Ast::Symbol(x) => {
+                            if let Some(f) = self.binding.get(x) {
+                                f(rest)
+                            } else {
+                                bail!("function not found: {}", x)
+                            }
+                        },
+                        _ => bail!("can only call by symbol"),
+                    }
+                }
+            },
+            x => Ok(x),
+        }
+    }
     fn print(&self, a:Ast) -> Result<String> {
         Ok(format!("{}", a))
     }
