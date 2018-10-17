@@ -68,70 +68,19 @@ pub struct Malvi {
     binding: HashMap<String, Func>,
 }
 
-pub mod stdlib {
-    use super::{Result,Ast};
-    pub fn id(x: &[Ast]) -> Result<Ast> {
-        if x.len() == 1 {
-            Ok(x[0].clone())
-        } else {
-            bail!("id funciton must have exactly one argument")
-        }
-    }
-    pub fn plus(x: &[Ast]) -> Result<Ast> {
-        let mut sum = 0;
-        for i in x {
-            match i.ignoremeta() {
-                Ast::Int(n) => sum+=n,
-                _ => bail!("+ does not support this type"),
-            }
-        };
-        Ok(Ast::Int(sum))
-    }
-    pub fn minus(x: &[Ast]) -> Result<Ast> {
-        match x.len() {
-            1 => match x[0].ignoremeta() {
-                    Ast::Int(n) => Ok(Ast::Int(-n)),
-                    _ => bail!("- does not support this type"),
-                },
-            2 => match (x[0].ignoremeta(), x[1].ignoremeta()) {
-                    (Ast::Int(n),Ast::Int(v)) => Ok(Ast::Int(n-v)),
-                    _ => bail!("- does not support this type"),
-                },
-            _ => bail!("- must have exactly 1 or 2 arguments"),
-        }
-    }
-    pub fn times(x: &[Ast]) -> Result<Ast> {
-        let mut prod = 1;
-        for i in x {
-            match i.ignoremeta() {
-                Ast::Int(n) => prod*=n,
-                _ => bail!("* does not support this type"),
-            }
-        };
-        Ok(Ast::Int(prod))
-    }
-    pub fn divide(x: &[Ast]) -> Result<Ast> {
-        match x.len() {
-            2 => match (x[0].ignoremeta(), x[1].ignoremeta()) {
-                    (Ast::Int(_),Ast::Int(0)) => bail!("division by zero"),
-                    (Ast::Int(n),Ast::Int(v)) => Ok(Ast::Int(n/v)),
-                    _ => bail!("/ does not support this type"),
-                },
-            _ => bail!("/ must have exactly 2 arguments"),
-        }
-    }
-}
+pub mod stdfn;
+pub mod eval;
 
 impl Malvi {
     pub fn new() -> Self { 
         let mut this = Malvi{
             binding: HashMap::with_capacity(10),
         };
-        this.binding.insert("id".to_string(), Box::new(stdlib::id));
-        this.binding.insert("+".to_string(), Box::new(stdlib::plus));
-        this.binding.insert("-".to_string(), Box::new(stdlib::minus));
-        this.binding.insert("*".to_string(), Box::new(stdlib::times));
-        this.binding.insert("/".to_string(), Box::new(stdlib::divide));
+        this.binding.insert("id".to_string(), Box::new(stdfn::id));
+        this.binding.insert("+".to_string(), Box::new(stdfn::plus));
+        this.binding.insert("-".to_string(), Box::new(stdfn::minus));
+        this.binding.insert("*".to_string(), Box::new(stdfn::times));
+        this.binding.insert("/".to_string(), Box::new(stdfn::divide));
         this
     }
 }
@@ -144,47 +93,7 @@ impl Mal for Malvi {
         Ok(a)
     }
     fn eval(&mut self, a:&Ast)-> Result<Ast> {
-        match a {
-            Ast::Round(inner) => {
-                if inner.is_empty() {
-                    Ok(Ast::Round(vec![]))
-                } else {
-                    let name = &inner[0];
-                    let rest = 
-                        inner[1..]
-                        .iter()
-                        .map(|x|self.eval(x))
-                        .collect::<Result<Vec<_>>>()?;
-                    match name.ignoremeta() {
-                        Ast::Symbol(x) => {
-                            if let Some(f) = self.binding.get(x) {
-                                f(&rest)
-                            } else {
-                                bail!("function not found: {}", x)
-                            }
-                        },
-                        _ => bail!("can only call by symbol"),
-                    }
-                }
-            },
-            Ast::Square(inner) => {
-                Ok(Ast::Square(
-                    inner
-                    .iter()
-                    .map(|x|self.eval(x).map(Rc::new))
-                    .collect::<Result<Vec<_>>>()?
-                ))
-            },
-            Ast::Curly(inner) => {
-                Ok(Ast::Curly(
-                    inner
-                    .iter()
-                    .map(|x|self.eval(x).map(Rc::new))
-                    .collect::<Result<Vec<_>>>()?
-                ))
-            },
-            x => Ok(x.clone()),
-        }
+        Malvi::eval(self, a)
     }
     fn print(&self, a:&Ast) -> Result<String> {
         Ok(format!("{}", a))
