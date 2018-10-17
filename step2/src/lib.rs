@@ -46,6 +46,14 @@ pub enum Ast {
     },
 }
 
+impl Ast {
+    pub fn ignoremeta(&self) -> &Self {
+        match self {
+            Ast::Withmeta {value,..} => value.ignoremeta(),
+            x => x,
+        }
+    }
+}
 
 pub trait Mal {
     fn read(&self, x:&str) -> Result<Ast>;
@@ -72,7 +80,7 @@ pub mod stdlib {
     pub fn plus(x: &[Ast]) -> Result<Ast> {
         let mut sum = 0;
         for i in x {
-            match i {
+            match i.ignoremeta() {
                 Ast::Int(n) => sum+=n,
                 _ => bail!("+ does not support this type"),
             }
@@ -107,7 +115,7 @@ impl Mal for Malvi {
                 } else {
                     let name = &inner[0];
                     let rest = &inner[1..];
-                    match name {
+                    match name.ignoremeta() {
                         Ast::Symbol(x) => {
                             if let Some(f) = self.binding.get(x) {
                                 f(rest)
