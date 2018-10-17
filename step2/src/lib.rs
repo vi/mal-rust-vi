@@ -69,6 +69,16 @@ pub mod stdlib {
             bail!("id funciton must have exactly one argument")
         }
     }
+    pub fn plus(x: &[Ast]) -> Result<Ast> {
+        let mut sum = 0;
+        for i in x {
+            match i {
+                Ast::Int(n) => sum+=n,
+                _ => bail!("+ does not support this type"),
+            }
+        };
+        Ok(Ast::Int(sum))
+    }
 }
 
 impl Malvi {
@@ -77,6 +87,7 @@ impl Malvi {
             binding: HashMap::with_capacity(10),
         };
         this.binding.insert("id".to_string(), Box::new(stdlib::id));
+        this.binding.insert("+".to_string(), Box::new(stdlib::plus));
         this
     }
 }
