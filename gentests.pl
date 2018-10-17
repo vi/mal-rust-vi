@@ -32,7 +32,7 @@ while(<F>) {
         print G "#[test]\n";
         print G "fn test$ctr() {\n";
         print G "    super::test_it (\n";
-        print G "        \"".esc($in)."\",\n";
+        print G "        &vec![\"".esc($in)."\"],\n";
         print G "        Some(\"".esc($out)."\"),\n";
         print G "    );\n";
         print G "}\n\n";
