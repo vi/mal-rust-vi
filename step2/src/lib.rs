@@ -57,8 +57,8 @@ impl Ast {
 
 pub trait Mal {
     fn read(&self, x:&str) -> Result<Ast>;
-    fn eval(&mut self,  a:Ast)-> Result<Ast>;
-    fn print(&self, a:Ast) -> Result<String>;
+    fn eval(&mut self,  a:&Ast)-> Result<Ast>;
+    fn print(&self, a:&Ast) -> Result<String>;
 }
 
 
@@ -143,18 +143,22 @@ impl Mal for Malvi {
         let a : Ast = (&a).into();
         Ok(a)
     }
-    fn eval(&mut self, a:Ast)-> Result<Ast> {
+    fn eval(&mut self, a:&Ast)-> Result<Ast> {
         match a {
             Ast::Round(inner) => {
                 if inner.is_empty() {
                     Ok(Ast::Round(vec![]))
                 } else {
                     let name = &inner[0];
-                    let rest = &inner[1..];
+                    let rest = 
+                        inner[1..]
+                        .iter()
+                        .map(|x|self.eval(x))
+                        .collect::<Result<Vec<_>>>()?;
                     match name.ignoremeta() {
                         Ast::Symbol(x) => {
                             if let Some(f) = self.binding.get(x) {
-                                f(rest)
+                                f(&rest)
                             } else {
                                 bail!("function not found: {}", x)
                             }
@@ -163,10 +167,26 @@ impl Mal for Malvi {
                     }
                 }
             },
-            x => Ok(x),
+            Ast::Square(inner) => {
+                Ok(Ast::Square(
+                    inner
+                    .iter()
+                    .map(|x|self.eval(x))
+                    .collect::<Result<Vec<_>>>()?
+                ))
+            },
+            Ast::Curly(inner) => {
+                Ok(Ast::Curly(
+                    inner
+                    .iter()
+                    .map(|x|self.eval(x))
+                    .collect::<Result<Vec<_>>>()?
+                ))
+            },
+            x => Ok(x.clone()),
         }
     }
-    fn print(&self, a:Ast) -> Result<String> {
+    fn print(&self, a:&Ast) -> Result<String> {
         Ok(format!("{}", a))
     }
 }
@@ -176,8 +196,8 @@ fn test_it(in_:&str, out_:Option<&str>) {
     let mut p = Malvi::new();
     let res : Result<String> = try {
         let a = p.read(in_)?;
-        let a = p.eval(a)?;
-        p.print(a)?
+        let a = p.eval(&a)?;
+        p.print(&a)?
     };
     if let Some(x) = out_ {
         assert!(res.is_ok());
