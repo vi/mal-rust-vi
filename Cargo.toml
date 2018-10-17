@@ -3,3 +3,6 @@ members = [
     "step0",
     "step1",
 ]
+
+#[replace]
+#"pest-deconstruct:0.2.0" = {  git = "https://github.com/pest-parser/pest_deconstruct", branch = "better-runtime-enum-exhaustion-error"}
