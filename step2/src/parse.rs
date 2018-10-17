@@ -1,3 +1,5 @@
+use ::std::rc::Rc;
+
 pub mod parser {
     #[derive(Parser)]
     #[grammar = "mal.pest"]
@@ -127,6 +129,7 @@ pub mod ast {
     impl<'a, 'b> From<&'b Obj<'a>> for super::super::Ast {
         fn from(x: &'b Obj<'a>) -> Self {
             use super::super::Ast;
+            use ::std::rc::Rc;
             match x {
                 Obj::Int(Int { value, .. }) => Ast::Int(*value),
                 Obj::StrLit(StrLit { span }) => Ast::StrLit(span.as_str().to_string()),
@@ -139,27 +142,27 @@ pub mod ast {
                     _ => unreachable!(),
                 },
                 Obj::StrLit(StrLit { span }) => Ast::StrLit(span.as_str().to_string()),
-                Obj::Quote(Quote { inner, .. }) => Ast::Quote(Box::new((&(**inner)).into())),
+                Obj::Quote(Quote { inner, .. }) => Ast::Quote(Rc::new((&(**inner)).into())),
                 Obj::Quasiquote(Quasiquote { inner, .. }) => {
-                    Ast::Quasiquote(Box::new((&(**inner)).into()))
+                    Ast::Quasiquote(Rc::new((&(**inner)).into()))
                 }
-                Obj::Unquote(Unquote { inner, .. }) => Ast::Unquote(Box::new((&(**inner)).into())),
+                Obj::Unquote(Unquote { inner, .. }) => Ast::Unquote(Rc::new((&(**inner)).into())),
                 Obj::Spliceunquote(Spliceunquote { inner, .. }) => {
-                    Ast::Spliceunquote(Box::new((&(**inner)).into()))
+                    Ast::Spliceunquote(Rc::new((&(**inner)).into()))
                 }
-                Obj::Deref(Deref { inner, .. }) => Ast::Deref(Box::new((&(**inner)).into())),
+                Obj::Deref(Deref { inner, .. }) => Ast::Deref(Rc::new((&(**inner)).into())),
                 Obj::Round(Round { items, .. }) => {
-                    Ast::Round(items.iter().map(|x| x.into()).collect())
+                    Ast::Round(items.iter().map(|x| Rc::new(x.into())).collect())
                 }
                 Obj::Square(Square { items, .. }) => {
-                    Ast::Square(items.iter().map(|x| x.into()).collect())
+                    Ast::Square(items.iter().map(|x| Rc::new(x.into()) ).collect())
                 }
                 Obj::Curly(Curly { items, .. }) => {
-                    Ast::Curly(items.iter().map(|x| x.into()).collect())
+                    Ast::Curly(items.iter().map(|x| Rc::new(x.into())).collect())
                 }
                 Obj::Withmeta(Withmeta { inner, meta, .. }) => Ast::Withmeta {
-                    value: Box::new((&(**inner)).into()),
-                    meta: Box::new((&(**meta)).into()),
+                    value: Rc::new((&(**inner)).into()),
+                    meta: Rc::new((&(**meta)).into()),
                 },
             }
         }
@@ -167,7 +170,7 @@ pub mod ast {
 
 }
 
-fn writevec(f: &mut std::fmt::Formatter<'_>, v: &[super::Ast], mapmode: bool) {
+fn writevec(f: &mut std::fmt::Formatter<'_>, v: &[Rc<super::Ast>], mapmode: bool) {
     let mut firsttime = true;
     let mut odd = false;
     for i in v {

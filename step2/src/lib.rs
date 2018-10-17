@@ -26,23 +26,23 @@ use pest_deconstruct::FromPest;
 /// High-level AST
 #[derive(Debug,Clone)]
 pub enum Ast {
-    Round(Vec<Ast>),
-    Square(Vec<Ast>),
-    Curly(Vec<Ast>),
+    Round(Vec<Rc<Ast>>),
+    Square(Vec<Rc<Ast>>),
+    Curly(Vec<Rc<Ast>>),
     Int(i64),
     Symbol(String),
     Bool(bool),
     Nil,
     Atom(String),
     StrLit(String),
-    Quote(Box<Ast>),
-    Quasiquote(Box<Ast>),
-    Unquote(Box<Ast>),
-    Spliceunquote(Box<Ast>),
-    Deref(Box<Ast>),
+    Quote(Rc<Ast>),
+    Quasiquote(Rc<Ast>),
+    Unquote(Rc<Ast>),
+    Spliceunquote(Rc<Ast>),
+    Deref(Rc<Ast>),
     Withmeta{
-        value: Box<Ast>,
-        meta: Box<Ast>,
+        value: Rc<Ast>,
+        meta: Rc<Ast>,
     },
 }
 
@@ -171,7 +171,7 @@ impl Mal for Malvi {
                 Ok(Ast::Square(
                     inner
                     .iter()
-                    .map(|x|self.eval(x))
+                    .map(|x|self.eval(x).map(Rc::new))
                     .collect::<Result<Vec<_>>>()?
                 ))
             },
@@ -179,7 +179,7 @@ impl Mal for Malvi {
                 Ok(Ast::Curly(
                     inner
                     .iter()
-                    .map(|x|self.eval(x))
+                    .map(|x|self.eval(x).map(Rc::new))
                     .collect::<Result<Vec<_>>>()?
                 ))
             },
