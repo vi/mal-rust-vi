@@ -51,16 +51,6 @@ pub enum Ast {
     },
     BuiltinFunction(Builtin),
 }
-
-impl Ast {
-    pub fn ignoremeta(&self) -> &Self {
-        match self {
-            Ast::Withmeta {value,..} => value.ignoremeta(),
-            x => x,
-        }
-    }
-}
-
 pub struct BoundAstRef<'a, 'b>(pub &'a Ast, pub &'b Malvi);
 
 pub trait Mal {

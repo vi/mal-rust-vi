@@ -1,7 +1,30 @@
-use super::{Malvi,Ast,Result};
+use super::{Malvi,Ast,Result,Symbol};
 use ::std::rc::Rc;
 
+
+impl Ast {
+    pub fn ignoremeta(&self) -> &Self {
+        match self {
+            Ast::Withmeta {value,..} => value.ignoremeta(),
+            x => x,
+        }
+    }
+}
+
 impl Malvi {
+    pub fn resolve_sym(&self, s:&Ast) -> Ast {
+        match s.ignoremeta().clone() {
+            Ast::Symbol(x) => {
+                if let Some(y) = self.binding.get(&x) {
+                    (*y).clone()
+                } else {
+                    Ast::Nil
+                }
+            }
+            x => x,
+        }
+    }
+
     pub fn eval(&mut self, a:&Ast)-> Result<Ast> {
         match a {
             Ast::Round(inner) => {
@@ -14,21 +37,11 @@ impl Malvi {
                         .iter()
                         .map(|x|self.eval(x))
                         .collect::<Result<Vec<_>>>()?;
-                    match name.ignoremeta() {
-                        Ast::Symbol(x) => {
-                            if let Some(f) = self.binding.get(x) {
-                                match f {
-                                    Ast::BuiltinFunction(ff) => {
-                                        self.builtins[ff](&rest)
-                                    },
-                                    _ => bail!("only built-in functions can ba called")
-                                }
-                            } else {
-                                let n = &self.sym2name[x];
-                                bail!("function not found: {}", n)
-                            }
+                    match self.resolve_sym(name) {
+                        Ast::BuiltinFunction(ff) => {
+                            self.builtins[ff](&rest)
                         },
-                        _ => bail!("can only call by symbol"),
+                        _ => bail!("only built-in functions can ba called"),
                     }
                 }
             },
