@@ -1,4 +1,5 @@
 #![feature(try_blocks)]
+#![feature(convert_id)]
 #![allow(unused)]
 
 extern crate pest;
@@ -48,6 +49,7 @@ pub enum Ast {
         value: Rc<Ast>,
         meta: Rc<Ast>,
     },
+    BuiltinFunction(Builtin),
 }
 
 impl Ast {
@@ -76,7 +78,7 @@ type Func = Box<Fn(&[Ast]) -> Result<Ast>>;
 pub struct Malvi {
     sym2name: Slab<Symbol, String>,
     name2sym: HashMap<String, Symbol>,
-    binding: HashMap<Symbol, Builtin>,
+    binding: HashMap<Symbol, Ast>,
     builtins: Slab<Builtin, Func>,
 }
 
@@ -105,7 +107,7 @@ impl Malvi {
             ($n:expr, $f:path) => {{
                 let s = this.sym($n);
                 let b = this.builtins.insert(Box::new($f));
-                this.binding.insert(s, b);
+                this.binding.insert(s, Ast::BuiltinFunction(b));
             }};
         }
         builtin_func!("id", stdfn::id);

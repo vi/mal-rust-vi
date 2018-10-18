@@ -17,7 +17,12 @@ impl Malvi {
                     match name.ignoremeta() {
                         Ast::Symbol(x) => {
                             if let Some(f) = self.binding.get(x) {
-                                self.builtins[f](&rest)
+                                match f {
+                                    Ast::BuiltinFunction(ff) => {
+                                        self.builtins[ff](&rest)
+                                    },
+                                    _ => bail!("only built-in functions can ba called")
+                                }
                             } else {
                                 let n = &self.sym2name[x];
                                 bail!("function not found: {}", n)

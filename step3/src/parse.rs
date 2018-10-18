@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use super::{Ast, BoundAstRef, Malvi, Result};
+use ::std::convert::identity as id;
 
 pub mod parser {
     #[derive(Parser)]
@@ -229,6 +230,13 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
                 write!(f, "{{");
                 writevec(f, env, x, true);
                 write!(f, "}}")
+            }
+            BuiltinFunction(x) => {
+                write!(
+                    f,
+                    "#builtin_fn_{}",
+                    id::<usize>((*x).into()),
+                )
             }
         };
         Ok(())
