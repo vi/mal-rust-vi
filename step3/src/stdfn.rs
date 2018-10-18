@@ -65,3 +65,24 @@ pub fn def(m:&mut Malvi, env:&mut Bindings, x: &[Rc<Ast>]) -> Result<Ast> {
         _ => bail!("set! must have exactly 2 arguments"),
     }
 }
+
+pub fn let_(m:&mut Malvi, env:&mut Bindings, x: &[Rc<Ast>]) -> Result<Ast> {
+    match x.len() {
+        2 => match (x[0].ignoremeta(), x[1].ignoremeta()) {
+                | (Ast::Round(n),v) 
+                | (Ast::Square(n),v) 
+                | (Ast::Curly(n),v) 
+                => {
+                    let mut new_bindings = Bindings {
+                        at_this_level: ::std::collections::HashMap::new(),
+                        parent: None,
+                    };
+                    let vv = m.eval_impl(&mut new_bindings, v)?;
+                    Ok(vv)
+                },
+                _ => bail!("First argument of set! must be square, round or curly brackets"),
+            },
+        _ => bail!("let* must have exactly 2 arguments"),
+    }
+}
+

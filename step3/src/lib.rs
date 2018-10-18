@@ -123,6 +123,7 @@ impl Malvi {
         builtin_func!("*" , stdfn::times);
         builtin_func!("/" , stdfn::divide);
         builtin_macro!("def!" , stdfn::def);
+        builtin_macro!("let*" , stdfn::let_);
         this
     }
 }
