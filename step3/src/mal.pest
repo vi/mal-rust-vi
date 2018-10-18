@@ -28,7 +28,7 @@ strlit_char = _{
 }
 symbol = @{ !kw ~ ident_char+ }
 ident_char = _{
-	ASCII_ALPHANUMERIC | "_" | "-" | "+" | "/" | "*" | "."
+	ASCII_ALPHANUMERIC | "_" | "-" | "+" | "/" | "*" | "." | "!" | "?"
 }
 kw = @{ ("true" | "false" | "nil") ~ !ident_char }
 atom = @{ ":" ~ symbol }
