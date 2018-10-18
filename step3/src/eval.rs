@@ -1,5 +1,6 @@
-use super::{Malvi,Ast,Result,Symbol};
+use super::{Malvi,Ast,Result,Symbol,Bindings};
 use ::std::rc::Rc;
+use ::std::cell::RefCell;
 
 
 impl Ast {
@@ -12,10 +13,10 @@ impl Ast {
 }
 
 impl Malvi {
-    pub fn resolve_sym(&self, s:&Ast) -> Result<Ast> {
+    pub fn resolve_sym(&self, env:&Bindings, s:&Ast) -> Result<Ast> {
         match s.ignoremeta().clone() {
             Ast::Symbol(x) => {
-                if let Some(y) = self.root_bindings.borrow().at_this_level.get(&x) {
+                if let Some(y) = env.at_this_level.get(&x) {
                     Ok((*y).clone())
                 } else {
                     bail!("Symbol not bound")
@@ -25,28 +26,28 @@ impl Malvi {
         }
     }
 
-    pub fn eval(&mut self, a:&Ast)-> Result<Ast> {
+    pub(crate) fn eval_impl(&mut self, env: &mut Bindings, a:&Ast)-> Result<Ast> {
         match a {
             Ast::Round(inner) => {
                 if inner.is_empty() {
                     Ok(Ast::Round(vec![]))
                 } else {
                     let name = &inner[0];
-                    match self.resolve_sym(name)? {
+                    match self.resolve_sym(env, name)? {
                         Ast::BuiltinFunction(ff) => {
                             let fnn = self.builtins[ff].clone();
                             let rest = 
                                 inner[1..]
                                 .iter()
-                                .map(|x|self.eval(x).map(Rc::new))
+                                .map(|x|self.eval_impl(env, x).map(Rc::new))
                                 .collect::<Result<Vec<_>>>()?;
-                            fnn(self, &rest)
+                            fnn(self, env, &rest)
                         },
                         Ast::BuiltinMacro(ff) => {
                             let fnn = self.builtins[ff].clone();
                             let rest = 
                                 &inner[1..];
-                            fnn(self, &rest)
+                            fnn(self, env, &rest)
                         }
                         _ => bail!("only built-in functions can ba called"),
                     }
@@ -56,7 +57,7 @@ impl Malvi {
                 Ok(Ast::Square(
                     inner
                     .iter()
-                    .map(|x|self.eval(x).map(Rc::new))
+                    .map(|x|self.eval_impl(env, x).map(Rc::new))
                     .collect::<Result<Vec<_>>>()?
                 ))
             },
@@ -64,11 +65,11 @@ impl Malvi {
                 Ok(Ast::Curly(
                     inner
                     .iter()
-                    .map(|x|self.eval(x).map(Rc::new))
+                    .map(|x|self.eval_impl(env, x).map(Rc::new))
                     .collect::<Result<Vec<_>>>()?
                 ))
             },
-            Ast::Symbol(n) => self.eval(&self.resolve_sym(&Ast::Symbol(*n))?),
+            Ast::Symbol(n) => self.eval_impl(env, &self.resolve_sym(env, &Ast::Symbol(*n))?),
             x => Ok(x.clone()),
         }
     }
