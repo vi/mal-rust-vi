@@ -57,7 +57,7 @@ pub fn def(m:&mut Malvi, x: &[Rc<Ast>]) -> Result<Ast> {
         2 => match (x[0].ignoremeta(), x[1].ignoremeta()) {
                 (Ast::Symbol(n),v) => {
                     let vv = m.eval(v)?;
-                    m.binding.insert(*n, vv.clone());
+                    m.root_bindings.borrow_mut().at_this_level.insert(*n, vv.clone());
                     Ok(vv)
                 },
                 _ => bail!("First argument of set! must be a symbol"),

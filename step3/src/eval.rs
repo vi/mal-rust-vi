@@ -15,7 +15,7 @@ impl Malvi {
     pub fn resolve_sym(&self, s:&Ast) -> Result<Ast> {
         match s.ignoremeta().clone() {
             Ast::Symbol(x) => {
-                if let Some(y) = self.binding.get(&x) {
+                if let Some(y) = self.root_bindings.borrow().at_this_level.get(&x) {
                     Ok((*y).clone())
                 } else {
                     bail!("Symbol not bound")

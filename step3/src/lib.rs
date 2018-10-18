@@ -13,6 +13,7 @@ extern crate failure;
 extern crate slab_typesafe;
 
 use slab_typesafe::Slab;
+use ::std::cell::RefCell;
 
 pub type Result<T> = ::std::result::Result<T, failure::Error>;
 
@@ -66,10 +67,15 @@ declare_slab_token!(pub Builtin);
 
 type Func = Rc<Fn(&mut Malvi, &[Rc<Ast>]) -> Result<Ast>>;
 
+pub struct Bindings {
+    at_this_level: HashMap<Symbol, Ast>,
+    parent: Option<Rc<RefCell<Bindings>>>,
+}
+
 pub struct Malvi {
     sym2name: Slab<Symbol, String>,
     name2sym: HashMap<String, Symbol>,
-    binding: HashMap<Symbol, Ast>,
+    root_bindings: Rc<RefCell<Bindings>>,
     builtins: Slab<Builtin, Func>,
 }
 
@@ -89,7 +95,10 @@ impl Malvi {
 
     pub fn new() -> Self { 
         let mut this = Malvi{
-            binding: HashMap::with_capacity(10),
+            root_bindings: Rc::new(RefCell::new(Bindings{
+                at_this_level: HashMap::with_capacity(10),
+                parent: None,
+            })),
             sym2name: Slab::with_capacity(10),
             name2sym: HashMap::with_capacity(10),
             builtins: Slab::with_capacity(10),
@@ -98,14 +107,14 @@ impl Malvi {
             ($n:expr, $f:path) => {{
                 let s = this.sym($n);
                 let b = this.builtins.insert(Rc::new($f));
-                this.binding.insert(s, Ast::BuiltinFunction(b));
+                this.root_bindings.borrow_mut().at_this_level.insert(s, Ast::BuiltinFunction(b));
             }};
         }
         macro_rules! builtin_macro {
             ($n:expr, $f:path) => {{
                 let s = this.sym($n);
                 let b = this.builtins.insert(Rc::new($f));
-                this.binding.insert(s, Ast::BuiltinMacro(b));
+                this.root_bindings.borrow_mut().at_this_level.insert(s, Ast::BuiltinMacro(b));
             }};
         }
         builtin_func!("id", stdfn::id);
