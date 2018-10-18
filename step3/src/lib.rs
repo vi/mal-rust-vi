@@ -1,5 +1,6 @@
 #![feature(try_blocks)]
 #![feature(convert_id)]
+#![feature(chunks_exact)]
 #![allow(unused)]
 
 extern crate pest;

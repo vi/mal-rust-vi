@@ -74,11 +74,24 @@ pub fn let_(m:&mut Malvi, env:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
                 | (Ast::Square(n),v) 
                 | (Ast::Curly(n),v) 
                 => {
+                    if n.len() % 2 != 0 {
+                        bail!("Odd number of elements in bindings list")
+                    }
                     let mut new_bindings = Bindings {
                         at_this_level: ::std::collections::HashMap::new(),
                         parent: Some(env.clone()),
                     };
-                    let vv = m.eval_impl(&Rc::new(RefCell::new(new_bindings)), v)?;
+                    let bh = Rc::new(RefCell::new(new_bindings));
+                    for bind in n[..].chunks_exact(2) {
+                        match (&*bind[0],&*bind[1]) {
+                            (Ast::Symbol(s), v) => {
+                                let vv = m.eval_impl(&bh, v)?;
+                                bh.borrow_mut().at_this_level.insert(*s, vv);
+                            },
+                            _ => bail!("Non-symbol speficied to let* for binding")
+                        }
+                    }
+                    let vv = m.eval_impl(&bh, v)?;
                     Ok(vv)
                 },
                 _ => bail!("First argument of set! must be square, round or curly brackets"),
