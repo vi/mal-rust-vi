@@ -39,7 +39,8 @@ impl Malvi {
                         .collect::<Result<Vec<_>>>()?;
                     match self.resolve_sym(name) {
                         Ast::BuiltinFunction(ff) => {
-                            self.builtins[ff](&rest)
+                            let fnn = self.builtins[ff].clone();
+                            fnn(self, &rest)
                         },
                         _ => bail!("only built-in functions can ba called"),
                     }

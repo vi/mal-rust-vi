@@ -1,12 +1,12 @@
-use super::{Result,Ast};
-pub fn id(x: &[Ast]) -> Result<Ast> {
+use super::{Result,Ast,Malvi};
+pub fn id(_:&mut Malvi, x: &[Ast]) -> Result<Ast> {
     if x.len() == 1 {
         Ok(x[0].clone())
     } else {
         bail!("id funciton must have exactly one argument")
     }
 }
-pub fn plus(x: &[Ast]) -> Result<Ast> {
+pub fn plus(_:&mut Malvi, x: &[Ast]) -> Result<Ast> {
     let mut sum = 0;
     for i in x {
         match i.ignoremeta() {
@@ -16,7 +16,7 @@ pub fn plus(x: &[Ast]) -> Result<Ast> {
     };
     Ok(Ast::Int(sum))
 }
-pub fn minus(x: &[Ast]) -> Result<Ast> {
+pub fn minus(_:&mut Malvi, x: &[Ast]) -> Result<Ast> {
     match x.len() {
         1 => match x[0].ignoremeta() {
                 Ast::Int(n) => Ok(Ast::Int(-n)),
@@ -29,7 +29,7 @@ pub fn minus(x: &[Ast]) -> Result<Ast> {
         _ => bail!("- must have exactly 1 or 2 arguments"),
     }
 }
-pub fn times(x: &[Ast]) -> Result<Ast> {
+pub fn times(_:&mut Malvi, x: &[Ast]) -> Result<Ast> {
     let mut prod = 1;
     for i in x {
         match i.ignoremeta() {
@@ -39,7 +39,7 @@ pub fn times(x: &[Ast]) -> Result<Ast> {
     };
     Ok(Ast::Int(prod))
 }
-pub fn divide(x: &[Ast]) -> Result<Ast> {
+pub fn divide(_:&mut Malvi, x: &[Ast]) -> Result<Ast> {
     match x.len() {
         2 => match (x[0].ignoremeta(), x[1].ignoremeta()) {
                 (Ast::Int(_),Ast::Int(0)) => bail!("division by zero"),

@@ -63,7 +63,7 @@ pub trait Mal {
 declare_slab_token!(pub Symbol);
 declare_slab_token!(pub Builtin);
 
-type Func = Box<Fn(&[Ast]) -> Result<Ast>>;
+type Func = Rc<Fn(&mut Malvi, &[Ast]) -> Result<Ast>>;
 
 pub struct Malvi {
     sym2name: Slab<Symbol, String>,
@@ -96,7 +96,7 @@ impl Malvi {
         macro_rules! builtin_func {
             ($n:expr, $f:path) => {{
                 let s = this.sym($n);
-                let b = this.builtins.insert(Box::new($f));
+                let b = this.builtins.insert(Rc::new($f));
                 this.binding.insert(s, Ast::BuiltinFunction(b));
             }};
         }
