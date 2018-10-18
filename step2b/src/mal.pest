@@ -1,0 +1,43 @@
+prog = _{ SOI ~ obj* ~ EOI }
+sobj = _{SOI ~ obj ~ EOI}
+obj = {
+	int
+    | "\"" ~ strlit ~ "\""
+    | round
+    | square
+    | curly
+    | symbol
+    | kw
+    | atom
+    | withmeta
+    | quote
+    | quasiquote
+    | spliceunquote
+    | unquote
+    | deref
+} 
+round = { "(" ~ obj* ~ ")" }
+square = { "[" ~ obj* ~ "]" }
+curly = { "{" ~ obj* ~ "}" }
+int = @{ "-"? ~ ASCII_DIGIT+ }
+strlit = @{ strlit_char* }
+strlit_char = _{
+    !("\"" | "\\") ~ ANY
+    | "\\" ~ ("x" ~ ASCII_HEX_DIGIT{2})
+    | "\\" ~ ANY
+}
+symbol = @{ !kw ~ ident_char+ }
+ident_char = _{
+	ASCII_ALPHANUMERIC | "_" | "-" | "+" | "/" | "*" | "." | "!" | "?"
+}
+kw = @{ ("true" | "false" | "nil") ~ !ident_char }
+atom = @{ ":" ~ symbol }
+withmeta = { "^" ~ obj ~ obj }
+quote = { "'" ~ obj }
+quasiquote = { "`" ~ obj }
+unquote = { "~" ~ obj }
+spliceunquote = { "~@" ~ obj }
+deref = { "@" ~ obj }
+
+WHITESPACE = _{ " " | "," | "\n" }
+COMMENT = _{ ";" ~ ANY* ~ ("\n" | EOI) }
