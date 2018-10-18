@@ -56,8 +56,9 @@ pub fn def(m:&mut Malvi, x: &[Rc<Ast>]) -> Result<Ast> {
     match x.len() {
         2 => match (x[0].ignoremeta(), x[1].ignoremeta()) {
                 (Ast::Symbol(n),v) => {
-                    m.binding.insert(*n, v.clone());
-                    Ok(v.clone())
+                    let vv = m.eval(v)?;
+                    m.binding.insert(*n, vv.clone());
+                    Ok(vv)
                 },
                 _ => bail!("First argument of set! must be a symbol"),
             },

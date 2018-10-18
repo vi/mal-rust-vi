@@ -68,7 +68,7 @@ impl Malvi {
                     .collect::<Result<Vec<_>>>()?
                 ))
             },
-            Ast::Symbol(n) => self.resolve_sym(&Ast::Symbol(*n)),
+            Ast::Symbol(n) => self.eval(&self.resolve_sym(&Ast::Symbol(*n))?),
             x => Ok(x.clone()),
         }
     }
