@@ -135,8 +135,12 @@ pub mod ast {
             match x {
                 Obj::Int(Int { value, .. }) => Ast::Int(*value),
                 Obj::StrLit(StrLit { span }) => Ast::StrLit(span.as_str().to_string()),
-                Obj::Symbol(Symbol { span }) => Ast::Symbol(span.as_str().to_string()),
-                Obj::Atom(Atom { span }) => Ast::Atom(span.as_str().to_string()),
+                Obj::Symbol(Symbol { span }) => Ast::Symbol(
+                    self.sym(span.as_str())
+                ),
+                Obj::Atom(Atom { span }) => Ast::Atom(
+                    self.sym(span.as_str())
+                ),
                 Obj::Keyword(Keyword { span }) => match span.as_str() {
                     "nil" => Ast::Nil,
                     "true" => Ast::Bool(true),
@@ -196,8 +200,8 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
         match a {
             Int(x) => write!(f, "{}", x),
             StrLit(x) => write!(f, "\"{}\"", x),
-            Symbol(x) => write!(f, "{}", x),
-            Atom(x) => write!(f, "{}", x),
+            Symbol(x) => write!(f, "{}", env.sym2name[x]),
+            Atom(x) => write!(f, "{}", env.sym2name[x]),
             Nil => write!(f, "nil"),
             Bool(x) => write!(f, "{}", x),
             Quote(x) => write!(f, "(quote {})", BoundAstRef(x, env)),

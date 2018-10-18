@@ -19,7 +19,8 @@ impl Malvi {
                             if let Some(f) = self.binding.get(x) {
                                 f(&rest)
                             } else {
-                                bail!("function not found: {}", x)
+                                let n = &self.sym2name[x];
+                                bail!("function not found: {}", n)
                             }
                         },
                         _ => bail!("can only call by symbol"),

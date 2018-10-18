@@ -36,10 +36,10 @@ pub enum Ast {
     Square(Vec<Rc<Ast>>),
     Curly(Vec<Rc<Ast>>),
     Int(i64),
-    Symbol(String),
+    Symbol(Symbol),
     Bool(bool),
     Nil,
-    Atom(String),
+    Atom(Symbol),
     StrLit(String),
     Quote(Rc<Ast>),
     Quasiquote(Rc<Ast>),
@@ -75,7 +75,7 @@ type Func = Box<Fn(&[Ast]) -> Result<Ast>>;
 pub struct Malvi {
     sym2name: Slab<Symbol, String>,
     name2sym: HashMap<String, Symbol>,
-    binding: HashMap<String, Func>,
+    binding: HashMap<Symbol, Func>,
 }
 
 pub mod stdfn;
@@ -98,11 +98,17 @@ impl Malvi {
             sym2name: Slab::with_capacity(10),
             name2sym: HashMap::with_capacity(10),
         };
-        this.binding.insert("id".to_string(), Box::new(stdfn::id));
-        this.binding.insert("+".to_string(), Box::new(stdfn::plus));
-        this.binding.insert("-".to_string(), Box::new(stdfn::minus));
-        this.binding.insert("*".to_string(), Box::new(stdfn::times));
-        this.binding.insert("/".to_string(), Box::new(stdfn::divide));
+        macro_rules! builtin_func {
+            ($n:expr, $f:path) => {{
+                let s = this.sym($n);
+                this.binding.insert(s, Box::new($f));
+            }};
+        }
+        builtin_func!("id", stdfn::id);
+        builtin_func!("+" , stdfn::plus);
+        builtin_func!("-" , stdfn::minus);
+        builtin_func!("*" , stdfn::times);
+        builtin_func!("." , stdfn::divide);
         this
     }
 }
