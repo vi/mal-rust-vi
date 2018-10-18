@@ -17,7 +17,7 @@ impl Malvi {
                     match name.ignoremeta() {
                         Ast::Symbol(x) => {
                             if let Some(f) = self.binding.get(x) {
-                                f(&rest)
+                                self.builtins[f](&rest)
                             } else {
                                 let n = &self.sym2name[x];
                                 bail!("function not found: {}", n)

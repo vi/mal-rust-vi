@@ -13,8 +13,6 @@ extern crate slab_typesafe;
 
 use slab_typesafe::Slab;
 
-declare_slab_token!(pub Symbol);
-
 pub type Result<T> = ::std::result::Result<T, failure::Error>;
 
 
@@ -70,12 +68,16 @@ pub trait Mal {
 }
 
 
+declare_slab_token!(pub Symbol);
+declare_slab_token!(pub Builtin);
+
 type Func = Box<Fn(&[Ast]) -> Result<Ast>>;
 
 pub struct Malvi {
     sym2name: Slab<Symbol, String>,
     name2sym: HashMap<String, Symbol>,
-    binding: HashMap<Symbol, Func>,
+    binding: HashMap<Symbol, Builtin>,
+    builtins: Slab<Builtin, Func>,
 }
 
 pub mod stdfn;
@@ -97,11 +99,13 @@ impl Malvi {
             binding: HashMap::with_capacity(10),
             sym2name: Slab::with_capacity(10),
             name2sym: HashMap::with_capacity(10),
+            builtins: Slab::with_capacity(10),
         };
         macro_rules! builtin_func {
             ($n:expr, $f:path) => {{
                 let s = this.sym($n);
-                this.binding.insert(s, Box::new($f));
+                let b = this.builtins.insert(Box::new($f));
+                this.binding.insert(s, b);
             }};
         }
         builtin_func!("id", stdfn::id);
