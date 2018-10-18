@@ -13,17 +13,26 @@ impl Ast {
 }
 
 impl Malvi {
-    pub fn resolve_sym(&self, env:&Bindings, s:&Ast) -> Result<Ast> {
+
+    fn resolve_sym_impl(&self, env:&Bindings, s:&Ast) -> Option<Ast> {
         match s.ignoremeta().clone() {
             Ast::Symbol(x) => {
                 if let Some(y) = env.at_this_level.get(&x) {
-                    Ok((*y).clone())
+                    Some((*y).clone())
                 } else {
-                    bail!("Symbol not bound")
+                    if let Some(ref par) = env.parent {
+                        self.resolve_sym_impl(&*par.borrow(), s)
+                    } else {
+                        None
+                    }
                 }
             }
-            x => Ok(x),
+            x => Some(x),
         }
+    }
+
+    pub fn resolve_sym(&self, env:&Bindings, s:&Ast) -> Result<Ast> {
+        self.resolve_sym_impl(env, s).ok_or(format_err!("Symbol not bound"))
     }
 
     pub(crate) fn eval_impl(&mut self, env: &mut Bindings, a:&Ast)-> Result<Ast> {
