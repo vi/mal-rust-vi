@@ -1,14 +1,15 @@
-use super::{Result,Ast,Malvi,Bindings};
+use super::{Result,Ast,Malvi,Bindings,BindingsHandle};
 use ::std::rc::Rc;
+use ::std::cell::RefCell;
 
-pub fn id(_:&mut Malvi, _:&mut Bindings, x: &[Rc<Ast>]) -> Result<Ast> {
+pub fn id(_:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
     if x.len() == 1 {
         Ok((*x[0]).clone())
     } else {
         bail!("id funciton must have exactly one argument")
     }
 }
-pub fn plus(_:&mut Malvi, _:&mut Bindings, x: &[Rc<Ast>]) -> Result<Ast> {
+pub fn plus(_:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
     let mut sum = 0;
     for i in x {
         match i.ignoremeta() {
@@ -18,7 +19,7 @@ pub fn plus(_:&mut Malvi, _:&mut Bindings, x: &[Rc<Ast>]) -> Result<Ast> {
     };
     Ok(Ast::Int(sum))
 }
-pub fn minus(_:&mut Malvi, _:&mut Bindings, x: &[Rc<Ast>]) -> Result<Ast> {
+pub fn minus(_:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
     match x.len() {
         1 => match x[0].ignoremeta() {
                 Ast::Int(n) => Ok(Ast::Int(-n)),
@@ -31,7 +32,7 @@ pub fn minus(_:&mut Malvi, _:&mut Bindings, x: &[Rc<Ast>]) -> Result<Ast> {
         _ => bail!("- must have exactly 1 or 2 arguments"),
     }
 }
-pub fn times(_:&mut Malvi, _:&mut Bindings, x: &[Rc<Ast>]) -> Result<Ast> {
+pub fn times(_:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
     let mut prod = 1;
     for i in x {
         match i.ignoremeta() {
@@ -41,7 +42,7 @@ pub fn times(_:&mut Malvi, _:&mut Bindings, x: &[Rc<Ast>]) -> Result<Ast> {
     };
     Ok(Ast::Int(prod))
 }
-pub fn divide(_:&mut Malvi, _:&mut Bindings, x: &[Rc<Ast>]) -> Result<Ast> {
+pub fn divide(_:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
     match x.len() {
         2 => match (x[0].ignoremeta(), x[1].ignoremeta()) {
                 (Ast::Int(_),Ast::Int(0)) => bail!("division by zero"),
@@ -52,12 +53,12 @@ pub fn divide(_:&mut Malvi, _:&mut Bindings, x: &[Rc<Ast>]) -> Result<Ast> {
     }
 }
 
-pub fn def(m:&mut Malvi, env:&mut Bindings, x: &[Rc<Ast>]) -> Result<Ast> {
+pub fn def(m:&mut Malvi, env:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
     match x.len() {
         2 => match (x[0].ignoremeta(), x[1].ignoremeta()) {
                 (Ast::Symbol(n),v) => {
                     let vv = m.eval_impl(env, v)?;
-                    env.at_this_level.insert(*n, vv.clone());
+                    env.borrow_mut().at_this_level.insert(*n, vv.clone());
                     Ok(vv)
                 },
                 _ => bail!("First argument of set! must be a symbol"),
@@ -66,7 +67,7 @@ pub fn def(m:&mut Malvi, env:&mut Bindings, x: &[Rc<Ast>]) -> Result<Ast> {
     }
 }
 
-pub fn let_(m:&mut Malvi, env:&mut Bindings, x: &[Rc<Ast>]) -> Result<Ast> {
+pub fn let_(m:&mut Malvi, env:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
     match x.len() {
         2 => match (x[0].ignoremeta(), x[1].ignoremeta()) {
                 | (Ast::Round(n),v) 
@@ -77,7 +78,7 @@ pub fn let_(m:&mut Malvi, env:&mut Bindings, x: &[Rc<Ast>]) -> Result<Ast> {
                         at_this_level: ::std::collections::HashMap::new(),
                         parent: None,
                     };
-                    let vv = m.eval_impl(&mut new_bindings, v)?;
+                    let vv = m.eval_impl(&Rc::new(RefCell::new(new_bindings)), v)?;
                     Ok(vv)
                 },
                 _ => bail!("First argument of set! must be square, round or curly brackets"),

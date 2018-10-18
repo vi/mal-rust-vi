@@ -65,17 +65,18 @@ pub trait Mal {
 declare_slab_token!(pub Symbol);
 declare_slab_token!(pub Builtin);
 
-type Func = Rc<Fn(&mut Malvi, &mut Bindings, &[Rc<Ast>]) -> Result<Ast>>;
+type Func = Rc<Fn(&mut Malvi, &BindingsHandle, &[Rc<Ast>]) -> Result<Ast>>;
 
+pub type BindingsHandle = Rc<RefCell<Bindings>>;
 pub struct Bindings {
     at_this_level: HashMap<Symbol, Ast>,
-    parent: Option<Rc<RefCell<Bindings>>>,
+    parent: Option<BindingsHandle>,
 }
 
 pub struct Malvi {
     sym2name: Slab<Symbol, String>,
     name2sym: HashMap<String, Symbol>,
-    root_bindings: Rc<RefCell<Bindings>>,
+    root_bindings: BindingsHandle,
     builtins: Slab<Builtin, Func>,
 }
 
@@ -137,9 +138,7 @@ impl Mal for Malvi {
     }
     fn eval(&mut self, a:&Ast)-> Result<Ast> {
         let root_bindings = self.root_bindings.clone();
-        let mut root_bindings = root_bindings.borrow_mut();
-        let root_bindings = &mut *root_bindings;
-        Malvi::eval_impl(self, root_bindings, a)
+        Malvi::eval_impl(self, &root_bindings, a)
     }
     fn print(&self, a:&Ast) -> Result<String> {
         Ok(format!("{}", BoundAstRef(a,self)))

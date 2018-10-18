@@ -1,4 +1,4 @@
-use super::{Malvi,Ast,Result,Symbol,Bindings};
+use super::{Malvi,Ast,Result,Symbol,Bindings,BindingsHandle};
 use ::std::rc::Rc;
 use ::std::cell::RefCell;
 
@@ -31,11 +31,11 @@ impl Malvi {
         }
     }
 
-    pub fn resolve_sym(&self, env:&Bindings, s:&Ast) -> Result<Ast> {
-        self.resolve_sym_impl(env, s).ok_or(format_err!("Symbol not bound"))
+    pub fn resolve_sym(&self, env:&BindingsHandle, s:&Ast) -> Result<Ast> {
+        self.resolve_sym_impl(&*env.borrow(), s).ok_or(format_err!("Symbol not bound"))
     }
 
-    pub(crate) fn eval_impl(&mut self, env: &mut Bindings, a:&Ast)-> Result<Ast> {
+    pub(crate) fn eval_impl(&mut self, env: &BindingsHandle, a:&Ast)-> Result<Ast> {
         match a {
             Ast::Round(inner) => {
                 if inner.is_empty() {
