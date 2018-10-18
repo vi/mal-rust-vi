@@ -1,4 +1,6 @@
-use ::std::rc::Rc;
+use std::rc::Rc;
+
+use super::{Ast, BoundAstRef, Malvi, Result};
 
 pub mod parser {
     #[derive(Parser)]
@@ -126,10 +128,10 @@ pub mod ast {
         Withmeta(Withmeta<'i>),
     }
 
-    impl<'a, 'b> From<&'b Obj<'a>> for super::super::Ast {
-        fn from(x: &'b Obj<'a>) -> Self {
+    impl super::super::Malvi {
+        pub fn read_impl<'a, 'b> (&mut self, x: &'b Obj<'a>) -> super::super::Ast {
             use super::super::Ast;
-            use ::std::rc::Rc;
+            use std::rc::Rc;
             match x {
                 Obj::Int(Int { value, .. }) => Ast::Int(*value),
                 Obj::StrLit(StrLit { span }) => Ast::StrLit(span.as_str().to_string()),
@@ -142,27 +144,27 @@ pub mod ast {
                     _ => unreachable!(),
                 },
                 Obj::StrLit(StrLit { span }) => Ast::StrLit(span.as_str().to_string()),
-                Obj::Quote(Quote { inner, .. }) => Ast::Quote(Rc::new((&(**inner)).into())),
+                Obj::Quote(Quote { inner, .. }) => Ast::Quote(Rc::new(self.read_impl(inner))),
                 Obj::Quasiquote(Quasiquote { inner, .. }) => {
-                    Ast::Quasiquote(Rc::new((&(**inner)).into()))
+                    Ast::Quasiquote(Rc::new(self.read_impl(inner)))
                 }
-                Obj::Unquote(Unquote { inner, .. }) => Ast::Unquote(Rc::new((&(**inner)).into())),
+                Obj::Unquote(Unquote { inner, .. }) => Ast::Unquote(Rc::new(self.read_impl(inner))),
                 Obj::Spliceunquote(Spliceunquote { inner, .. }) => {
-                    Ast::Spliceunquote(Rc::new((&(**inner)).into()))
+                    Ast::Spliceunquote(Rc::new(self.read_impl(inner)))
                 }
-                Obj::Deref(Deref { inner, .. }) => Ast::Deref(Rc::new((&(**inner)).into())),
+                Obj::Deref(Deref { inner, .. }) => Ast::Deref(Rc::new(self.read_impl(inner))),
                 Obj::Round(Round { items, .. }) => {
-                    Ast::Round(items.iter().map(|x| Rc::new(x.into())).collect())
+                    Ast::Round(items.iter().map(|x| Rc::new(self.read_impl(x))).collect())
                 }
                 Obj::Square(Square { items, .. }) => {
-                    Ast::Square(items.iter().map(|x| Rc::new(x.into()) ).collect())
+                    Ast::Square(items.iter().map(|x| Rc::new(self.read_impl(x))).collect())
                 }
                 Obj::Curly(Curly { items, .. }) => {
-                    Ast::Curly(items.iter().map(|x| Rc::new(x.into())).collect())
+                    Ast::Curly(items.iter().map(|x| Rc::new(self.read_impl(x))).collect())
                 }
                 Obj::Withmeta(Withmeta { inner, meta, .. }) => Ast::Withmeta {
-                    value: Rc::new((&(**inner)).into()),
-                    meta: Rc::new((&(**meta)).into()),
+                    value: Rc::new(self.read_impl(inner)),
+                    meta: Rc::new(self.read_impl(meta)),
                 },
             }
         }
@@ -170,54 +172,60 @@ pub mod ast {
 
 }
 
-fn writevec(f: &mut std::fmt::Formatter<'_>, v: &[Rc<super::Ast>], mapmode: bool) {
+fn writevec(f: &mut std::fmt::Formatter<'_>, m: &Malvi, v: &[Rc<Ast>], mapmode: bool) {
     let mut firsttime = true;
     let mut odd = false;
     for i in v {
         if !firsttime {
             if !mapmode || odd {
-                write!(f, " "); 
+                write!(f, " ");
             } else {
                 write!(f, ", ");
             }
         }
-        write!(f, "{}", i);
+        write!(f, "{}", BoundAstRef(i, m));
         firsttime = false;
         odd = !odd;
     }
 }
 
-impl ::std::fmt::Display for super::Ast {
+impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         use super::Ast::*;
-        match self {
+        let BoundAstRef(a, env) = self;
+        match a {
             Int(x) => write!(f, "{}", x),
-            StrLit(x) =>  write!(f, "\"{}\"", x),
-            Symbol(x) =>  write!(f, "{}", x),
-            Atom(x) =>  write!(f, "{}", x),
-            Nil =>  write!(f, "nil"),
-            Bool(x) =>  write!(f, "{}", x),
-            Quote(x) => write!(f, "(quote {})", x),
-            Quasiquote(x) => write!(f, "(quasiquote {})", x),
-            Unquote(x) => write!(f, "(unquote {})", x),
-            Spliceunquote(x) => write!(f, "(splice-unquote {})", x),
-            Withmeta{value,meta} => write!(f, "(with-meta {} {})", value, meta),
-            Deref(x) => write!(f, "(deref {})", x),
+            StrLit(x) => write!(f, "\"{}\"", x),
+            Symbol(x) => write!(f, "{}", x),
+            Atom(x) => write!(f, "{}", x),
+            Nil => write!(f, "nil"),
+            Bool(x) => write!(f, "{}", x),
+            Quote(x) => write!(f, "(quote {})", BoundAstRef(x, env)),
+            Quasiquote(x) => write!(f, "(quasiquote {})", BoundAstRef(x, env)),
+            Unquote(x) => write!(f, "(unquote {})", BoundAstRef(x, env)),
+            Spliceunquote(x) => write!(f, "(splice-unquote {})", BoundAstRef(x, env)),
+            Withmeta { value, meta } => write!(
+                f,
+                "(with-meta {} {})",
+                BoundAstRef(value, env),
+                BoundAstRef(meta, env)
+            ),
+            Deref(x) => write!(f, "(deref {})", BoundAstRef(x, env)),
             Round(x) => {
                 write!(f, "(");
-                writevec(f, x, false);
+                writevec(f, env, x, false);
                 write!(f, ")")
-            },
+            }
             Square(x) => {
                 write!(f, "[");
-                writevec(f, x, false);
+                writevec(f, env, x, false);
                 write!(f, "]")
-            },
+            }
             Curly(x) => {
                 write!(f, "{{");
-                writevec(f, x, true);
+                writevec(f, env, x, true);
                 write!(f, "}}")
-            },
+            }
         };
         Ok(())
     }

@@ -61,6 +61,8 @@ impl Ast {
     }
 }
 
+pub struct BoundAstRef<'a, 'b>(pub &'a Ast, pub &'b Malvi);
+
 pub trait Mal {
     fn read(&mut self, x:&str) -> Result<Ast>;
     fn eval(&mut self,  a:&Ast)-> Result<Ast>;
@@ -109,14 +111,14 @@ impl Mal for Malvi {
         let p = parse::parser::ParserImpl::parse(parse::parser::Rule::sobj, x)?
             .next().unwrap();
         let a = parse::ast::Obj::from_pest(p);
-        let a : Ast = (&a).into();
+        let a : Ast = self.read_impl(&a);
         Ok(a)
     }
     fn eval(&mut self, a:&Ast)-> Result<Ast> {
         Malvi::eval(self, a)
     }
     fn print(&self, a:&Ast) -> Result<String> {
-        Ok(format!("{}", a))
+        Ok(format!("{}", BoundAstRef(a,self)))
     }
 }
 
