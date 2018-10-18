@@ -50,6 +50,7 @@ pub enum Ast {
         meta: Rc<Ast>,
     },
     BuiltinFunction(Builtin),
+    BuiltinMacro(Builtin),
 }
 pub struct BoundAstRef<'a, 'b>(pub &'a Ast, pub &'b Malvi);
 
@@ -63,7 +64,7 @@ pub trait Mal {
 declare_slab_token!(pub Symbol);
 declare_slab_token!(pub Builtin);
 
-type Func = Rc<Fn(&mut Malvi, &[Ast]) -> Result<Ast>>;
+type Func = Rc<Fn(&mut Malvi, &[Rc<Ast>]) -> Result<Ast>>;
 
 pub struct Malvi {
     sym2name: Slab<Symbol, String>,
@@ -100,11 +101,19 @@ impl Malvi {
                 this.binding.insert(s, Ast::BuiltinFunction(b));
             }};
         }
+        macro_rules! builtin_macro {
+            ($n:expr, $f:path) => {{
+                let s = this.sym($n);
+                let b = this.builtins.insert(Rc::new($f));
+                this.binding.insert(s, Ast::BuiltinMacro(b));
+            }};
+        }
         builtin_func!("id", stdfn::id);
         builtin_func!("+" , stdfn::plus);
         builtin_func!("-" , stdfn::minus);
         builtin_func!("*" , stdfn::times);
         builtin_func!("/" , stdfn::divide);
+        builtin_macro!("def!" , stdfn::def);
         this
     }
 }

@@ -12,16 +12,16 @@ impl Ast {
 }
 
 impl Malvi {
-    pub fn resolve_sym(&self, s:&Ast) -> Ast {
+    pub fn resolve_sym(&self, s:&Ast) -> Result<Ast> {
         match s.ignoremeta().clone() {
             Ast::Symbol(x) => {
                 if let Some(y) = self.binding.get(&x) {
-                    (*y).clone()
+                    Ok((*y).clone())
                 } else {
-                    Ast::Nil
+                    bail!("Symbol not bound")
                 }
             }
-            x => x,
+            x => Ok(x),
         }
     }
 
@@ -32,16 +32,22 @@ impl Malvi {
                     Ok(Ast::Round(vec![]))
                 } else {
                     let name = &inner[0];
-                    let rest = 
-                        inner[1..]
-                        .iter()
-                        .map(|x|self.eval(x))
-                        .collect::<Result<Vec<_>>>()?;
-                    match self.resolve_sym(name) {
+                    match self.resolve_sym(name)? {
                         Ast::BuiltinFunction(ff) => {
                             let fnn = self.builtins[ff].clone();
+                            let rest = 
+                                inner[1..]
+                                .iter()
+                                .map(|x|self.eval(x).map(Rc::new))
+                                .collect::<Result<Vec<_>>>()?;
                             fnn(self, &rest)
                         },
+                        Ast::BuiltinMacro(ff) => {
+                            let fnn = self.builtins[ff].clone();
+                            let rest = 
+                                &inner[1..];
+                            fnn(self, &rest)
+                        }
                         _ => bail!("only built-in functions can ba called"),
                     }
                 }
@@ -62,6 +68,7 @@ impl Malvi {
                     .collect::<Result<Vec<_>>>()?
                 ))
             },
+            Ast::Symbol(n) => self.resolve_sym(&Ast::Symbol(*n)),
             x => Ok(x.clone()),
         }
     }
