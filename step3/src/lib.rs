@@ -130,7 +130,7 @@ fn test_it(in_:&[&str], out_:Option<&str>) {
     let mut res : Result<String> = Ok("".to_string());
     for x in in_ {
         res = try {
-            let a = p.read(in_[0])?;
+            let a = p.read(x)?;
             let a = p.eval(&a)?;
             p.print(&a)?
         };
