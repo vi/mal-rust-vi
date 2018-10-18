@@ -76,7 +76,7 @@ pub fn let_(m:&mut Malvi, env:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
                 => {
                     let mut new_bindings = Bindings {
                         at_this_level: ::std::collections::HashMap::new(),
-                        parent: None,
+                        parent: Some(env.clone()),
                     };
                     let vv = m.eval_impl(&Rc::new(RefCell::new(new_bindings)), v)?;
                     Ok(vv)
