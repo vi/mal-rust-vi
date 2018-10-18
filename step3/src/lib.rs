@@ -8,6 +8,12 @@ extern crate pest_derive;
 extern crate pest_deconstruct;
 #[macro_use]
 extern crate failure;
+#[macro_use]
+extern crate slab_typesafe;
+
+use slab_typesafe::Slab;
+
+declare_slab_token!(pub Symbol);
 
 pub type Result<T> = ::std::result::Result<T, failure::Error>;
 
@@ -56,7 +62,7 @@ impl Ast {
 }
 
 pub trait Mal {
-    fn read(&self, x:&str) -> Result<Ast>;
+    fn read(&mut self, x:&str) -> Result<Ast>;
     fn eval(&mut self,  a:&Ast)-> Result<Ast>;
     fn print(&self, a:&Ast) -> Result<String>;
 }
@@ -65,6 +71,8 @@ pub trait Mal {
 type Func = Box<Fn(&[Ast]) -> Result<Ast>>;
 
 pub struct Malvi {
+    sym2name: Slab<Symbol, String>,
+    name2sym: HashMap<String, Symbol>,
     binding: HashMap<String, Func>,
 }
 
@@ -72,9 +80,21 @@ pub mod stdfn;
 pub mod eval;
 
 impl Malvi {
+    pub fn sym(&mut self, n: &str) -> Symbol {
+        if let Some(x) = self.name2sym.get(n) {
+            *x
+        } else {
+            let s = self.sym2name.insert(n.to_string());
+            self.name2sym.insert(n.to_string(), s);
+            s
+        }
+    }
+
     pub fn new() -> Self { 
         let mut this = Malvi{
             binding: HashMap::with_capacity(10),
+            sym2name: Slab::with_capacity(10),
+            name2sym: HashMap::with_capacity(10),
         };
         this.binding.insert("id".to_string(), Box::new(stdfn::id));
         this.binding.insert("+".to_string(), Box::new(stdfn::plus));
@@ -85,7 +105,7 @@ impl Malvi {
     }
 }
 impl Mal for Malvi {
-    fn read(&self, x:&str) -> Result<Ast> {
+    fn read(&mut self, x:&str) -> Result<Ast> {
         let p = parse::parser::ParserImpl::parse(parse::parser::Rule::sobj, x)?
             .next().unwrap();
         let a = parse::ast::Obj::from_pest(p);
