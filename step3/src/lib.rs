@@ -108,7 +108,7 @@ impl Malvi {
         builtin_func!("+" , stdfn::plus);
         builtin_func!("-" , stdfn::minus);
         builtin_func!("*" , stdfn::times);
-        builtin_func!("." , stdfn::divide);
+        builtin_func!("/" , stdfn::divide);
         this
     }
 }
