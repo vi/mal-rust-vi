@@ -30,18 +30,27 @@ use ::std::collections::HashMap;
 use pest::Parser;
 use pest_deconstruct::FromPest;
 
-/// High-level AST
-#[derive(Debug,Clone)]
-pub enum Ast {
-    Round(Vec<Rc<Ast>>),
-    Square(Vec<Rc<Ast>>),
-    Curly(Vec<Rc<Ast>>),
+
+// A map-key-friendly node
+#[derive(Debug,Clone,Eq,PartialEq,Hash)]
+pub enum SAst {
     Int(i64),
     Symbol(Symbol),
     Bool(bool),
     Nil,
     Atom(Symbol),
     StrLit(String),
+}
+
+/// A node for high-level AST
+#[derive(Debug,Clone,Eq,PartialEq)]
+pub enum Ast {
+    Simple(SAst),
+    
+    Round(Vec<Rc<Ast>>),
+    Square(Vec<Rc<Ast>>),
+    Curly(HashMap<SAst, Rc<Ast>>),
+
     Quote(Rc<Ast>),
     Quasiquote(Rc<Ast>),
     Unquote(Rc<Ast>),

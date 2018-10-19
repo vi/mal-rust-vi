@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use super::{Ast, BoundAstRef, Malvi, Result};
+use super::{Ast, SAst, BoundAstRef, Malvi, Result};
 use ::std::convert::identity as id;
 
 pub mod parser {
@@ -131,24 +131,24 @@ pub mod ast {
 
     impl super::super::Malvi {
         pub fn read_impl<'a, 'b> (&mut self, x: &'b Obj<'a>) -> super::super::Ast {
-            use super::super::Ast;
+            use super::super::{Ast,SAst};
             use std::rc::Rc;
             match x {
-                Obj::Int(Int { value, .. }) => Ast::Int(*value),
-                Obj::StrLit(StrLit { span }) => Ast::StrLit(span.as_str().to_string()),
-                Obj::Symbol(Symbol { span }) => Ast::Symbol(
+                Obj::Int(Int { value, .. }) => Ast::Simple(SAst::Int(*value)),
+                Obj::StrLit(StrLit { span }) => Ast::Simple(SAst::StrLit(span.as_str().to_string())),
+                Obj::Symbol(Symbol { span }) => Ast::Simple(SAst::Symbol(
                     self.sym(span.as_str())
-                ),
-                Obj::Atom(Atom { span }) => Ast::Atom(
+                )),
+                Obj::Atom(Atom { span }) => Ast::Simple(SAst::Atom(
                     self.sym(span.as_str())
-                ),
+                )),
                 Obj::Keyword(Keyword { span }) => match span.as_str() {
-                    "nil" => Ast::Nil,
-                    "true" => Ast::Bool(true),
-                    "false" => Ast::Bool(false),
+                    "nil" => Ast::Simple(SAst::Nil),
+                    "true" => Ast::Simple(SAst::Bool(true)),
+                    "false" => Ast::Simple(SAst::Bool(false)),
                     _ => unreachable!(),
                 },
-                Obj::StrLit(StrLit { span }) => Ast::StrLit(span.as_str().to_string()),
+                Obj::StrLit(StrLit { span }) => Ast::Simple(SAst::StrLit(span.as_str().to_string())),
                 Obj::Quote(Quote { inner, .. }) => Ast::Quote(Rc::new(self.read_impl(inner))),
                 Obj::Quasiquote(Quasiquote { inner, .. }) => {
                     Ast::Quasiquote(Rc::new(self.read_impl(inner)))
@@ -165,7 +165,17 @@ pub mod ast {
                     Ast::Square(items.iter().map(|x| Rc::new(self.read_impl(x))).collect())
                 }
                 Obj::Curly(Curly { items, .. }) => {
-                    Ast::Curly(items.iter().map(|x| Rc::new(self.read_impl(x))).collect())
+                    Ast::Curly(
+                        items
+                        .chunks_exact(2)
+                        .map(|x| (
+                            match self.read_impl(&x[0]) {
+                                Ast::Simple(x) => x,
+                                _ => unreachable!(),
+                            },
+                            Rc::new(self.read_impl(&x[1])),
+                        )).collect()
+                    )
                 }
                 Obj::Withmeta(Withmeta { inner, meta, .. }) => Ast::Withmeta {
                     value: Rc::new(self.read_impl(inner)),
@@ -177,34 +187,29 @@ pub mod ast {
 
 }
 
-fn writevec(f: &mut std::fmt::Formatter<'_>, m: &Malvi, v: &[Rc<Ast>], mapmode: bool) {
+fn writevec(f: &mut std::fmt::Formatter<'_>, m: &Malvi, v: &[Rc<Ast>]) {
     let mut firsttime = true;
-    let mut odd = false;
     for i in v {
         if !firsttime {
-            if !mapmode || odd {
-                write!(f, " ");
-            } else {
-                write!(f, ", ");
-            }
+            write!(f, " ");
         }
         write!(f, "{}", BoundAstRef(i, m));
         firsttime = false;
-        odd = !odd;
     }
 }
 
 impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         use super::Ast::*;
+        use super::SAst::*;
         let BoundAstRef(a, env) = self;
         match a {
-            Int(x) => write!(f, "{}", x),
-            StrLit(x) => write!(f, "\"{}\"", x),
-            Symbol(x) => write!(f, "{}", env.sym2name[x]),
-            Atom(x) => write!(f, "{}", env.sym2name[x]),
-            Nil => write!(f, "nil"),
-            Bool(x) => write!(f, "{}", x),
+            Simple(Int(x)) => write!(f, "{}", x),
+            Simple(StrLit(x)) => write!(f, "\"{}\"", x),
+            Simple(Symbol(x)) => write!(f, "{}", env.sym2name[x]),
+            Simple(Atom(x)) => write!(f, "{}", env.sym2name[x]),
+            Simple(Nil) => write!(f, "nil"),
+            Simple(Bool(x)) => write!(f, "{}", x),
             Quote(x) => write!(f, "(quote {})", BoundAstRef(x, env)),
             Quasiquote(x) => write!(f, "(quasiquote {})", BoundAstRef(x, env)),
             Unquote(x) => write!(f, "(unquote {})", BoundAstRef(x, env)),
@@ -218,17 +223,27 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
             Deref(x) => write!(f, "(deref {})", BoundAstRef(x, env)),
             Round(x) => {
                 write!(f, "(");
-                writevec(f, env, x, false);
+                writevec(f, env, x);
                 write!(f, ")")
             }
             Square(x) => {
                 write!(f, "[");
-                writevec(f, env, x, false);
+                writevec(f, env, x);
                 write!(f, "]")
             }
             Curly(x) => {
                 write!(f, "{{");
-                writevec(f, env, x, true);
+                let mut first = true;
+                for (k,v) in x {
+                    if !first { write!(f, ", "); };
+                    write!(
+                        f,
+                        "{} {}", 
+                        BoundAstRef(&Ast::Simple(k.clone()), env), 
+                        BoundAstRef(v, env),
+                    );
+                    first = false;
+                }
                 write!(f, "}}")
             }
             BuiltinFunction(x) => {

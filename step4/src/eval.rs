@@ -1,6 +1,7 @@
-use super::{Malvi,Ast,Result,Symbol,Bindings,BindingsHandle};
+use super::{Malvi,Ast,SAst,Result,Symbol,Bindings,BindingsHandle};
 use ::std::rc::Rc;
 use ::std::cell::RefCell;
+use ::std::collections::HashMap;
 
 
 impl Ast {
@@ -16,7 +17,7 @@ impl Malvi {
 
     fn resolve_sym_impl(&self, env:&Bindings, s:&Ast) -> Option<Ast> {
         match s.ignoremeta().clone() {
-            Ast::Symbol(x) => {
+            Ast::Simple(SAst::Symbol(x)) => {
                 if let Some(y) = env.at_this_level.get(&x) {
                     Some((*y).clone())
                 } else {
@@ -74,11 +75,16 @@ impl Malvi {
                 Ok(Ast::Curly(
                     inner
                     .iter()
-                    .map(|x|self.eval_impl(env, x).map(Rc::new))
-                    .collect::<Result<Vec<_>>>()?
+                    .map(|(k,v)| {
+                        self.eval_impl(env, v).map(|vv|(k.clone(), Rc::new(vv)))
+                    })
+                    .collect::<Result<HashMap<_,_>>>()?
                 ))
             },
-            Ast::Symbol(n) => self.eval_impl(env, &self.resolve_sym(env, &Ast::Symbol(*n))?),
+            Ast::Simple(SAst::Symbol(n)) => self.eval_impl(
+                env, 
+                &self.resolve_sym(env, &Ast::Simple(SAst::Symbol(*n)))?,
+            ),
             x => Ok(x.clone()),
         }
     }
