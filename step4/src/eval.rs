@@ -92,6 +92,7 @@ impl Malvi {
                 env, 
                 &self.resolve_sym(env, &Ast::Simple(SAst::Symbol(*n)))?,
             ),
+            Ast::Withmeta{value,..} => self.eval_impl(env,value),
             x => Ok(x.clone()),
         }
     }
