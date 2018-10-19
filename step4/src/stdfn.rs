@@ -115,3 +115,36 @@ pub fn let_(m:&mut Malvi, env:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
     }
 }
 
+
+impl Malvi {
+    pub fn stdfn(&mut self) {
+        let this = self;
+        macro_rules! builtin_func {
+            ($n:expr, $f:path) => {{
+                let s = this.sym($n);
+                let b = this.builtins.insert(Rc::new($f));
+                this.root_bindings.borrow_mut().at_this_level.insert(s, Ast::BuiltinFunction(b));
+            }};
+        }
+        macro_rules! builtin_macro {
+            ($n:expr, $f:path) => {{
+                let s = this.sym($n);
+                let b = this.builtins.insert(Rc::new($f));
+                this.root_bindings.borrow_mut().at_this_level.insert(s, Ast::BuiltinMacro(b));
+            }};
+        }
+        builtin_macro!("quote", quote);
+        builtin_macro!("quasiquote",nimpl);
+        builtin_macro!("unquote",nimpl);
+        builtin_macro!("splice-unquote",nimpl);
+        builtin_macro!("deref",nimpl);
+        builtin_macro!("with-meta",withmeta);
+        builtin_func!("id", id);
+        builtin_func!("+" , plus);
+        builtin_func!("-" , minus);
+        builtin_func!("*" , times);
+        builtin_func!("/" , divide);
+        builtin_macro!("def!" , def);
+        builtin_macro!("let*" , let_);
+    }
+}

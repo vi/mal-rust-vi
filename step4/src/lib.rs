@@ -105,33 +105,7 @@ impl Malvi {
             name2sym: HashMap::with_capacity(10),
             builtins: Slab::with_capacity(10),
         };
-        macro_rules! builtin_func {
-            ($n:expr, $f:path) => {{
-                let s = this.sym($n);
-                let b = this.builtins.insert(Rc::new($f));
-                this.root_bindings.borrow_mut().at_this_level.insert(s, Ast::BuiltinFunction(b));
-            }};
-        }
-        macro_rules! builtin_macro {
-            ($n:expr, $f:path) => {{
-                let s = this.sym($n);
-                let b = this.builtins.insert(Rc::new($f));
-                this.root_bindings.borrow_mut().at_this_level.insert(s, Ast::BuiltinMacro(b));
-            }};
-        }
-        builtin_macro!("quote",stdfn::quote);
-        builtin_macro!("quasiquote",stdfn::nimpl);
-        builtin_macro!("unquote",stdfn::nimpl);
-        builtin_macro!("splice-unquote",stdfn::nimpl);
-        builtin_macro!("deref",stdfn::nimpl);
-        builtin_macro!("with-meta",stdfn::withmeta);
-        builtin_func!("id", stdfn::id);
-        builtin_func!("+" , stdfn::plus);
-        builtin_func!("-" , stdfn::minus);
-        builtin_func!("*" , stdfn::times);
-        builtin_func!("/" , stdfn::divide);
-        builtin_macro!("def!" , stdfn::def);
-        builtin_macro!("let*" , stdfn::let_);
+        this.stdfn();
         this
     }
 }
