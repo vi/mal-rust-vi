@@ -165,6 +165,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "malvi_step3b"
+version = "0.1.0"
+dependencies = [
+ "failure 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pest 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pest-deconstruct 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pest_derive 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "slab_typesafe 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "malvi_step4"
 version = "0.1.0"
 dependencies = [

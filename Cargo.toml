@@ -6,6 +6,7 @@ members = [
     "step2b",
     "step2c",
     "step3",
+    "step3b",
     "step4",
 ]
 
