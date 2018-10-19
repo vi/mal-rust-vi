@@ -20,6 +20,8 @@ extern crate itertools;
 use slab_typesafe::Slab;
 use ::std::cell::RefCell;
 use self::im::Vector;
+use self::im::HashMap;
+use std::collections::HashMap as StdHashMap;
 
 pub type Result<T> = ::std::result::Result<T, failure::Error>;
 
@@ -31,7 +33,6 @@ pub mod parse;
 
 
 use ::std::rc::Rc;
-use ::std::collections::HashMap;
 use pest::Parser;
 use pest_deconstruct::FromPest;
 
@@ -81,7 +82,7 @@ pub struct Bindings {
 
 pub struct Malvi {
     sym2name: Slab<Symbol, String>,
-    name2sym: HashMap<String, Symbol>,
+    name2sym: StdHashMap<String, Symbol>,
     root_bindings: BindingsHandle,
     builtins: Slab<Builtin, Func>,
 }
@@ -103,11 +104,11 @@ impl Malvi {
     pub fn new() -> Self { 
         let mut this = Malvi{
             root_bindings: Rc::new(RefCell::new(Bindings{
-                at_this_level: HashMap::with_capacity(10),
+                at_this_level: HashMap::new(),
                 parent: None,
             })),
             sym2name: Slab::with_capacity(10),
-            name2sym: HashMap::with_capacity(10),
+            name2sym: StdHashMap::with_capacity(10),
             builtins: Slab::with_capacity(10),
         };
         this.stdfn();

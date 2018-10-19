@@ -140,7 +140,7 @@ pub fn let_(m: &mut Malvi, env: &BindingsHandle, x: Vector<Rc<Ast>>) -> Result<A
                     bail!("Odd number of elements in bindings list")
                 }
                 let mut new_bindings = Bindings {
-                    at_this_level: ::std::collections::HashMap::new(),
+                    at_this_level: crate::im::HashMap::new(),
                     parent: Some(env.clone()),
                 };
                 let bh = Rc::new(RefCell::new(new_bindings));

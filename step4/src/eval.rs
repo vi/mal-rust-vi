@@ -1,7 +1,7 @@
 use super::{Malvi,Ast,SAst,Result,Symbol,Bindings,BindingsHandle};
 use ::std::rc::Rc;
 use ::std::cell::RefCell;
-use ::std::collections::HashMap;
+use crate::im::HashMap;
 
 impl Malvi {
 
