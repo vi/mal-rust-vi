@@ -61,6 +61,12 @@ impl Malvi {
             Ok(Ast::Round(v))
         });
 
+        builtin_macro!("fn*", |m,_,x| {
+            let mut v = vector![Rc::new(Sym!(m.sym("fn*")))];
+            v.append(x);
+            Ok(Ast::Round(v))
+        });
+
         builtin_macro!("with-meta", |_, _, x| if x.len() == 2 {
             Ok((*x[0]).clone())
         } else {
