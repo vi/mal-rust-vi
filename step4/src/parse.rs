@@ -104,23 +104,37 @@ pub mod ast {
     }
 
     #[derive(Debug, FromPest)]
-    #[pest(rule = "Rule::curly")]
-    pub struct Curly<'i> {
+    #[pest(rule = "Rule::curly_item")]
+    pub struct CurlyItem<'i> {
         pub span: Span<'i>,
-        pub items: Vec<Obj<'i>>,
+        pub k: SimpleObj<'i>,
+        pub v: Obj<'i>,
     }
 
     #[derive(Debug, FromPest)]
-    #[pest(rule = "Rule::obj")]
-    pub enum Obj<'i> {
-        Round(Round<'i>),
-        Square(Square<'i>),
-        Curly(Curly<'i>),
+    #[pest(rule = "Rule::curly")]
+    pub struct Curly<'i> {
+        pub span: Span<'i>,
+        pub items: Vec<CurlyItem<'i>>,
+    }
+
+    #[derive(Debug, FromPest)]
+    #[pest(rule = "Rule::obj_simple")]
+    pub enum SimpleObj<'i> {
         Int(Int<'i>),
         Symbol(Symbol<'i>),
         Keyword(Keyword<'i>),
         Atom(Atom<'i>),
         StrLit(StrLit<'i>),
+    }
+
+    #[derive(Debug, FromPest)]
+    #[pest(rule = "Rule::obj")]
+    pub enum Obj<'i> {
+        Simple(SimpleObj<'i>),
+        Round(Round<'i>),
+        Square(Square<'i>),
+        Curly(Curly<'i>),
         Quote(Quote<'i>),
         Quasiquote(Quasiquote<'i>),
         Unquote(Unquote<'i>),
@@ -130,25 +144,33 @@ pub mod ast {
     }
 
     impl super::super::Malvi {
+        fn read_impl_simple<'a, 'b> (&mut self, x: &'b SimpleObj<'a>) -> super::super::SAst {
+            use super::super::{SAst};
+            match x {
+                SimpleObj::Int(Int{ value, .. }) => SAst::Int(*value),
+                SimpleObj::StrLit(StrLit { span }) => SAst::StrLit(span.as_str().to_string()),
+                SimpleObj::Symbol(Symbol { span }) => SAst::Symbol(
+                    self.sym(span.as_str())
+                ),
+                SimpleObj::Atom(Atom { span }) => SAst::Atom(
+                    self.sym(span.as_str())
+                ),
+                SimpleObj::Keyword(Keyword { span }) => match span.as_str() {
+                    "nil" => SAst::Nil,
+                    "true" => SAst::Bool(true),
+                    "false" => SAst::Bool(false),
+                    _ => unreachable!(),
+                },
+                SimpleObj::StrLit(StrLit { span }) => SAst::StrLit(span.as_str().to_string()),
+            }
+        }
+
         pub fn read_impl<'a, 'b> (&mut self, x: &'b Obj<'a>) -> super::super::Ast {
             use super::super::{Ast,SAst};
             use std::rc::Rc;
             match x {
-                Obj::Int(Int { value, .. }) => Ast::Simple(SAst::Int(*value)),
-                Obj::StrLit(StrLit { span }) => Ast::Simple(SAst::StrLit(span.as_str().to_string())),
-                Obj::Symbol(Symbol { span }) => Ast::Simple(SAst::Symbol(
-                    self.sym(span.as_str())
-                )),
-                Obj::Atom(Atom { span }) => Ast::Simple(SAst::Atom(
-                    self.sym(span.as_str())
-                )),
-                Obj::Keyword(Keyword { span }) => match span.as_str() {
-                    "nil" => Ast::Simple(SAst::Nil),
-                    "true" => Ast::Simple(SAst::Bool(true)),
-                    "false" => Ast::Simple(SAst::Bool(false)),
-                    _ => unreachable!(),
-                },
-                Obj::StrLit(StrLit { span }) => Ast::Simple(SAst::StrLit(span.as_str().to_string())),
+                Obj::Simple(xx) => Ast::Simple(self.read_impl_simple(xx)),
+                
                 Obj::Quote(Quote { inner, .. }) => Ast::Quote(Rc::new(self.read_impl(inner))),
                 Obj::Quasiquote(Quasiquote { inner, .. }) => {
                     Ast::Quasiquote(Rc::new(self.read_impl(inner)))
@@ -167,13 +189,10 @@ pub mod ast {
                 Obj::Curly(Curly { items, .. }) => {
                     Ast::Curly(
                         items
-                        .chunks_exact(2)
+                        .iter()
                         .map(|x| (
-                            match self.read_impl(&x[0]) {
-                                Ast::Simple(x) => x,
-                                _ => unreachable!(),
-                            },
-                            Rc::new(self.read_impl(&x[1])),
+                            self.read_impl_simple(&x.k),
+                            Rc::new(self.read_impl(&x.v)),
                         )).collect()
                     )
                 }

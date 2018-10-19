@@ -1,14 +1,17 @@
 prog = _{ SOI ~ obj* ~ EOI }
 sobj = _{SOI ~ obj ~ EOI}
-obj = {
+obj_simple = {
 	int
     | "\"" ~ strlit ~ "\""
-    | round
-    | square
-    | curly
     | symbol
     | kw
     | atom
+}
+obj = {
+	obj_simple
+    | round
+    | square
+    | curly
     | withmeta
     | quote
     | quasiquote
@@ -18,7 +21,8 @@ obj = {
 } 
 round = { "(" ~ obj* ~ ")" }
 square = { "[" ~ obj* ~ "]" }
-curly = { "{" ~ obj* ~ "}" }
+curly_item = {obj_simple ~ obj}
+curly = { "{" ~ curly_item* ~ "}" }
 int = @{ "-"? ~ ASCII_DIGIT+ }
 strlit = @{ strlit_char* }
 strlit_char = _{
