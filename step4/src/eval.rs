@@ -76,7 +76,14 @@ impl Malvi {
                     inner
                     .iter()
                     .map(|(k,v)| {
-                        self.eval_impl(env, v).map(|vv|(k.clone(), Rc::new(vv)))
+                        try {
+                            let kk = match self.resolve_sym(env, &Ast::Simple(k.clone()))? {
+                                Ast::Simple(x) => x,
+                                _ => bail!("Unhashable type"),
+                            };
+                            let vv = self.eval_impl(env, v)?;
+                            (kk, Rc::new(vv))
+                        }
                     })
                     .collect::<Result<HashMap<_,_>>>()?
                 ))
