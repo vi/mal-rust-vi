@@ -3,20 +3,10 @@ use ::std::rc::Rc;
 use ::std::cell::RefCell;
 use ::std::collections::HashMap;
 
-
-impl Ast {
-    pub fn ignoremeta(&self) -> &Self {
-        match self {
-            Ast::Withmeta {value,..} => value.ignoremeta(),
-            x => x,
-        }
-    }
-}
-
 impl Malvi {
 
     fn resolve_sym_impl(&self, env:&Bindings, s:&Ast) -> Option<Ast> {
-        match s.ignoremeta().clone() {
+        match s.clone() {
             Ast::Simple(SAst::Symbol(x)) => {
                 if let Some(y) = env.at_this_level.get(&x) {
                     Some((*y).clone())
@@ -92,7 +82,6 @@ impl Malvi {
                 env, 
                 &self.resolve_sym(env, &Ast::Simple(SAst::Symbol(*n)))?,
             ),
-            Ast::Withmeta{value,..} => self.eval_impl(env,value),
             x => Ok(x.clone()),
         }
     }

@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
-use super::{Ast, SAst, BoundAstRef, Malvi, Result};
-use ::std::convert::identity as id;
+use super::{Ast, BoundAstRef, Malvi, Result, SAst};
+use std::convert::identity as id;
 
 pub mod parser {
     #[derive(Parser)]
@@ -144,17 +144,13 @@ pub mod ast {
     }
 
     impl super::super::Malvi {
-        fn read_impl_simple<'a, 'b> (&mut self, x: &'b SimpleObj<'a>) -> super::super::SAst {
-            use super::super::{SAst};
+        fn read_impl_simple<'a, 'b>(&mut self, x: &'b SimpleObj<'a>) -> super::super::SAst {
+            use super::super::SAst;
             match x {
-                SimpleObj::Int(Int{ value, .. }) => SAst::Int(*value),
+                SimpleObj::Int(Int { value, .. }) => SAst::Int(*value),
                 SimpleObj::StrLit(StrLit { span }) => SAst::StrLit(span.as_str().to_string()),
-                SimpleObj::Symbol(Symbol { span }) => SAst::Symbol(
-                    self.sym(span.as_str())
-                ),
-                SimpleObj::Atom(Atom { span }) => SAst::Atom(
-                    self.sym(span.as_str())
-                ),
+                SimpleObj::Symbol(Symbol { span }) => SAst::Symbol(self.sym(span.as_str())),
+                SimpleObj::Atom(Atom { span }) => SAst::Atom(self.sym(span.as_str())),
                 SimpleObj::Keyword(Keyword { span }) => match span.as_str() {
                     "nil" => SAst::Nil,
                     "true" => SAst::Bool(true),
@@ -165,41 +161,50 @@ pub mod ast {
             }
         }
 
-        pub fn read_impl<'a, 'b> (&mut self, x: &'b Obj<'a>) -> super::super::Ast {
-            use super::super::{Ast,SAst};
+        pub fn read_impl<'a, 'b>(&mut self, x: &'b Obj<'a>) -> super::super::Ast {
+            use super::super::{Ast, SAst};
             use std::rc::Rc;
+
+            macro_rules! sugar {
+                (A $id:ident $x:ident) => {
+                    Obj::$id($id { inner:$x, .. })
+                };
+                (B $x:ident $symnam:expr) => {
+                    Ast::Round(
+                        vec![
+                            Rc::new(Ast::Simple(SAst::Symbol(self.sym($symnam)))),
+                            Rc::new(self.read_impl($x)),
+                        ]
+                    )
+                };
+            }
+
             match x {
                 Obj::Simple(xx) => Ast::Simple(self.read_impl_simple(xx)),
+
+                sugar!(A Quote x)      => sugar!(B x "quote"),
+                sugar!(A Quasiquote x) => sugar!(B x "quasiquote"),
+                sugar!(A Unquote x)    => sugar!(B x "unquote"),
+                sugar!(A Spliceunquote x) => sugar!(B x "splice-unquote"),
+                sugar!(A Deref x)      => sugar!(B x "deref"),
                 
-                Obj::Quote(Quote { inner, .. }) => Ast::Quote(Rc::new(self.read_impl(inner))),
-                Obj::Quasiquote(Quasiquote { inner, .. }) => {
-                    Ast::Quasiquote(Rc::new(self.read_impl(inner)))
-                }
-                Obj::Unquote(Unquote { inner, .. }) => Ast::Unquote(Rc::new(self.read_impl(inner))),
-                Obj::Spliceunquote(Spliceunquote { inner, .. }) => {
-                    Ast::Spliceunquote(Rc::new(self.read_impl(inner)))
-                }
-                Obj::Deref(Deref { inner, .. }) => Ast::Deref(Rc::new(self.read_impl(inner))),
                 Obj::Round(Round { items, .. }) => {
                     Ast::Round(items.iter().map(|x| Rc::new(self.read_impl(x))).collect())
                 }
                 Obj::Square(Square { items, .. }) => {
                     Ast::Square(items.iter().map(|x| Rc::new(self.read_impl(x))).collect())
                 }
-                Obj::Curly(Curly { items, .. }) => {
-                    Ast::Curly(
-                        items
+                Obj::Curly(Curly { items, .. }) => Ast::Curly(
+                    items
                         .iter()
-                        .map(|x| (
-                            self.read_impl_simple(&x.k),
-                            Rc::new(self.read_impl(&x.v)),
-                        )).collect()
-                    )
-                }
-                Obj::Withmeta(Withmeta { inner, meta, .. }) => Ast::Withmeta {
-                    value: Rc::new(self.read_impl(inner)),
-                    meta: Rc::new(self.read_impl(meta)),
-                },
+                        .map(|x| (self.read_impl_simple(&x.k), Rc::new(self.read_impl(&x.v))))
+                        .collect(),
+                ),
+                Obj::Withmeta(Withmeta { inner, meta, .. }) => Ast::Round(vec![
+                    Rc::new(Ast::Simple(SAst::Symbol(self.sym("with-meta")))),
+                    Rc::new(self.read_impl(inner)),
+                    Rc::new(self.read_impl(meta)),
+                ]),
             }
         }
     }
@@ -229,17 +234,6 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
             Simple(Atom(x)) => write!(f, "{}", env.sym2name[x]),
             Simple(Nil) => write!(f, "nil"),
             Simple(Bool(x)) => write!(f, "{}", x),
-            Quote(x) => write!(f, "(quote {})", BoundAstRef(x, env)),
-            Quasiquote(x) => write!(f, "(quasiquote {})", BoundAstRef(x, env)),
-            Unquote(x) => write!(f, "(unquote {})", BoundAstRef(x, env)),
-            Spliceunquote(x) => write!(f, "(splice-unquote {})", BoundAstRef(x, env)),
-            Withmeta { value, meta } => write!(
-                f,
-                "(with-meta {} {})",
-                BoundAstRef(value, env),
-                BoundAstRef(meta, env)
-            ),
-            Deref(x) => write!(f, "(deref {})", BoundAstRef(x, env)),
             Round(x) => {
                 write!(f, "(");
                 writevec(f, env, x);
@@ -253,32 +247,22 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
             Curly(x) => {
                 write!(f, "{{");
                 let mut first = true;
-                for (k,v) in x {
-                    if !first { write!(f, ", "); };
+                for (k, v) in x {
+                    if !first {
+                        write!(f, ", ");
+                    };
                     write!(
                         f,
-                        "{} {}", 
-                        BoundAstRef(&Ast::Simple(k.clone()), env), 
+                        "{} {}",
+                        BoundAstRef(&Ast::Simple(k.clone()), env),
                         BoundAstRef(v, env),
                     );
                     first = false;
                 }
                 write!(f, "}}")
             }
-            BuiltinFunction(x) => {
-                write!(
-                    f,
-                    "#builtin_fn_{}",
-                    id::<usize>((*x).into()),
-                )
-            }
-            BuiltinMacro(x) => {
-                write!(
-                    f,
-                    "#builtin_macro_{}",
-                    id::<usize>((*x).into()),
-                )
-            }
+            BuiltinFunction(x) => write!(f, "#builtin_fn_{}", id::<usize>((*x).into()),),
+            BuiltinMacro(x) => write!(f, "#builtin_macro_{}", id::<usize>((*x).into()),),
         };
         Ok(())
     }

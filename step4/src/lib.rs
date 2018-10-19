@@ -51,15 +51,6 @@ pub enum Ast {
     Square(Vec<Rc<Ast>>),
     Curly(HashMap<SAst, Rc<Ast>>),
 
-    Quote(Rc<Ast>),
-    Quasiquote(Rc<Ast>),
-    Unquote(Rc<Ast>),
-    Spliceunquote(Rc<Ast>),
-    Deref(Rc<Ast>),
-    Withmeta{
-        value: Rc<Ast>,
-        meta: Rc<Ast>,
-    },
     BuiltinFunction(Builtin),
     BuiltinMacro(Builtin),
 }
@@ -128,6 +119,12 @@ impl Malvi {
                 this.root_bindings.borrow_mut().at_this_level.insert(s, Ast::BuiltinMacro(b));
             }};
         }
+        builtin_macro!("quote",stdfn::quote);
+        builtin_macro!("quasiquote",stdfn::nimpl);
+        builtin_macro!("unquote",stdfn::nimpl);
+        builtin_macro!("splice-unquote",stdfn::nimpl);
+        builtin_macro!("deref",stdfn::nimpl);
+        builtin_macro!("with-meta",stdfn::withmeta);
         builtin_func!("id", stdfn::id);
         builtin_func!("+" , stdfn::plus);
         builtin_func!("-" , stdfn::minus);

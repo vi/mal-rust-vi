@@ -2,6 +2,9 @@ use super::{Result,Ast,SAst,Malvi,Bindings,BindingsHandle};
 use ::std::rc::Rc;
 use ::std::cell::RefCell;
 
+pub fn nimpl(_:&mut Malvi, _:&BindingsHandle, _: &[Rc<Ast>]) -> Result<Ast> {
+   bail!("Not implemented")
+}
 pub fn id(_:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
     if x.len() == 1 {
         Ok((*x[0]).clone())
@@ -9,10 +12,23 @@ pub fn id(_:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
         bail!("id funciton must have exactly one argument")
     }
 }
+pub fn withmeta(_:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
+    if x.len() == 2 {
+        Ok((*x[0]).clone())
+    } else {
+        bail!("with-meta macro must have exactly two arguments")
+    }
+}
+pub fn quote(m:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
+    let mut v = vec![Rc::new(Ast::Simple(SAst::Symbol(m.sym("quote"))))];
+    v.extend_from_slice(x);
+    Ok(Ast::Round(v))
+}
+
 pub fn plus(_:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
     let mut sum = 0;
     for i in x {
-        match i.ignoremeta() {
+        match **i {
             Ast::Simple(SAst::Int(n)) => sum+=n,
             _ => bail!("+ does not support this type"),
         }
@@ -21,11 +37,11 @@ pub fn plus(_:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
 }
 pub fn minus(_:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
     match x.len() {
-        1 => match x[0].ignoremeta() {
+        1 => match *x[0] {
                Ast::Simple(SAst::Int(n)) => Ok(Ast::Simple(SAst::Int(-n))),
                 _ => bail!("- does not support this type"),
             },
-        2 => match (x[0].ignoremeta(), x[1].ignoremeta()) {
+        2 => match (&*x[0], &*x[1]) {
                 (Ast::Simple(SAst::Int(n)),Ast::Simple(SAst::Int(v))) => Ok(Ast::Simple(SAst::Int(n-v))),
                 _ => bail!("- does not support this type"),
             },
@@ -35,7 +51,7 @@ pub fn minus(_:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
 pub fn times(_:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
     let mut prod = 1;
     for i in x {
-        match i.ignoremeta() {
+        match **i {
             Ast::Simple(SAst::Int(n)) => prod*=n,
             _ => bail!("* does not support this type"),
         }
@@ -44,7 +60,7 @@ pub fn times(_:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
 }
 pub fn divide(_:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
     match x.len() {
-        2 => match (x[0].ignoremeta(), x[1].ignoremeta()) {
+        2 => match (&*x[0], &*x[1]) {
                 (Ast::Simple(SAst::Int(_)),Ast::Simple(SAst::Int(0))) => bail!("division by zero"),
                 (Ast::Simple(SAst::Int(n)),Ast::Simple(SAst::Int(v))) => Ok(Ast::Simple(SAst::Int(n/v))),
                 _ => bail!("/ does not support this type"),
@@ -55,9 +71,9 @@ pub fn divide(_:&mut Malvi, _:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
 
 pub fn def(m:&mut Malvi, env:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
     match x.len() {
-        2 => match (x[0].ignoremeta(), x[1].ignoremeta()) {
+        2 => match (&*x[0], &*x[1]) {
                 (Ast::Simple(SAst::Symbol(n)),v) => {
-                    let vv = m.eval_impl(env, v)?;
+                    let vv = m.eval_impl(env, &v)?;
                     env.borrow_mut().at_this_level.insert(*n, vv.clone());
                     Ok(vv)
                 },
@@ -69,7 +85,7 @@ pub fn def(m:&mut Malvi, env:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
 
 pub fn let_(m:&mut Malvi, env:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
     match x.len() {
-        2 => match (x[0].ignoremeta(), x[1].ignoremeta()) {
+        2 => match (&*x[0], &*x[1]) {
                 | (Ast::Round(n),v) 
                 | (Ast::Square(n),v)
                 => {
@@ -90,7 +106,7 @@ pub fn let_(m:&mut Malvi, env:&BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
                             _ => bail!("Non-symbol speficied to let* for binding")
                         }
                     }
-                    let vv = m.eval_impl(&bh, v)?;
+                    let vv = m.eval_impl(&bh, &v)?;
                     Ok(vv)
                 },
                 _ => bail!("First argument of set! must be square or round brackets"),
