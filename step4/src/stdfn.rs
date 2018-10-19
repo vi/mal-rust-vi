@@ -1,8 +1,10 @@
 use super::{Ast, Bindings, BindingsHandle, Malvi, Result, SAst};
 use std::cell::RefCell;
 use std::rc::Rc;
+use crate::im::Vector;
+use crate::itertools::Itertools;
 
-pub fn nimpl(_: &mut Malvi, _: &BindingsHandle, _: &[Rc<Ast>]) -> Result<Ast> {
+pub fn nimpl(_: &mut Malvi, _: &BindingsHandle, _: Vector<Rc<Ast>>) -> Result<Ast> {
     bail!("Not implemented")
 }
 
@@ -54,8 +56,8 @@ impl Malvi {
         builtin_notimpl_macro!("deref");
 
         builtin_macro!("quote", |m, _env, x| {
-            let mut v = vec![Rc::new(Sym!(m.sym("quote")))];
-            v.extend_from_slice(x);
+            let mut v = vector![Rc::new(Sym!(m.sym("quote")))];
+            v.append(x);
             Ok(Ast::Round(v))
         });
 
@@ -74,7 +76,7 @@ impl Malvi {
         builtin_func!("+", |_, _, x| {
             let mut sum = 0;
             for i in x {
-                match **i {
+                match *i {
                     Int!(n) => sum += n,
                     _ => bail!("+ does not support this type"),
                 }
@@ -97,7 +99,7 @@ impl Malvi {
         builtin_func!("*", |_, _, x| {
             let mut prod = 1;
             for i in x {
-                match **i {
+                match *i {
                     Int!(n) => prod *= n,
                     _ => bail!("* does not support this type"),
                 }
@@ -130,7 +132,7 @@ impl Malvi {
     }
 }
 
-pub fn let_(m: &mut Malvi, env: &BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
+pub fn let_(m: &mut Malvi, env: &BindingsHandle, x: Vector<Rc<Ast>>) -> Result<Ast> {
     match x.len() {
         2 => match (&*x[0], &*x[1]) {
             (Ast::Round(n), v) | (Ast::Square(n), v) => {
@@ -142,9 +144,11 @@ pub fn let_(m: &mut Malvi, env: &BindingsHandle, x: &[Rc<Ast>]) -> Result<Ast> {
                     parent: Some(env.clone()),
                 };
                 let bh = Rc::new(RefCell::new(new_bindings));
-                for bind in n[..].chunks_exact(2) {
-                    match (&*bind[0], &*bind[1]) {
-                        (Sym!(s), v) => {
+                for mut bind in &n.iter().chunks(2) {
+                    let s = bind.next().unwrap();
+                    let v = bind.next().unwrap();
+                    match **s {
+                        Sym!(ref s) => {
                             let vv = m.eval_impl(&bh, v)?;
                             bh.borrow_mut().at_this_level.insert(*s, vv);
                         }

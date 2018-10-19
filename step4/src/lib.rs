@@ -12,9 +12,14 @@ extern crate pest_deconstruct;
 extern crate failure;
 #[macro_use]
 extern crate slab_typesafe;
+#[macro_use]
+extern crate im_rc as im;
+#[macro_use]
+extern crate itertools;
 
 use slab_typesafe::Slab;
 use ::std::cell::RefCell;
+use self::im::Vector;
 
 pub type Result<T> = ::std::result::Result<T, failure::Error>;
 
@@ -47,8 +52,8 @@ pub enum SAst {
 pub enum Ast {
     Simple(SAst),
     
-    Round(Vec<Rc<Ast>>),
-    Square(Vec<Rc<Ast>>),
+    Round(Vector<Rc<Ast>>),
+    Square(Vector<Rc<Ast>>),
     Curly(HashMap<SAst, Rc<Ast>>),
 
     BuiltinFunction(Builtin),
@@ -66,7 +71,7 @@ pub trait Mal {
 declare_slab_token!(pub Symbol);
 declare_slab_token!(pub Builtin);
 
-type Func = Rc<Fn(&mut Malvi, &BindingsHandle, &[Rc<Ast>]) -> Result<Ast>>;
+type Func = Rc<Fn(&mut Malvi, &BindingsHandle, Vector<Rc<Ast>>) -> Result<Ast>>;
 
 pub type BindingsHandle = Rc<RefCell<Bindings>>;
 pub struct Bindings {

@@ -30,24 +30,26 @@ impl Malvi {
         match a {
             Ast::Round(inner) => {
                 if inner.is_empty() {
-                    Ok(Ast::Round(vec![]))
+                    Ok(Ast::Round(vector![]))
                 } else {
                     let name = &inner[0];
                     match self.resolve_sym(env, name)? {
                         Ast::BuiltinFunction(ff) => {
                             let fnn = self.builtins[ff].clone();
                             let rest = 
-                                inner[1..]
+                                inner
+                                .clone()
+                                .split_off(1)
                                 .iter()
                                 .map(|x|self.eval_impl(env, x).map(Rc::new))
-                                .collect::<Result<Vec<_>>>()?;
-                            fnn(self, env, &rest)
+                                .collect::<Result<Vec<_>>>()?
+                                .into();
+                            fnn(self, env, rest)
                         },
                         Ast::BuiltinMacro(ff) => {
                             let fnn = self.builtins[ff].clone();
-                            let rest = 
-                                &inner[1..];
-                            fnn(self, env, &rest)
+                            let rest = inner.clone().split_off(1);
+                            fnn(self, env, rest)
                         }
                         _ => bail!("only built-in functions can ba called"),
                     }
@@ -59,6 +61,7 @@ impl Malvi {
                     .iter()
                     .map(|x|self.eval_impl(env, x).map(Rc::new))
                     .collect::<Result<Vec<_>>>()?
+                    .into()
                 ))
             },
             Ast::Curly(inner) => {

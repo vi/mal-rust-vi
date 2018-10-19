@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use super::{Ast, BoundAstRef, Malvi, Result, SAst};
 use std::convert::identity as id;
+use crate::im::Vector;
 
 pub mod parser {
     #[derive(Parser)]
@@ -171,7 +172,7 @@ pub mod ast {
                 };
                 (B $x:ident $symnam:expr) => {
                     Ast::Round(
-                        vec![
+                        vector![
                             Rc::new(Ast::Simple(SAst::Symbol(self.sym($symnam)))),
                             Rc::new(self.read_impl($x)),
                         ]
@@ -200,7 +201,7 @@ pub mod ast {
                         .map(|x| (self.read_impl_simple(&x.k), Rc::new(self.read_impl(&x.v))))
                         .collect(),
                 ),
-                Obj::Withmeta(Withmeta { inner, meta, .. }) => Ast::Round(vec![
+                Obj::Withmeta(Withmeta { inner, meta, .. }) => Ast::Round(vector![
                     Rc::new(Ast::Simple(SAst::Symbol(self.sym("with-meta")))),
                     Rc::new(self.read_impl(inner)),
                     Rc::new(self.read_impl(meta)),
@@ -211,13 +212,13 @@ pub mod ast {
 
 }
 
-fn writevec(f: &mut std::fmt::Formatter<'_>, m: &Malvi, v: &[Rc<Ast>]) {
+fn writevec(f: &mut std::fmt::Formatter<'_>, m: &Malvi, v: &Vector<Rc<Ast>>) {
     let mut firsttime = true;
     for i in v {
         if !firsttime {
             write!(f, " ");
         }
-        write!(f, "{}", BoundAstRef(i, m));
+        write!(f, "{}", BoundAstRef(&*i, m));
         firsttime = false;
     }
 }
