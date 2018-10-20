@@ -143,8 +143,18 @@ impl Malvi {
 
         builtin_func!("apply", apply);
 
-        builtin_func!("do", |m, env, x|{
-            Ok(x.last().map(|q|(**q).clone()).unwrap_or(Ast::Simple(SAst::Nil)))
+        builtin_macro!("do", |m, env, mut x|{
+            let tail = match x.pop_back() {
+                Some(x) => x,
+                None => return Ok(Ast::Simple(SAst::Nil)),
+            };
+            for obj in x {
+                m.eval_impl(env, &obj)?;
+            };
+            Ok(Ast::EvalMeAgain{
+                env: env.clone(),
+                obj: tail,
+            })
         })
     }
 }
@@ -231,5 +241,8 @@ pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> 
     }
     let bh = Rc::new(RefCell::new(new_bindings));
 
-    m.eval_impl(&bh, func_body)
+    Ok(Ast::EvalMeAgain {
+        obj: func_body.clone(),
+        env: bh,
+    })
 }

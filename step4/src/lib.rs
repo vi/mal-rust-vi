@@ -1,6 +1,5 @@
 #![feature(try_blocks)]
 #![feature(convert_id)]
-#![feature(chunks_exact)]
 #![allow(unused)]
 
 extern crate pest;
@@ -64,6 +63,11 @@ pub enum Ast {
         is_macro: bool,
         func: Rc<Ast>,
         bindings: BindingsHandle,
+    },
+    /// For TCO
+    EvalMeAgain {
+        env: BindingsHandle,
+        obj: Rc<Ast>,
     },
 }
 pub struct BoundAstRef<'a, 'b>(pub &'a Ast, pub &'b Malvi);
