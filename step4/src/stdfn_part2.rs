@@ -92,9 +92,27 @@ impl Malvi {
             (Ast::Simple(SAst::StrLit(x)),Ast::Simple(SAst::StrLit(y)))
             if x == y => True!(),
             (Ast::Simple(SAst::StrLit(_)),_) => False!(),
+        }));
 
-
-            //(Ast::BuiltinFunction
+        builtin_func2!(">", |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>| Ok(match (&*arg1,&*arg2){
+            (Int!(x),Int!(y)) if x>y   => True!(),
+            (Int!(_),Int!(_)) => False!(),
+            (_,_) => bail!("Can only compare integers"),
+        }));
+        builtin_func2!(">=", |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>| Ok(match (&*arg1,&*arg2){
+            (Int!(x),Int!(y)) if x>=y   => True!(),
+            (Int!(_),Int!(_)) => False!(),
+            (_,_) => bail!("Can only compare integers"),
+        }));
+        builtin_func2!("<", |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>| Ok(match (&*arg1,&*arg2){
+            (Int!(x),Int!(y)) if x<y   => True!(),
+            (Int!(_),Int!(_)) => False!(),
+            (_,_) => bail!("Can only compare integers"),
+        }));
+        builtin_func2!("<=", |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>| Ok(match (&*arg1,&*arg2){
+            (Int!(x),Int!(y)) if x<=y   => True!(),
+            (Int!(_),Int!(_)) => False!(),
+            (_,_) => bail!("Can only compare integers"),
         }));
     }
 }
