@@ -64,7 +64,7 @@ pub enum Ast {
         is_macro: bool,
         func: Rc<Ast>,
         bindings: BindingsHandle,
-    }
+    },
 }
 pub struct BoundAstRef<'a, 'b>(pub &'a Ast, pub &'b Malvi);
 

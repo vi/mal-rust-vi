@@ -63,7 +63,7 @@ impl Malvi {
                             apply_args.append(rest);
                             super::stdfn::apply(self, env, apply_args)
                         }
-                        _ => bail!("only built-in functions can ba called"),
+                        _ => bail!("this cannot be called"),
                     }
                 }
             },
