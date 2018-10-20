@@ -80,6 +80,12 @@ macro_rules! Int {
 macro_rules! Sym {
     ($($x:tt)*) => {Ast::Simple(SAst::Symbol($($x)*))};
 }
+macro_rules! True {
+    () => {Ast::Simple(SAst::Bool(true))};
+}
+macro_rules! False {
+    () => {Ast::Simple(SAst::Bool(false))};
+}
 
 /// For `Display`ing.
 pub struct BoundAstRef<'a, 'b>(pub &'a Ast, pub &'b Malvi);
