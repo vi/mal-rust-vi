@@ -19,9 +19,12 @@ fn main() -> malvi::Result<()> {
         }
         let ret : malvi::Result<()> = try {
             let i = p.read(&line)?;
-            let o = p.eval(&i)?;
-            line = p.print(&o)?;
-            println!(";=>{}", line);
+            for xx in i {
+                let o = p.eval(&xx)?;
+                line = p.print(&o)?;
+                println!(";=>{}", line);
+            }
+            println!();
             ()
         };
         if let Err(e) = ret {

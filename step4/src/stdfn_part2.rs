@@ -127,5 +127,7 @@ impl Malvi {
             println!();
             Ok(Nil!())
         });
+
+        //"(def! not (fn* [x] (if x false true))";
     }
 }

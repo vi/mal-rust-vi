@@ -94,7 +94,7 @@ macro_rules! Nil {
 pub struct BoundAstRef<'a, 'b>(pub &'a Ast, pub &'b Malvi);
 
 pub trait Mal {
-    fn read(&mut self, x:&str) -> Result<Ast>;
+    fn read(&mut self, x:&str) -> Result<Vector<Ast>>;
     fn eval(&mut self,  a:&Ast)-> Result<Ast>;
     fn print(&self, a:&Ast) -> Result<String>;
 }
@@ -150,12 +150,16 @@ impl Malvi {
     }
 }
 impl Mal for Malvi {
-    fn read(&mut self, x:&str) -> Result<Ast> {
-        let p = parse::parser::ParserImpl::parse(parse::parser::Rule::sobj, x)?
+    fn read(&mut self, x:&str) -> Result<Vector<Ast>> {
+        let p = parse::parser::ParserImpl::parse(parse::parser::Rule::mobj, x)?
             .next().unwrap();
-        let a = parse::ast::Obj::from_pest(p);
-        let a : Ast = self.read_impl(&a);
-        Ok(a)
+        let a = parse::ast::MObj::from_pest(p);
+        let mut v = vector![];
+        for vv in a.items {
+            let a : Ast = self.read_impl(&vv);
+            v.push_back(a);
+        }
+        Ok(v)
     }
     fn eval(&mut self, a:&Ast)-> Result<Ast> {
         let root_bindings = self.root_bindings.clone();
@@ -173,8 +177,12 @@ fn test_it(in_:&[&str], out_:Option<&str>) {
     for x in in_ {
         res = try {
             let a = p.read(x)?;
-            let a = p.eval(&a)?;
-            p.print(&a)?
+            let mut lastval = "".to_string();
+            for x in a {
+                let a = p.eval(&x)?;
+                lastval = p.print(&a)?;
+            }
+            lastval
         };
     };
     if let Some(x) = out_ {

@@ -144,6 +144,14 @@ pub mod ast {
         Withmeta(Withmeta<'i>),
     }
 
+    #[derive(Debug, FromPest)]
+    #[pest(rule = "Rule::mobj")]
+    #[pest(discard_trailing)]
+    pub struct MObj<'i> {
+        pub span: Span<'i>,
+        pub items: Vec<Obj<'i>>,
+    }
+
     impl super::super::Malvi {
         fn read_impl_simple<'a, 'b>(&mut self, x: &'b SimpleObj<'a>) -> super::super::SAst {
             use super::super::SAst;

@@ -1,5 +1,6 @@
-prog = _{ SOI ~ obj* ~ EOI }
-sobj = _{SOI ~ obj ~ EOI}
+mobj = { SOI ~ obj* ~ EOI }
+sobj = {SOI ~ obj ~ EOI}
+
 obj_simple = {
 	int
     | "\"" ~ strlit ~ "\""
