@@ -1,7 +1,7 @@
 // ; -----------------------------------------------------
 // ; Testing list functions
 #[test]
-fn test0() {
+fn test000() {
     super::test_it (
         &vec!["(list)"],
         Some("()"),
@@ -9,7 +9,7 @@ fn test0() {
 }
 
 #[test]
-fn test1() {
+fn test001() {
     super::test_it (
         &vec!["(list? (list))"],
         Some("true"),
@@ -17,7 +17,7 @@ fn test1() {
 }
 
 #[test]
-fn test2() {
+fn test002() {
     super::test_it (
         &vec!["(empty? (list))"],
         Some("true"),
@@ -25,7 +25,7 @@ fn test2() {
 }
 
 #[test]
-fn test3() {
+fn test003() {
     super::test_it (
         &vec!["(empty? (list 1))"],
         Some("false"),
@@ -33,7 +33,7 @@ fn test3() {
 }
 
 #[test]
-fn test4() {
+fn test004() {
     super::test_it (
         &vec!["(list 1 2 3)"],
         Some("(1 2 3)"),
@@ -41,7 +41,7 @@ fn test4() {
 }
 
 #[test]
-fn test5() {
+fn test005() {
     super::test_it (
         &vec!["(count (list 1 2 3))"],
         Some("3"),
@@ -49,7 +49,7 @@ fn test5() {
 }
 
 #[test]
-fn test6() {
+fn test006() {
     super::test_it (
         &vec!["(count (list))"],
         Some("0"),
@@ -65,7 +65,7 @@ fn test7() {
 }
 
 #[test]
-fn test8() {
+fn test008() {
     super::test_it (
         &vec!["(if (> (count (list 1 2 3)) 3) \"yes\" \"no\")"],
         Some("\"no\""),
@@ -73,7 +73,7 @@ fn test8() {
 }
 
 #[test]
-fn test9() {
+fn test009() {
     super::test_it (
         &vec!["(if (>= (count (list 1 2 3)) 3) \"yes\" \"no\")"],
         Some("\"yes\""),
@@ -82,7 +82,7 @@ fn test9() {
 
 // ; Testing if form
 #[test]
-fn test10() {
+fn test010() {
     super::test_it (
         &vec!["(if true 7 8)"],
         Some("7"),
@@ -90,7 +90,7 @@ fn test10() {
 }
 
 #[test]
-fn test11() {
+fn test011() {
     super::test_it (
         &vec!["(if false 7 8)"],
         Some("8"),
@@ -98,7 +98,7 @@ fn test11() {
 }
 
 #[test]
-fn test12() {
+fn test012() {
     super::test_it (
         &vec!["(if true (+ 1 7) (+ 1 8))"],
         Some("8"),
@@ -106,7 +106,7 @@ fn test12() {
 }
 
 #[test]
-fn test13() {
+fn test013() {
     super::test_it (
         &vec!["(if false (+ 1 7) (+ 1 8))"],
         Some("9"),
@@ -114,7 +114,7 @@ fn test13() {
 }
 
 #[test]
-fn test14() {
+fn test014() {
     super::test_it (
         &vec!["(if nil 7 8)"],
         Some("8"),
@@ -122,7 +122,7 @@ fn test14() {
 }
 
 #[test]
-fn test15() {
+fn test015() {
     super::test_it (
         &vec!["(if 0 7 8)"],
         Some("7"),
@@ -130,7 +130,7 @@ fn test15() {
 }
 
 #[test]
-fn test16() {
+fn test016() {
     super::test_it (
         &vec!["(if \"\" 7 8)"],
         Some("7"),
@@ -138,7 +138,7 @@ fn test16() {
 }
 
 #[test]
-fn test17() {
+fn test017() {
     super::test_it (
         &vec!["(if (list) 7 8)"],
         Some("7"),
@@ -146,7 +146,7 @@ fn test17() {
 }
 
 #[test]
-fn test18() {
+fn test018() {
     super::test_it (
         &vec!["(if (list 1 2 3) 7 8)"],
         Some("7"),
@@ -154,7 +154,7 @@ fn test18() {
 }
 
 #[test]
-fn test19() {
+fn test019() {
     super::test_it (
         &vec!["(= (list) nil)"],
         Some("false"),
@@ -163,7 +163,7 @@ fn test19() {
 
 // ; Testing 1-way if form
 #[test]
-fn test20() {
+fn test020() {
     super::test_it (
         &vec!["(if false (+ 1 7))"],
         Some("nil"),
@@ -171,7 +171,7 @@ fn test20() {
 }
 
 #[test]
-fn test21() {
+fn test021() {
     super::test_it (
         &vec!["(if nil 8 7)"],
         Some("7"),
@@ -179,7 +179,7 @@ fn test21() {
 }
 
 #[test]
-fn test22() {
+fn test022() {
     super::test_it (
         &vec!["(if true (+ 1 7))"],
         Some("8"),
@@ -188,7 +188,7 @@ fn test22() {
 
 // ; Testing basic conditionals
 #[test]
-fn test23() {
+fn test023() {
     super::test_it (
         &vec!["(= 2 1)"],
         Some("false"),
@@ -196,7 +196,7 @@ fn test23() {
 }
 
 #[test]
-fn test24() {
+fn test024() {
     super::test_it (
         &vec!["(= 1 1)"],
         Some("true"),
@@ -204,7 +204,7 @@ fn test24() {
 }
 
 #[test]
-fn test25() {
+fn test025() {
     super::test_it (
         &vec!["(= 1 2)"],
         Some("false"),
@@ -212,7 +212,7 @@ fn test25() {
 }
 
 #[test]
-fn test26() {
+fn test026() {
     super::test_it (
         &vec!["(= 1 (+ 1 1))"],
         Some("false"),
@@ -220,7 +220,7 @@ fn test26() {
 }
 
 #[test]
-fn test27() {
+fn test027() {
     super::test_it (
         &vec!["(= 2 (+ 1 1))"],
         Some("true"),
@@ -228,7 +228,7 @@ fn test27() {
 }
 
 #[test]
-fn test28() {
+fn test028() {
     super::test_it (
         &vec!["(= nil 1)"],
         Some("false"),
@@ -236,7 +236,7 @@ fn test28() {
 }
 
 #[test]
-fn test29() {
+fn test029() {
     super::test_it (
         &vec!["(= nil nil)"],
         Some("true"),
@@ -244,7 +244,7 @@ fn test29() {
 }
 
 #[test]
-fn test30() {
+fn test030() {
     super::test_it (
         &vec!["(> 2 1)"],
         Some("true"),
@@ -252,7 +252,7 @@ fn test30() {
 }
 
 #[test]
-fn test31() {
+fn test031() {
     super::test_it (
         &vec!["(> 1 1)"],
         Some("false"),
@@ -260,7 +260,7 @@ fn test31() {
 }
 
 #[test]
-fn test32() {
+fn test032() {
     super::test_it (
         &vec!["(> 1 2)"],
         Some("false"),
@@ -268,7 +268,7 @@ fn test32() {
 }
 
 #[test]
-fn test33() {
+fn test033() {
     super::test_it (
         &vec!["(>= 2 1)"],
         Some("true"),
@@ -276,7 +276,7 @@ fn test33() {
 }
 
 #[test]
-fn test34() {
+fn test034() {
     super::test_it (
         &vec!["(>= 1 1)"],
         Some("true"),
@@ -284,7 +284,7 @@ fn test34() {
 }
 
 #[test]
-fn test35() {
+fn test035() {
     super::test_it (
         &vec!["(>= 1 2)"],
         Some("false"),
@@ -292,7 +292,7 @@ fn test35() {
 }
 
 #[test]
-fn test36() {
+fn test036() {
     super::test_it (
         &vec!["(< 2 1)"],
         Some("false"),
@@ -300,7 +300,7 @@ fn test36() {
 }
 
 #[test]
-fn test37() {
+fn test037() {
     super::test_it (
         &vec!["(< 1 1)"],
         Some("false"),
@@ -308,7 +308,7 @@ fn test37() {
 }
 
 #[test]
-fn test38() {
+fn test038() {
     super::test_it (
         &vec!["(< 1 2)"],
         Some("true"),
@@ -316,7 +316,7 @@ fn test38() {
 }
 
 #[test]
-fn test39() {
+fn test039() {
     super::test_it (
         &vec!["(<= 2 1)"],
         Some("false"),
@@ -324,7 +324,7 @@ fn test39() {
 }
 
 #[test]
-fn test40() {
+fn test040() {
     super::test_it (
         &vec!["(<= 1 1)"],
         Some("true"),
@@ -332,7 +332,7 @@ fn test40() {
 }
 
 #[test]
-fn test41() {
+fn test041() {
     super::test_it (
         &vec!["(<= 1 2)"],
         Some("true"),
@@ -341,7 +341,7 @@ fn test41() {
 
 // ; Testing equality
 #[test]
-fn test42() {
+fn test042() {
     super::test_it (
         &vec!["(= 1 1)"],
         Some("true"),
@@ -349,7 +349,7 @@ fn test42() {
 }
 
 #[test]
-fn test43() {
+fn test043() {
     super::test_it (
         &vec!["(= 0 0)"],
         Some("true"),
@@ -357,7 +357,7 @@ fn test43() {
 }
 
 #[test]
-fn test44() {
+fn test044() {
     super::test_it (
         &vec!["(= 1 0)"],
         Some("false"),
@@ -365,7 +365,7 @@ fn test44() {
 }
 
 #[test]
-fn test45() {
+fn test045() {
     super::test_it (
         &vec!["(= \"\" \"\")"],
         Some("true"),
@@ -373,7 +373,7 @@ fn test45() {
 }
 
 #[test]
-fn test46() {
+fn test046() {
     super::test_it (
         &vec!["(= \"abc\" \"abc\")"],
         Some("true"),
@@ -381,7 +381,7 @@ fn test46() {
 }
 
 #[test]
-fn test47() {
+fn test047() {
     super::test_it (
         &vec!["(= \"abc\" \"\")"],
         Some("false"),
@@ -389,7 +389,7 @@ fn test47() {
 }
 
 #[test]
-fn test48() {
+fn test048() {
     super::test_it (
         &vec!["(= \"\" \"abc\")"],
         Some("false"),
@@ -397,7 +397,7 @@ fn test48() {
 }
 
 #[test]
-fn test49() {
+fn test049() {
     super::test_it (
         &vec!["(= \"abc\" \"def\")"],
         Some("false"),
@@ -405,7 +405,7 @@ fn test49() {
 }
 
 #[test]
-fn test50() {
+fn test050() {
     super::test_it (
         &vec!["(= \"abc\" \"ABC\")"],
         Some("false"),
@@ -413,7 +413,7 @@ fn test50() {
 }
 
 #[test]
-fn test51() {
+fn test051() {
     super::test_it (
         &vec!["(= true true)"],
         Some("true"),
@@ -421,7 +421,7 @@ fn test51() {
 }
 
 #[test]
-fn test52() {
+fn test052() {
     super::test_it (
         &vec!["(= false false)"],
         Some("true"),
@@ -429,7 +429,7 @@ fn test52() {
 }
 
 #[test]
-fn test53() {
+fn test053() {
     super::test_it (
         &vec!["(= nil nil)"],
         Some("true"),
@@ -437,7 +437,7 @@ fn test53() {
 }
 
 #[test]
-fn test54() {
+fn test054() {
     super::test_it (
         &vec!["(= (list) (list))"],
         Some("true"),
@@ -445,7 +445,7 @@ fn test54() {
 }
 
 #[test]
-fn test55() {
+fn test055() {
     super::test_it (
         &vec!["(= (list 1 2) (list 1 2))"],
         Some("true"),
@@ -453,7 +453,7 @@ fn test55() {
 }
 
 #[test]
-fn test56() {
+fn test056() {
     super::test_it (
         &vec!["(= (list 1) (list))"],
         Some("false"),
@@ -461,7 +461,7 @@ fn test56() {
 }
 
 #[test]
-fn test57() {
+fn test057() {
     super::test_it (
         &vec!["(= (list) (list 1))"],
         Some("false"),
@@ -469,7 +469,7 @@ fn test57() {
 }
 
 #[test]
-fn test58() {
+fn test058() {
     super::test_it (
         &vec!["(= 0 (list))"],
         Some("false"),
@@ -477,7 +477,7 @@ fn test58() {
 }
 
 #[test]
-fn test59() {
+fn test059() {
     super::test_it (
         &vec!["(= (list) 0)"],
         Some("false"),
@@ -485,7 +485,7 @@ fn test59() {
 }
 
 #[test]
-fn test60() {
+fn test060() {
     super::test_it (
         &vec!["(= (list) \"\")"],
         Some("false"),
@@ -493,7 +493,7 @@ fn test60() {
 }
 
 #[test]
-fn test61() {
+fn test061() {
     super::test_it (
         &vec!["(= \"\" (list))"],
         Some("false"),
@@ -502,7 +502,7 @@ fn test61() {
 
 // ; Testing builtin and user defined functions
 #[test]
-fn test62() {
+fn test062() {
     super::test_it (
         &vec!["(+ 1 2)"],
         Some("3"),
@@ -510,7 +510,7 @@ fn test62() {
 }
 
 #[test]
-fn test63() {
+fn test063() {
     super::test_it (
         &vec!["( (fn* (a b) (+ b a)) 3 4)"],
         Some("7"),
@@ -518,7 +518,7 @@ fn test63() {
 }
 
 #[test]
-fn test64() {
+fn test064() {
     super::test_it (
         &vec!["( (fn* () 4) )"],
         Some("4"),
@@ -526,7 +526,7 @@ fn test64() {
 }
 
 #[test]
-fn test65() {
+fn test065() {
     super::test_it (
         &vec!["( (fn* (f x) (f x)) (fn* (a) (+ 1 a)) 7)"],
         Some("8"),
@@ -535,7 +535,7 @@ fn test65() {
 
 // ; Testing closures
 #[test]
-fn test66() {
+fn test066() {
     super::test_it (
         &vec!["( ( (fn* (a) (fn* (b) (+ a b))) 5) 7)"],
         Some("12"),
@@ -543,7 +543,7 @@ fn test66() {
 }
 
 #[test]
-fn test67() {
+fn test067() {
     super::test_it (
         &vec![
             "(def! gen-plus5 (fn* () (fn* (b) (+ 5 b))))",
@@ -555,7 +555,7 @@ fn test67() {
 }
 
 #[test]
-fn test68() {
+fn test068() {
     super::test_it (
         &vec![
             "(def! gen-plus5 (fn* () (fn* (b) (+ 5 b))))",
@@ -571,7 +571,7 @@ fn test68() {
 // ; Testing do form
 //  "prn output1"
 #[test]
-fn test69() {
+fn test069() {
     super::test_it (
         &vec!["(do (prn \"prn output1\"))"],
         Some("nil"),
@@ -580,7 +580,7 @@ fn test69() {
 
 //  "prn output2"
 #[test]
-fn test70() {
+fn test070() {
     super::test_it (
         &vec!["(do (prn \"prn output2\") 7)"],
         Some("7"),
@@ -590,7 +590,7 @@ fn test70() {
 //  "prn output1"
 //  "prn output2"
 #[test]
-fn test71() {
+fn test071() {
     super::test_it (
         &vec!["(do (prn \"prn output1\") (prn \"prn output2\") (+ 1 2))"],
         Some("3"),
@@ -598,7 +598,7 @@ fn test71() {
 }
 
 #[test]
-fn test72() {
+fn test072() {
     super::test_it (
         &vec!["(do (def! a 6) 7 (+ a 8))"],
         Some("14"),
@@ -606,7 +606,7 @@ fn test72() {
 }
 
 #[test]
-fn test73() {
+fn test073() {
     super::test_it (
         &vec!["(do (def! a 6) 7 (+ a 8))","a"],
         Some("6"),
@@ -615,7 +615,7 @@ fn test73() {
 
 // ; Testing special form case-sensitivity
 #[test]
-fn test74() {
+fn test074() {
     super::test_it (
         &vec!["(def! DO (fn* (a) 7))","(DO 3)"],
         Some("7"),
@@ -624,7 +624,7 @@ fn test74() {
 
 // ; Testing recursive sumdown function
 #[test]
-fn test75() {
+fn test075() {
     super::test_it (
         &vec![
             "(def! sumdown (fn* (N) (if (> N 0) (+ N (sumdown  (- N 1))) 0)))",
@@ -635,7 +635,7 @@ fn test75() {
 }
 
 #[test]
-fn test76() {
+fn test076() {
     super::test_it (
         &vec![
             "(def! sumdown (fn* (N) (if (> N 0) (+ N (sumdown  (- N 1))) 0)))",
@@ -646,7 +646,7 @@ fn test76() {
 }
 
 #[test]
-fn test77() {
+fn test077() {
     super::test_it (
         &vec![
             "(def! sumdown (fn* (N) (if (> N 0) (+ N (sumdown  (- N 1))) 0)))",
@@ -658,7 +658,7 @@ fn test77() {
 
 // ; Testing recursive fibonacci function
 #[test]
-fn test78() {
+fn test078() {
     super::test_it (
         &vec![
             "(def! fib (fn* (N) (if (= N 0) 1 (if (= N 1) 1 (+ (fib (- N 1)) (fib (- N 2)))))))",
@@ -669,7 +669,7 @@ fn test78() {
 }
 
 #[test]
-fn test79() {
+fn test079() {
     super::test_it (
         &vec![
             "(def! fib (fn* (N) (if (= N 0) 1 (if (= N 1) 1 (+ (fib (- N 1)) (fib (- N 2)))))))",
@@ -680,7 +680,7 @@ fn test79() {
 }
 
 #[test]
-fn test80() {
+fn test080() {
     super::test_it (
         &vec![
             "(def! fib (fn* (N) (if (= N 0) 1 (if (= N 1) 1 (+ (fib (- N 1)) (fib (- N 2)))))))",
@@ -698,7 +698,7 @@ fn test80() {
 // ; -------- Deferrable Functionality --------
 // ; Testing variable length arguments
 #[test]
-fn test81() {
+fn test081() {
     super::test_it (
         &vec!["( (fn* (& more) (count more)) 1 2 3)"],
         Some("3"),
@@ -706,7 +706,7 @@ fn test81() {
 }
 
 #[test]
-fn test82() {
+fn test082() {
     super::test_it (
         &vec!["( (fn* (& more) (list? more)) 1 2 3)"],
         Some("true"),
@@ -714,7 +714,7 @@ fn test82() {
 }
 
 #[test]
-fn test83() {
+fn test083() {
     super::test_it (
         &vec!["( (fn* (& more) (count more)) 1)"],
         Some("1"),
@@ -722,7 +722,7 @@ fn test83() {
 }
 
 #[test]
-fn test84() {
+fn test084() {
     super::test_it (
         &vec!["( (fn* (& more) (count more)) )"],
         Some("0"),
@@ -730,7 +730,7 @@ fn test84() {
 }
 
 #[test]
-fn test85() {
+fn test085() {
     super::test_it (
         &vec!["( (fn* (& more) (list? more)) )"],
         Some("true"),
@@ -738,7 +738,7 @@ fn test85() {
 }
 
 #[test]
-fn test86() {
+fn test086() {
     super::test_it (
         &vec!["( (fn* (a & more) (count more)) 1 2 3)"],
         Some("2"),
@@ -746,7 +746,7 @@ fn test86() {
 }
 
 #[test]
-fn test87() {
+fn test087() {
     super::test_it (
         &vec!["( (fn* (a & more) (count more)) 1)"],
         Some("0"),
@@ -754,7 +754,7 @@ fn test87() {
 }
 
 #[test]
-fn test88() {
+fn test088() {
     super::test_it (
         &vec!["( (fn* (a & more) (list? more)) 1)"],
         Some("true"),
@@ -763,7 +763,7 @@ fn test88() {
 
 // ; Testing language defined not function
 #[test]
-fn test89() {
+fn test089() {
     super::test_it (
         &vec!["(not false)"],
         Some("true"),
@@ -771,7 +771,7 @@ fn test89() {
 }
 
 #[test]
-fn test90() {
+fn test090() {
     super::test_it (
         &vec!["(not nil)"],
         Some("true"),
@@ -779,7 +779,7 @@ fn test90() {
 }
 
 #[test]
-fn test91() {
+fn test091() {
     super::test_it (
         &vec!["(not true)"],
         Some("false"),
@@ -787,7 +787,7 @@ fn test91() {
 }
 
 #[test]
-fn test92() {
+fn test092() {
     super::test_it (
         &vec!["(not \"a\")"],
         Some("false"),
@@ -795,7 +795,7 @@ fn test92() {
 }
 
 #[test]
-fn test93() {
+fn test093() {
     super::test_it (
         &vec!["(not 0)"],
         Some("false"),
@@ -805,7 +805,7 @@ fn test93() {
 // ; -----------------------------------------------------
 // ; Testing string quoting
 #[test]
-fn test94() {
+fn test094() {
     super::test_it (
         &vec!["\"\""],
         Some("\"\""),
@@ -813,7 +813,7 @@ fn test94() {
 }
 
 #[test]
-fn test95() {
+fn test095() {
     super::test_it (
         &vec!["\"abc\""],
         Some("\"abc\""),
@@ -821,7 +821,7 @@ fn test95() {
 }
 
 #[test]
-fn test96() {
+fn test096() {
     super::test_it (
         &vec!["\"abc  def\""],
         Some("\"abc  def\""),
@@ -829,7 +829,7 @@ fn test96() {
 }
 
 #[test]
-fn test97() {
+fn test097() {
     super::test_it (
         &vec!["\"\\\"\""],
         Some("\"\\\"\""),
@@ -837,7 +837,7 @@ fn test97() {
 }
 
 #[test]
-fn test98() {
+fn test098() {
     super::test_it (
         &vec!["\"abc\\ndef\\nghi\""],
         Some("\"abc\\ndef\\nghi\""),
@@ -845,7 +845,7 @@ fn test98() {
 }
 
 #[test]
-fn test99() {
+fn test099() {
     super::test_it (
         &vec!["\"abc\\\\def\\\\ghi\""],
         Some("\"abc\\\\def\\\\ghi\""),
