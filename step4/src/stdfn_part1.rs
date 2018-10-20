@@ -194,21 +194,49 @@ pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> 
         _ => bail!("Cannot apply a malformed function. Well-formed function's second element must be () or []"),
     };
 
-    if func_bindings.len() != args.len() {
-        bail!("Wrong number of arguments specified to a function");
+    let amp = Rc::new(Ast::Simple(SAst::Symbol(m.sym("&"))));
+    let (usual_bindings, rest_symbol) = {
+        if let Some(x) = func_bindings.index_of(&amp) {
+            if x + 2 != func_bindings.len() {
+                bail!("`&` must be penultimate symbol in binding list")
+            }
+            let (usual,rest) = func_bindings.split_at(x);
+            let rest = match &**rest.last().unwrap() {
+                Sym!(s) => *s,
+                _ => bail!("Capture-the-rest in function argument bindings must be a symbol")
+            };
+            if usual.len() > args.len() {
+                bail!("Too few arguments specified to a function");
+            };
+            (usual, Some(rest))
+        } else {
+            if func_bindings.len() != args.len() {
+                bail!("Wrong number of arguments specified to a function");
+            };
+            (func_bindings, None)
+        }
     };
+    let rest_symbol : Option<super::Symbol> = rest_symbol;
+
     let newenv : BindingsHandle = env_override.unwrap_or(env.clone());
     let mut new_bindings = Bindings {
         at_this_level: crate::im::HashMap::new(),
         parent: Some(newenv),
     };
-    for (binding,arg) in func_bindings.iter().zip(args.iter()) {
+
+    let (usual_args, rest_args) = args.split_at(usual_bindings.len());
+    for (binding,arg) in usual_bindings.iter().zip(usual_args.iter()) {
         match &**binding {
             Sym!(symnam) => {
                 new_bindings.at_this_level.insert(*symnam, (**arg).clone());
             },
             _ => bail!("All function arguments must currently be only symbols"),
         }
+    }
+    if let Some(rest) = rest_symbol {
+        new_bindings.at_this_level.insert(rest, Ast::Round(rest_args));
+    } else {
+        assert!(rest_args.is_empty());
     }
     let bh = Rc::new(RefCell::new(new_bindings));
 

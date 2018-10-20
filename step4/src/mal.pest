@@ -44,6 +44,7 @@ ident_char = _{
     | "=" 
     | ">" 
     | "<"
+    | "&"
 }
 kw = @{ ("true" | "false" | "nil") ~ !ident_char }
 atom = @{ ":" ~ symbol }
