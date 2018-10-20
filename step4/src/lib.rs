@@ -59,6 +59,12 @@ pub enum Ast {
 
     BuiltinFunction(Builtin),
     BuiltinMacro(Builtin),
+
+    UserFunction{
+        is_macro: bool,
+        func: Rc<Ast>,
+        bindings: BindingsHandle,
+    }
 }
 pub struct BoundAstRef<'a, 'b>(pub &'a Ast, pub &'b Malvi);
 
@@ -75,6 +81,7 @@ declare_slab_token!(pub Builtin);
 type Func = Rc<Fn(&mut Malvi, &BindingsHandle, Vector<Rc<Ast>>) -> Result<Ast>>;
 
 pub type BindingsHandle = Rc<RefCell<Bindings>>;
+#[derive(Debug,Eq,PartialEq)]
 pub struct Bindings {
     at_this_level: HashMap<Symbol, Ast>,
     parent: Option<BindingsHandle>,

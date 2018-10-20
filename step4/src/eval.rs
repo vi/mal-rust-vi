@@ -56,6 +56,13 @@ impl Malvi {
                             apply_args.append(rest);
                             super::stdfn::apply(self, env, apply_args)
                         },
+                        func@Ast::UserFunction{..} => {
+                            let mut apply_args = vector![
+                                Rc::new(func),
+                            ];
+                            apply_args.append(rest);
+                            super::stdfn::apply(self, env, apply_args)
+                        }
                         _ => bail!("only built-in functions can ba called"),
                     }
                 }

@@ -61,10 +61,15 @@ impl Malvi {
             Ok(Ast::Round(v))
         });
 
-        builtin_macro!("fn*", |m,_,x| {
+        builtin_macro!("fn*", |m,env,x| {
             let mut v = vector![Rc::new(Sym!(m.sym("fn*")))];
             v.append(x);
-            Ok(Ast::Round(v))
+            let userfunc = Ast::UserFunction{
+                bindings: env.clone(),
+                is_macro: false,
+                func: Rc::new(Ast::Round(v)),
+            };
+            Ok(userfunc)
         });
 
         builtin_macro!("with-meta", |_, _, x| if x.len() == 2 {
@@ -177,10 +182,22 @@ pub fn let_(m: &mut Malvi, env: &BindingsHandle, x: Vector<Rc<Ast>>) -> Result<A
 }
 
 pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> Result<Ast> {
-    let func = args.pop_front().ok_or(format_err!("apply must have at least one argument"))?;
+    let func = args.pop_front().ok_or(format_err!("apply must have at least one argument"))?;    
+    let mut env_override : Option<BindingsHandle> = None;
     let mut func = match &*func {
         Ast::Round(v) => v.clone(),
-        _ => bail!("apply's first argument must be round brackets"),
+        Ast::UserFunction{
+            is_macro: false,
+            func: vv,
+            bindings,
+        } => match &**vv {
+            Ast::Round(v) => {
+                env_override = Some(bindings.clone());
+                v.clone()
+            },
+            _ => bail!("Malformed #fn. Must be round brackets."),
+        }
+        _ => bail!("apply's first argument must be round brackets or #fn"),
     };
     if func.len() != 3 {
         bail!("Cannot apply a malformed function. Well-formed function is a round list with exactly 3 values")
@@ -199,9 +216,10 @@ pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> 
     if func_bindings.len() != args.len() {
         bail!("Wrong number of arguments specified to a function");
     };
+    let newenv : BindingsHandle = env_override.unwrap_or(env.clone());
     let mut new_bindings = Bindings {
         at_this_level: crate::im::HashMap::new(),
-        parent: Some(env.clone()),
+        parent: Some(newenv),
     };
     for (binding,arg) in func_bindings.iter().zip(args.iter()) {
         match &**binding {
