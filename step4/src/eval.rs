@@ -34,7 +34,7 @@ impl Malvi {
                 } else {
                     let mut rest = inner.clone();
                     let name = rest.pop_front().unwrap();
-                    let name = self.resolve_sym(env, &*name)?;
+                    let name = self.eval_impl(env, &*name)?;
                     match name {
                         Ast::BuiltinFunction(ff) => {
                             let fnn = self.builtins[ff].clone();
