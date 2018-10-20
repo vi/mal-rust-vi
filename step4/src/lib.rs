@@ -146,6 +146,11 @@ impl Malvi {
         };
         this.stdfn_part1();
         this.stdfn_part2();
+
+        let prelude = include_str!("prelude.mal");
+        for x in this.read(prelude).expect("error parsing prelude") {
+            this.eval(&x).expect("error evaluating prelude");
+        }
         this
     }
 }
