@@ -18,7 +18,14 @@ impl Malvi {
             Ast::Round(x) => Int!(x.len() as i64),
             Ast::Square(x) => Int!(x.len() as i64),
             Ast::Curly(x) => Int!(x.len() as i64),
+            Ast::Simple(SAst::Nil) => Int!(0),
             _ => bail!("Can't count elements of this"),
+        }));
+        builtin_func1!("empty?", |_,_,x:Rc<Ast>|Ok(match &*x {
+            Ast::Round(x) => Ast::Simple(SAst::Bool(x.is_empty())),
+            Ast::Square(x) =>Ast::Simple(SAst::Bool(x.is_empty())),
+            Ast::Curly(x) => Ast::Simple(SAst::Bool(x.is_empty())),
+            _ => bail!("Can't check emptiness of this"),
         }));
     }
 }
