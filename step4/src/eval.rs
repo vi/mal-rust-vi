@@ -121,10 +121,7 @@ impl Malvi {
                     .collect::<Result<HashMap<_,_>>>()?
                 ))
             },
-            Ast::Simple(SAst::Symbol(n)) => self.eval_impl(
-                env, 
-                &self.resolve_sym(env, &Ast::Simple(SAst::Symbol(*n)))?,
-            ),
+            Ast::Simple(SAst::Symbol(n)) => Ok(self.resolve_sym(env, &Ast::Simple(SAst::Symbol(*n)))?),
             x => Ok(x.clone()),
         }
     }
