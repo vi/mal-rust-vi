@@ -36,14 +36,27 @@ macro_rules! declare_macros_for_builtins {
         macro_rules! builtin_func1 {
             ($n:expr, $f:expr) => {{
                 builtin_func!($n, |m,env,mut x|{
-                    if let Some(arg) = x.pop_front() {
-                        $f(m,env,arg)
-                    } else {
+                    if x.len() != 1 {
                         bail!("This function has exactly 1 argument");
                     }
+                    let arg = x.pop_front().unwrap();
+                    $f(m,env,arg)
                 });
             }};
         }
+        macro_rules! builtin_func2 {
+            ($n:expr, $f:expr) => {{
+                builtin_func!($n, |m,env,mut x|{
+                    if x.len() != 2 {
+                        bail!("This function has exactly 2 arguments");
+                    }
+                    let arg1 : Rc<Ast> = x.pop_front().unwrap();
+                    let arg2 : Rc<Ast> = x.pop_front().unwrap();
+                    $f(m,env,arg1,arg2)
+                });
+            }};
+        }
+
 
         macro_rules! builtin_macro {
             ($n:expr, $f:expr) => {{

@@ -49,5 +49,52 @@ impl Malvi {
                 _ => bail!("Wrong type used in `if` conditional"),
             }
         });
+        builtin_func2!("=", |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>| Ok(match (&*arg1,&*arg2){
+            (Ast::UserFunction{..}, _) => bail!("Can't compare functions"),
+            (_, Ast::UserFunction{..}) => bail!("Can't compare functions"),
+            (Ast::BuiltinFunction(..),_) => bail!("Can't compare functions"),
+            (_, Ast::BuiltinFunction(..)) => bail!("Can't compare functions"),
+            (Ast::BuiltinMacro(..),_) => bail!("Can't compare macros"),
+            (_, Ast::BuiltinMacro(..)) => bail!("Can't compare macros"),
+            (Ast::EvalMeAgain{..},_) => bail!("Can't compare TCO thunks"),
+            (_, Ast::EvalMeAgain{..}) => bail!("Can't compare TCO thunks"),
+            
+            (Int!(x),Int!(y)) if x==y   => True!(),
+            (Int!(_),_) => False!(),
+
+            | (Ast::Round(x),Ast::Round(y)) 
+            | (Ast::Square(x),Ast::Square(y)) 
+            if x == y => True!(),
+            | (Ast::Curly(x),Ast::Curly(y)) 
+            if x == y => True!(),
+
+            | (Ast::Round(_),_) 
+            | (Ast::Square(_),_)
+            => False!(),
+            | (Ast::Curly(_),_) 
+            => False!(),
+
+            (Ast::Simple(SAst::Nil), Ast::Simple(SAst::Nil)) => True!(),
+            (Ast::Simple(SAst::Nil), _) => False!(),
+
+            (Ast::Simple(SAst::Symbol(x)),Ast::Simple(SAst::Symbol(y)))
+            if x == y => True!(),
+            (Ast::Simple(SAst::Symbol(_)),_) => False!(),
+
+            (Ast::Simple(SAst::Bool(x)),Ast::Simple(SAst::Bool(y)))
+            if x == y => True!(),
+            (Ast::Simple(SAst::Bool(_)),_) => False!(),
+
+            (Ast::Simple(SAst::Atom(x)),Ast::Simple(SAst::Atom(y)))
+            if x == y => True!(),
+            (Ast::Simple(SAst::Atom(_)),_) => False!(),
+
+            (Ast::Simple(SAst::StrLit(x)),Ast::Simple(SAst::StrLit(y)))
+            if x == y => True!(),
+            (Ast::Simple(SAst::StrLit(_)),_) => False!(),
+
+
+            //(Ast::BuiltinFunction
+        }));
     }
 }
