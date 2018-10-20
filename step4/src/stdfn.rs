@@ -135,6 +135,8 @@ impl Malvi {
         });
 
         builtin_macro!("let*", let_);
+
+        builtin_func!("apply", apply);
     }
 }
 
@@ -168,4 +170,44 @@ pub fn let_(m: &mut Malvi, env: &BindingsHandle, x: Vector<Rc<Ast>>) -> Result<A
         },
         _ => bail!("let* must have exactly 2 arguments"),
     }
+}
+
+pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> Result<Ast> {
+    let func = args.pop_front().ok_or(format_err!("apply must have at least one argument"))?;
+    let mut func = match &*func {
+        Ast::Round(v) => v.clone(),
+        _ => bail!("apply's first argument must be round brackets"),
+    };
+    if func.len() != 3 {
+        bail!("Cannot apply a malformed function. Well-formed function is a round list with exactly 3 values")
+    };
+    let func_signature = &func[0];
+    let func_bindings = &func[1];
+    let func_body = &func[2];
+    if **func_signature != Sym!(m.sym("fn*")) {
+        bail!("Cannot apply a malformed function. Well-formed function's first element must be `fn*`")
+    };
+    let func_bindings = match &**func_bindings {
+        Ast::Round(v) | Ast::Square(v) => v.clone(),
+        _ => bail!("Cannot apply a malformed function. Well-formed function's second element must be () or []"),
+    };
+
+    if func_bindings.len() != args.len() {
+        bail!("Wrong number of arguments specified to a function");
+    };
+    let mut new_bindings = Bindings {
+        at_this_level: crate::im::HashMap::new(),
+        parent: Some(env.clone()),
+    };
+    for (binding,arg) in func_bindings.iter().zip(args.iter()) {
+        match &**binding {
+            Sym!(symnam) => {
+                new_bindings.at_this_level.insert(*symnam, (**arg).clone());
+            },
+            _ => bail!("All function arguments must currently be only symbols"),
+        }
+    }
+    let bh = Rc::new(RefCell::new(new_bindings));
+
+    m.eval_impl(&bh, func_body)
 }
