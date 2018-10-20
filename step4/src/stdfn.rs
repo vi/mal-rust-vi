@@ -137,6 +137,10 @@ impl Malvi {
         builtin_macro!("let*", let_);
 
         builtin_func!("apply", apply);
+
+        builtin_func!("do", |m, env, x|{
+            Ok(x.last().map(|q|(**q).clone()).unwrap_or(Ast::Simple(SAst::Nil)))
+        })
     }
 }
 
