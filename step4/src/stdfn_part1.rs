@@ -17,10 +17,12 @@ impl Malvi {
         builtin_notimpl_macro!("splice-unquote");
         builtin_notimpl_macro!("deref");
 
-        builtin_macro!("quote", |m, _env, x| {
-            let mut v = vector![Rc::new(Sym!(m.sym("quote")))];
-            v.append(x);
-            Ok(Ast::Round(v))
+        builtin_macro!("quote", |m, _env, mut x : Vector<Rc<Ast>>| {
+            if x.len() != 1 {
+                bail!("`quote` must have exactly 1 argument")
+            }
+            let arg = x.pop_front().unwrap();
+            Ok((*arg).clone())
         });
 
         builtin_macro!("fn*", |m,env,x| {
