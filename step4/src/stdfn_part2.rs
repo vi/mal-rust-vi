@@ -114,5 +114,18 @@ impl Malvi {
             (Int!(_),Int!(_)) => False!(),
             (_,_) => bail!("Can only compare integers"),
         }));
+
+        builtin_func!("prn",|m,env,args:Vector<Rc<Ast>>| {
+            let mut first = true;
+            for x in args {
+                if !first {
+                    print!(" ")
+                }
+                print!("{}", super::BoundAstRef(&*x, m));
+                first = false;
+            }
+            println!();
+            Ok(Nil!())
+        });
     }
 }

@@ -86,6 +86,9 @@ macro_rules! True {
 macro_rules! False {
     () => {Ast::Simple(SAst::Bool(false))};
 }
+macro_rules! Nil {
+    () => {Ast::Simple(SAst::Nil)};
+}
 
 /// For `Display`ing.
 pub struct BoundAstRef<'a, 'b>(pub &'a Ast, pub &'b Malvi);
