@@ -39,19 +39,13 @@ impl Malvi {
             match m.eval_impl(env,&cond)? {
                 True!() => iftrue(),
                 False!() => iffalse(),
-                Int!(x) if x == 0 => iffalse(),
                 Int!(_) => iftrue(),
-                Ast::Simple(SAst::Nil) => iffalse(),
-                | Ast::Round(ref x) 
-                | Ast::Square(ref x)
-                if x.is_empty() => iffalse(),
-                | Ast::Round(ref x) 
-                | Ast::Square(ref x)
+                | Ast::Round(..) 
+                | Ast::Square(..)
+                | Ast::Curly(..) 
                 => iftrue(),
-                Ast::Curly(ref x) if x.is_empty() => iffalse(),
-                Ast::Curly(ref x) => iftrue(),
-                Ast::Simple(SAst::StrLit(ref x)) if x.is_empty() => iffalse(),
                 Ast::Simple(SAst::StrLit(ref x)) => iftrue(),
+                Ast::Simple(SAst::Nil) => iffalse(),
                 _ => bail!("Wrong type used in `if` conditional"),
             }
         });
