@@ -6,6 +6,7 @@ use crate::im::HashMap;
 impl Malvi {
 
     fn resolve_sym_impl(&self, env:&Bindings, s:&Ast) -> Option<Ast> {
+        //eprintln!("resolve_sym {} against bindings {:?}", super::BoundAstRef(s,self),env as *const Bindings);
         match s.clone() {
             Ast::Simple(SAst::Symbol(x)) => {
                 if let Some(y) = env.at_this_level.get(&x) {
@@ -43,6 +44,7 @@ impl Malvi {
         }
     }
     fn eval_impl_inner(&mut self, env: &BindingsHandle, a:&Ast)-> Result<Ast> {
+        //eprintln!("eval {} with bindings {:?}", super::BoundAstRef(a,self),&*env.borrow() as *const Bindings);
         match a {
             Ast::Round(inner) => {
                 if inner.is_empty() {
@@ -69,6 +71,11 @@ impl Malvi {
                             let mut apply_args = vector![
                                 Rc::new(func),
                             ];
+                            let rest = rest
+                                .iter()
+                                .map(|x|self.eval_impl(env, x).map(Rc::new))
+                                .collect::<Result<Vec<_>>>()?
+                                .into();
                             apply_args.append(rest);
                             super::stdfn_part1::apply(self, env, apply_args)
                         },
@@ -76,6 +83,11 @@ impl Malvi {
                             let mut apply_args = vector![
                                 Rc::new(func),
                             ];
+                            let rest = rest
+                                .iter()
+                                .map(|x|self.eval_impl(env, x).map(Rc::new))
+                                .collect::<Result<Vec<_>>>()?
+                                .into();
                             apply_args.append(rest);
                             super::stdfn_part1::apply(self, env, apply_args)
                         }

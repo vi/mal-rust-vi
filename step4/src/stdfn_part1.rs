@@ -156,6 +156,13 @@ pub fn let_(m: &mut Malvi, env: &BindingsHandle, x: Vector<Rc<Ast>>) -> Result<A
 }
 
 pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> Result<Ast> {
+    /*
+    eprint!("apply ");
+    for x in &args {
+        eprint!("{} ", super::BoundAstRef(&*x,m));
+    }
+    eprintln!();
+    */
     let func = args.pop_front().ok_or(format_err!("apply must have at least one argument"))?;    
     let mut env_override : Option<BindingsHandle> = None;
     let mut func = match &*func {
