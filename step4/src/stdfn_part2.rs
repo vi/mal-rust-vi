@@ -18,7 +18,7 @@ impl Malvi {
             Ast::Round(x) => Int!(x.len() as i64),
             Ast::Square(x) => Int!(x.len() as i64),
             Ast::Curly(x) => Int!(x.len() as i64),
-            Ast::Simple(SAst::Nil) => Int!(0),
+            Nil!() => Int!(0),
             _ => bail!("Can't count elements of this"),
         }));
         builtin_func1!("empty?", |_,_,x:Rc<Ast>|Ok(match &*x {
@@ -33,7 +33,7 @@ impl Malvi {
             }
             let cond = x.pop_front().unwrap();
             let iftrue = x.pop_front().unwrap();
-            let iffalse = x.pop_front().unwrap_or(Rc::new(Ast::Simple(SAst::Nil)));
+            let iffalse = x.pop_front().unwrap_or(Rc::new(Nil!()));
             let iftrue = ||Ok(Ast::EvalMeAgain{obj:iftrue, env:env.clone()});
             let iffalse = ||Ok(Ast::EvalMeAgain{obj:iffalse, env:env.clone()});
             match m.eval_impl(env,&cond)? {
@@ -45,7 +45,7 @@ impl Malvi {
                 | Ast::Curly(..) 
                 => iftrue(),
                 Ast::Simple(SAst::StrLit(ref x)) => iftrue(),
-                Ast::Simple(SAst::Nil) => iffalse(),
+                Nil!() => iffalse(),
                 _ => bail!("Wrong type used in `if` conditional"),
             }
         });
@@ -74,8 +74,8 @@ impl Malvi {
             | (Ast::Curly(_),_) 
             => False!(),
 
-            (Ast::Simple(SAst::Nil), Ast::Simple(SAst::Nil)) => True!(),
-            (Ast::Simple(SAst::Nil), _) => False!(),
+            (Nil!(), Nil!()) => True!(),
+            (Nil!(), _) => False!(),
 
             (Ast::Simple(SAst::Symbol(x)),Ast::Simple(SAst::Symbol(y)))
             if x == y => True!(),

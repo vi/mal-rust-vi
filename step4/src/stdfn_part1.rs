@@ -110,7 +110,7 @@ impl Malvi {
         builtin_macro!("do", |m, env, mut x|{
             let tail = match x.pop_back() {
                 Some(x) => x,
-                None => return Ok(Ast::Simple(SAst::Nil)),
+                None => return Ok(Nil!()),
             };
             for obj in x {
                 m.eval_impl(env, &obj)?;
