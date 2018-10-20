@@ -8,47 +8,9 @@ pub fn nimpl(_: &mut Malvi, _: &BindingsHandle, _: Vector<Rc<Ast>>) -> Result<As
     bail!("Not implemented")
 }
 
-macro_rules! Int {
-    ($($x:tt)*) => {Ast::Simple(SAst::Int($($x)*))};
-}
-macro_rules! Sym {
-    ($($x:tt)*) => {Ast::Simple(SAst::Symbol($($x)*))};
-}
-
 impl Malvi {
-    pub fn stdfn(&mut self) {
-        let this = self;
-
-        macro_rules! builtin_notimpl_macro {
-            ($n:expr) => {{
-                let s = this.sym($n);
-                let b = this.builtins.insert(Rc::new(nimpl));
-                this.root_bindings
-                    .borrow_mut()
-                    .at_this_level
-                    .insert(s, Ast::BuiltinMacro(b));
-            }};
-        }
-        macro_rules! builtin_func {
-            ($n:expr, $f:expr) => {{
-                let s = this.sym($n);
-                let b = this.builtins.insert(Rc::new($f));
-                this.root_bindings
-                    .borrow_mut()
-                    .at_this_level
-                    .insert(s, Ast::BuiltinFunction(b));
-            }};
-        }
-        macro_rules! builtin_macro {
-            ($n:expr, $f:expr) => {{
-                let s = this.sym($n);
-                let b = this.builtins.insert(Rc::new($f));
-                this.root_bindings
-                    .borrow_mut()
-                    .at_this_level
-                    .insert(s, Ast::BuiltinMacro(b));
-            }};
-        }
+    pub fn stdfn_part1(&mut self) {
+        declare_macros_for_builtins!(self);
 
         builtin_notimpl_macro!("quasiquote");
         builtin_notimpl_macro!("unquote");

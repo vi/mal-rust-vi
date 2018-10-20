@@ -36,6 +36,9 @@ use pest::Parser;
 use pest_deconstruct::FromPest;
 
 
+declare_slab_token!(pub Symbol);
+declare_slab_token!(pub Builtin);
+
 // A map-key-friendly node
 #[derive(Debug,Clone,Eq,PartialEq,Hash)]
 pub enum SAst {
@@ -70,6 +73,15 @@ pub enum Ast {
         obj: Rc<Ast>,
     },
 }
+
+macro_rules! Int {
+    ($($x:tt)*) => {Ast::Simple(SAst::Int($($x)*))};
+}
+macro_rules! Sym {
+    ($($x:tt)*) => {Ast::Simple(SAst::Symbol($($x)*))};
+}
+
+/// For `Display`ing.
 pub struct BoundAstRef<'a, 'b>(pub &'a Ast, pub &'b Malvi);
 
 pub trait Mal {
@@ -77,10 +89,6 @@ pub trait Mal {
     fn eval(&mut self,  a:&Ast)-> Result<Ast>;
     fn print(&self, a:&Ast) -> Result<String>;
 }
-
-
-declare_slab_token!(pub Symbol);
-declare_slab_token!(pub Builtin);
 
 type Func = Rc<Fn(&mut Malvi, &BindingsHandle, Vector<Rc<Ast>>) -> Result<Ast>>;
 
@@ -98,7 +106,12 @@ pub struct Malvi {
     builtins: Slab<Builtin, Func>,
 }
 
-pub mod stdfn;
+
+
+#[macro_use]
+pub mod stdfn_utils;
+pub mod stdfn_part1;
+pub mod stdfn_part2;
 pub mod eval;
 
 impl Malvi {
@@ -122,7 +135,8 @@ impl Malvi {
             name2sym: StdHashMap::with_capacity(10),
             builtins: Slab::with_capacity(10),
         };
-        this.stdfn();
+        this.stdfn_part1();
+        this.stdfn_part2();
         this
     }
 }

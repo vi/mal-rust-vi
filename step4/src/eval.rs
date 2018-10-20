@@ -70,14 +70,14 @@ impl Malvi {
                                 Rc::new(func),
                             ];
                             apply_args.append(rest);
-                            super::stdfn::apply(self, env, apply_args)
+                            super::stdfn_part1::apply(self, env, apply_args)
                         },
                         func@Ast::UserFunction{..} => {
                             let mut apply_args = vector![
                                 Rc::new(func),
                             ];
                             apply_args.append(rest);
-                            super::stdfn::apply(self, env, apply_args)
+                            super::stdfn_part1::apply(self, env, apply_args)
                         }
                         _ => bail!("this cannot be called"),
                     }
