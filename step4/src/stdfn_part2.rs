@@ -28,12 +28,12 @@ impl Malvi {
             _ => bail!("Can't check emptiness of this"),
         }));
         builtin_macro!("if", |m,env,mut x:Vector<Rc<Ast>>| {
-            if x.len() != 3 {
-                bail!("`if` has exactly three arguments");
+            if x.len() != 3 && x.len() != 2 {
+                bail!("`if` has exactly two or three arguments");
             }
             let cond = x.pop_front().unwrap();
             let iftrue = x.pop_front().unwrap();
-            let iffalse = x.pop_front().unwrap();
+            let iffalse = x.pop_front().unwrap_or(Rc::new(Ast::Simple(SAst::Nil)));
             let iftrue = ||Ok(Ast::EvalMeAgain{obj:iftrue, env:env.clone()});
             let iffalse = ||Ok(Ast::EvalMeAgain{obj:iffalse, env:env.clone()});
             match m.eval_impl(env,&cond)? {
