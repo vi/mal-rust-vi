@@ -27,5 +27,19 @@ impl Malvi {
             Ast::Curly(x) => Ast::Simple(SAst::Bool(x.is_empty())),
             _ => bail!("Can't check emptiness of this"),
         }));
+        builtin_macro!("if", |m,env_,mut x:Vector<Rc<Ast>>| {
+            if x.len() != 3 {
+                bail!("`if` has exactly three arguments");
+            }
+            let cond = x.pop_front().unwrap();
+            let iftrue = x.pop_front().unwrap();
+            let iffalse = x.pop_front().unwrap();
+            let env = env_.clone();
+            match m.eval_impl(env_,&cond)? {
+                True!() => Ok(Ast::EvalMeAgain{obj:iftrue, env}),
+                False!() => Ok(Ast::EvalMeAgain{obj:iffalse, env}),
+                _ => bail!("Non-boolean in `if` conditional"),
+            }
+        });
     }
 }
