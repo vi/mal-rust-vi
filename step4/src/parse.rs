@@ -157,7 +157,9 @@ pub mod ast {
             use super::super::SAst;
             match x {
                 SimpleObj::Int(Int { value, .. }) => SAst::Int(*value),
-                SimpleObj::StrLit(StrLit { span }) => SAst::StrLit(span.as_str().to_string()),
+                SimpleObj::StrLit(StrLit { span }) => SAst::StrLit(
+                    unescape::unescape(span.as_str()).expect("String literal unescape failed")
+                ),
                 SimpleObj::Symbol(Symbol { span }) => SAst::Symbol(self.sym(span.as_str())),
                 SimpleObj::Atom(Atom { span }) => SAst::Atom(self.sym(span.as_str())),
                 SimpleObj::Keyword(Keyword { span }) => match span.as_str() {
@@ -238,7 +240,7 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
         let BoundAstRef(a, env) = self;
         match a {
             Simple(Int(x)) => write!(f, "{}", x),
-            Simple(StrLit(x)) => write!(f, "\"{}\"", x),
+            Simple(StrLit(x)) => write!(f, "\"{}\"", x.escape_default()),
             Simple(Symbol(x)) => write!(f, "{}", env.sym2name[x]),
             Simple(Atom(x)) => write!(f, "{}", env.sym2name[x]),
             Simple(Nil) => write!(f, "nil"),

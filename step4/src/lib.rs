@@ -1,5 +1,6 @@
 #![feature(try_blocks)]
 #![feature(convert_id)]
+#![feature(str_escape)]
 #![allow(unused)]
 
 extern crate pest;
@@ -15,6 +16,7 @@ extern crate slab_typesafe;
 extern crate im_rc as im;
 #[macro_use]
 extern crate itertools;
+extern crate unescape;
 
 use slab_typesafe::Slab;
 use ::std::cell::RefCell;
