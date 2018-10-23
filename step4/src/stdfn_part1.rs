@@ -174,6 +174,7 @@ pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> 
         } => match &**vv {
             Ast::Round(v) => {
                 env_override = Some(bindings.clone());
+                //eprintln!("bindings {:?} depth = {}", (&**bindings) as *const _, bindings.borrow().depth());
                 v.clone()
             },
             _ => bail!("Malformed #fn. Must be round brackets."),

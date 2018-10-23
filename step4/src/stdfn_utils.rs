@@ -70,3 +70,13 @@ macro_rules! declare_macros_for_builtins {
         }
     }
 }
+
+impl super::Bindings {
+    pub fn depth(&self) -> usize {
+        if let Some(x) = self.parent.as_ref() {
+            1 + x.borrow().depth()
+        } else {
+            0
+        }
+    }
+}
