@@ -95,8 +95,14 @@ macro_rules! StrLit {
     ($($x:tt)*) => {Ast::Simple(SAst::StrLit($($x)*))};
 }
 
+#[derive(Clone,Copy)]
+pub enum DisplayMode {
+    PrStr,
+    Str,
+}
+
 /// For `Display`ing.
-pub struct BoundAstRef<'a, 'b>(pub &'a Ast, pub &'b Malvi);
+pub struct BoundAstRef<'a, 'b>(pub &'a Ast, pub &'b Malvi, pub DisplayMode);
 
 pub trait Mal {
     fn read(&mut self, x:&str) -> Result<Vector<Ast>>;
@@ -176,7 +182,7 @@ impl Mal for Malvi {
         Malvi::eval_impl(self, &root_bindings, a)
     }
     fn print(&self, a:&Ast) -> Result<String> {
-        Ok(format!("{}", BoundAstRef(a,self)))
+        Ok(format!("{}", BoundAstRef(a,self, DisplayMode::PrStr)))
     }
 }
 

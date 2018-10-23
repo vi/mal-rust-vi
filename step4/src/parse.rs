@@ -1,3 +1,5 @@
+//! Parsing and displaying AST
+
 use std::rc::Rc;
 
 use super::{Ast, BoundAstRef, Malvi, Result, SAst};
@@ -222,13 +224,13 @@ pub mod ast {
 
 }
 
-fn writevec(f: &mut std::fmt::Formatter<'_>, m: &Malvi, v: &Vector<Rc<Ast>>) {
+fn writevec(f: &mut std::fmt::Formatter<'_>, m: &Malvi, v: &Vector<Rc<Ast>>, dm : crate::DisplayMode) {
     let mut firsttime = true;
     for i in v {
         if !firsttime {
             write!(f, " ");
         }
-        write!(f, "{}", BoundAstRef(&*i, m));
+        write!(f, "{}", BoundAstRef(&*i, m, dm));
         firsttime = false;
     }
 }
@@ -237,22 +239,26 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         use super::Ast::*;
         use super::SAst::*;
-        let BoundAstRef(a, env) = self;
+        let BoundAstRef(a, env, dm) = self;
+        let dm = *dm;
         match a {
             Simple(Int(x)) => write!(f, "{}", x),
-            Simple(StrLit(x)) => write!(f, "\"{}\"", x.escape_default()),
+            Simple(StrLit(x)) => match dm {
+                crate::DisplayMode::PrStr => write!(f, "\"{}\"", x.escape_default()),
+                crate::DisplayMode::Str => write!(f, "{}", x),
+            },
             Simple(Symbol(x)) => write!(f, "{}", env.sym2name[x]),
             Simple(Atom(x)) => write!(f, "{}", env.sym2name[x]),
             Simple(Nil) => write!(f, "nil"),
             Simple(Bool(x)) => write!(f, "{}", x),
             Round(x) => {
                 write!(f, "(");
-                writevec(f, env, x);
+                writevec(f, env, x, dm);
                 write!(f, ")")
             }
             Square(x) => {
                 write!(f, "[");
-                writevec(f, env, x);
+                writevec(f, env, x, dm);
                 write!(f, "]")
             }
             Curly(x) => {
@@ -265,8 +271,8 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
                     write!(
                         f,
                         "{} {}",
-                        BoundAstRef(&Ast::Simple(k.clone()), env),
-                        BoundAstRef(v, env),
+                        BoundAstRef(&Ast::Simple(k.clone()), env, dm),
+                        BoundAstRef(v, env, dm),
                     );
                     first = false;
                 }

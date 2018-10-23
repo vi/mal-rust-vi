@@ -79,7 +79,7 @@ impl Malvi {
                 if !first {
                     print!(" ")
                 };
-                print!("{}", super::BoundAstRef(&*x, m));
+                print!("{}", super::BoundAstRef(&*x, m, crate::DisplayMode::PrStr));
                 first = false;
             }
             println!();
@@ -94,12 +94,33 @@ impl Malvi {
                 if !first {
                     write!(s, " ");
                 };
-                write!(s, "{}", super::BoundAstRef(&*x, m));
+                write!(s, "{}", super::BoundAstRef(&*x, m, crate::DisplayMode::PrStr));
                 first = false;
             }
             Ok(StrLit!(s))
         });
 
+        builtin_func!("str",|m,env,args:Vector<Rc<Ast>>| {
+            let mut s = String::new();
+            use ::std::fmt::Write;
+            for x in args {
+                write!(s, "{}", super::BoundAstRef(&*x, m, crate::DisplayMode::Str));
+            };
+            Ok(StrLit!(s))
+        });
+
+        builtin_func!("println",|m,env,args:Vector<Rc<Ast>>| {
+            let mut first = true;
+            for x in args {
+                if !first {
+                    print!(" ")
+                };
+                print!("{}", super::BoundAstRef(&*x, m, crate::DisplayMode::Str));
+                first = false;
+            }
+            println!();
+            Ok(Nil!())
+        });
     }
 }
 
