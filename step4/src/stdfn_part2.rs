@@ -49,50 +49,8 @@ impl Malvi {
                 _ => bail!("Wrong type used in `if` conditional"),
             }
         });
-        builtin_func2!("=", |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>| Ok(match (&*arg1,&*arg2){
-            (Ast::UserFunction{..}, _) => bail!("Can't compare functions"),
-            (_, Ast::UserFunction{..}) => bail!("Can't compare functions"),
-            (Ast::BuiltinFunction(..),_) => bail!("Can't compare functions"),
-            (_, Ast::BuiltinFunction(..)) => bail!("Can't compare functions"),
-            (Ast::BuiltinMacro(..),_) => bail!("Can't compare macros"),
-            (_, Ast::BuiltinMacro(..)) => bail!("Can't compare macros"),
-            (Ast::EvalMeAgain{..},_) => bail!("Can't compare TCO thunks"),
-            (_, Ast::EvalMeAgain{..}) => bail!("Can't compare TCO thunks"),
-            
-            (Int!(x),Int!(y)) if x==y   => True!(),
-            (Int!(_),_) => False!(),
-
-            | (Ast::Round(x),Ast::Round(y)) 
-            | (Ast::Square(x),Ast::Square(y)) 
-            if x == y => True!(),
-            | (Ast::Curly(x),Ast::Curly(y)) 
-            if x == y => True!(),
-
-            | (Ast::Round(_),_) 
-            | (Ast::Square(_),_)
-            => False!(),
-            | (Ast::Curly(_),_) 
-            => False!(),
-
-            (Nil!(), Nil!()) => True!(),
-            (Nil!(), _) => False!(),
-
-            (Ast::Simple(SAst::Symbol(x)),Ast::Simple(SAst::Symbol(y)))
-            if x == y => True!(),
-            (Ast::Simple(SAst::Symbol(_)),_) => False!(),
-
-            (Ast::Simple(SAst::Bool(x)),Ast::Simple(SAst::Bool(y)))
-            if x == y => True!(),
-            (Ast::Simple(SAst::Bool(_)),_) => False!(),
-
-            (Ast::Simple(SAst::Atom(x)),Ast::Simple(SAst::Atom(y)))
-            if x == y => True!(),
-            (Ast::Simple(SAst::Atom(_)),_) => False!(),
-
-            (Ast::Simple(SAst::StrLit(x)),Ast::Simple(SAst::StrLit(y)))
-            if x == y => True!(),
-            (Ast::Simple(SAst::StrLit(_)),_) => False!(),
-        }));
+        builtin_func2!("=", |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>|
+            Ok(Ast::Simple(SAst::Bool(mal_eq(&arg1, &arg2)?))));
 
         builtin_func2!(">", |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>| Ok(match (&*arg1,&*arg2){
             (Int!(x),Int!(y)) if x>y   => True!(),
@@ -143,4 +101,77 @@ impl Malvi {
         });
 
     }
+}
+
+fn mal_eq(arg1: &Rc<Ast>, arg2: &Rc<Ast>) -> Result<bool> {
+    Ok(match (&**arg1,&**arg2){
+        (Ast::UserFunction{..}, _) => bail!("Can't compare functions"),
+        (_, Ast::UserFunction{..}) => bail!("Can't compare functions"),
+        (Ast::BuiltinFunction(..),_) => bail!("Can't compare functions"),
+        (_, Ast::BuiltinFunction(..)) => bail!("Can't compare functions"),
+        (Ast::BuiltinMacro(..),_) => bail!("Can't compare macros"),
+        (_, Ast::BuiltinMacro(..)) => bail!("Can't compare macros"),
+        (Ast::EvalMeAgain{..},_) => bail!("Can't compare TCO thunks"),
+        (_, Ast::EvalMeAgain{..}) => bail!("Can't compare TCO thunks"),
+        
+        (Int!(x),Int!(y)) if x==y   => true,
+        (Int!(_),_) => false,
+
+        | (Ast::Round(x),Ast::Round(y)) 
+        | (Ast::Square(x),Ast::Square(y)) 
+        | (Ast::Round(x),Ast::Square(y)) 
+        | (Ast::Square(x),Ast::Round(y)) 
+        => {
+            if x.len() != y.len() {
+                return Ok(false);
+            };
+            for (a1,a2) in x.iter().zip(y.iter()) {
+                if !mal_eq(a1,a2)? {
+                    return Ok(false);
+                };
+            };
+            true
+        }
+        | (Ast::Curly(x),Ast::Curly(y)) 
+        => {
+            if x.len() != y.len() {
+                return Ok(false);
+            };
+            for (s1,a1) in x.iter() {
+                if let Some(a2) = y.get(s1) {
+                    if !mal_eq(a1,a2)? {
+                        return Ok(false);
+                    };
+                } else {
+                    return Ok(false);
+                }
+            };
+            true
+        }
+
+        | (Ast::Round(_),_) 
+        | (Ast::Square(_),_)
+        => false,
+        | (Ast::Curly(_),_) 
+        => false,
+
+        (Nil!(), Nil!()) => true,
+        (Nil!(), _) => false,
+
+        (Ast::Simple(SAst::Symbol(x)),Ast::Simple(SAst::Symbol(y)))
+        if x == y => true,
+        (Ast::Simple(SAst::Symbol(_)),_) => false,
+
+        (Ast::Simple(SAst::Bool(x)),Ast::Simple(SAst::Bool(y)))
+        if x == y => true,
+        (Ast::Simple(SAst::Bool(_)),_) => false,
+
+        (Ast::Simple(SAst::Atom(x)),Ast::Simple(SAst::Atom(y)))
+        if x == y => true,
+        (Ast::Simple(SAst::Atom(_)),_) => false,
+
+        (Ast::Simple(SAst::StrLit(x)),Ast::Simple(SAst::StrLit(y)))
+        if x == y => true,
+        (Ast::Simple(SAst::StrLit(_)),_) => false,
+    })
 }
