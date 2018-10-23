@@ -10,6 +10,7 @@ members = [
     "step3c",
     "step3d",
     "step4",
+    "step5",
 ]
 
 #[replace]
