@@ -91,6 +91,9 @@ macro_rules! False {
 macro_rules! Nil {
     () => {Ast::Simple(SAst::Nil)};
 }
+macro_rules! StrLit {
+    ($($x:tt)*) => {Ast::Simple(SAst::StrLit($($x)*))};
+}
 
 /// For `Display`ing.
 pub struct BoundAstRef<'a, 'b>(pub &'a Ast, pub &'b Malvi);

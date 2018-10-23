@@ -120,12 +120,26 @@ impl Malvi {
             for x in args {
                 if !first {
                     print!(" ")
-                }
+                };
                 print!("{}", super::BoundAstRef(&*x, m));
                 first = false;
             }
             println!();
             Ok(Nil!())
+        });
+
+        builtin_func!("pr-str",|m,env,args:Vector<Rc<Ast>>| {
+            let mut s = String::new();
+            let mut first = true;
+            use ::std::fmt::Write;
+            for x in args {
+                if !first {
+                    write!(s, " ");
+                };
+                write!(s, "{}", super::BoundAstRef(&*x, m));
+                first = false;
+            }
+            Ok(StrLit!(s))
         });
 
     }
