@@ -131,6 +131,7 @@ pub struct Malvi {
 pub mod stdfn_utils;
 pub mod stdfn_part1;
 pub mod stdfn_part2;
+pub mod stdfn_part3;
 pub mod eval;
 
 impl Malvi {
@@ -156,6 +157,7 @@ impl Malvi {
         };
         this.stdfn_part1();
         this.stdfn_part2();
+        this.stdfn_part3();
 
         let prelude = include_str!("prelude.mal");
         for x in this.read(prelude).expect("error parsing prelude") {
