@@ -104,7 +104,7 @@ pub enum DisplayMode {
 pub struct BoundAstRef<'a, 'b>(pub &'a Ast, pub &'b Malvi, pub DisplayMode);
 
 pub trait Mal {
-    fn read(&mut self, x:&str) -> Result<Vector<Ast>>;
+    fn read(&mut self, x:&str) -> Result<Vector<Rc<Ast>>>;
     fn eval(&mut self,  a:&Ast)-> Result<Ast>;
     fn print(&self, a:&Ast) -> Result<String>;
 }
@@ -169,14 +169,14 @@ impl Malvi {
     }
 }
 impl Mal for Malvi {
-    fn read(&mut self, x:&str) -> Result<Vector<Ast>> {
+    fn read(&mut self, x:&str) -> Result<Vector<Rc<Ast>>> {
         let p = parse::parser::ParserImpl::parse(parse::parser::Rule::mobj, x)?
             .next().unwrap();
         let a = parse::ast::MObj::from_pest(p);
         let mut v = vector![];
         for vv in a.items {
             let a : Ast = self.read_impl(&vv);
-            v.push_back(a);
+            v.push_back(Rc::new(a));
         }
         Ok(v)
     }

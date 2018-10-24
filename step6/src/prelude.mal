@@ -1,1 +1,3 @@
 (def! not (fn* [x] (if x false true)))
+
+(def! load-file (fn* [x] (eval-in-root-env (read-string (slurp x)))))

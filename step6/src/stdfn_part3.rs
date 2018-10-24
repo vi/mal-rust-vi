@@ -10,10 +10,16 @@ impl Malvi {
             match &*arg {
                 StrLit!(x) => {
                     let mut a = m.read(x)?;
-                    if a.len() != 1 {
-                        bail!("String contains not exactly one sexpr");
+                    match a.len() {
+                        0 => Ok(Nil!()),
+                        1 => {
+                            let ast = Rc::try_unwrap(a.pop_front().unwrap()).unwrap();
+                            Ok(ast)
+                        },
+                        _ => {
+                            Ok(Ast::Square(a))
+                        },
                     }
-                    Ok(a.pop_front().unwrap())
                 },
                 _ => bail!("read-string requires a string")
             }
@@ -21,6 +27,11 @@ impl Malvi {
 
         builtin_func1!("eval",|m:&mut Malvi,env,arg:Rc<Ast>| {
             m.eval_impl(env, &*arg)
+        });
+
+        builtin_func1!("eval-in-root-env",|m:&mut Malvi,_env,arg:Rc<Ast>| {
+            let rootbind = m.root_bindings.clone();
+            m.eval_impl(&rootbind, &*arg)
         });
     }
 }
