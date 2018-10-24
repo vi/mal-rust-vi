@@ -55,7 +55,7 @@ fn test04() {
 #[test]
 fn test05() {
     super::test_it (
-        &vec!["(slurp \"test.txt\")"],
+        &vec!["(slurp \"src/test.txt\")"],
         Some("\"A line of text\\n\""),
     );
 }
@@ -65,7 +65,7 @@ fn test05() {
 fn test06() {
     super::test_it (
         &vec![
-            "(load-file \"inc.mal\")",
+            "(load-file \"src/inc.mal\")",
             "(inc1 7)",
         ],
         Some("8"),
@@ -76,7 +76,7 @@ fn test06() {
 fn test07() {
     super::test_it (
         &vec![
-            "(load-file \"inc.mal\")",
+            "(load-file \"src/inc.mal\")",
             "(inc2 7)",
         ],
         Some("9"),
@@ -87,7 +87,7 @@ fn test07() {
 fn test08() {
     super::test_it (
         &vec![
-            "(load-file \"inc.mal\")",
+            "(load-file \"src/inc.mal\")",
             "(inc3 9)",
         ],
         Some("12"),
