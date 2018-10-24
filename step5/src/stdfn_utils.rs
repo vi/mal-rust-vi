@@ -12,6 +12,7 @@ pub fn nimpl(_: &mut Malvi, _: &BindingsHandle, _: Vector<Rc<Ast>>) -> Result<As
 macro_rules! declare_macros_for_builtins {
     ($this:expr) => {
         let this = $this;
+        #[allow(unused_macros)]
         macro_rules! builtin_notimpl_macro {
             ($n:expr) => {{
                 let s = this.sym($n);
@@ -22,6 +23,7 @@ macro_rules! declare_macros_for_builtins {
                     .insert(s, Ast::BuiltinMacro(b));
             }};
         }
+        #[allow(unused_macros)]
         macro_rules! builtin_func {
             ($n:expr, $f:expr) => {{
                 let s = this.sym($n);
@@ -33,6 +35,7 @@ macro_rules! declare_macros_for_builtins {
             }};
         }
 
+        #[allow(unused_macros)]
         macro_rules! builtin_func1 {
             ($n:expr, $f:expr) => {{
                 builtin_func!($n, |m,env,mut x|{
@@ -44,6 +47,7 @@ macro_rules! declare_macros_for_builtins {
                 });
             }};
         }
+        #[allow(unused_macros)]
         macro_rules! builtin_func2 {
             ($n:expr, $f:expr) => {{
                 builtin_func!($n, |m,env,mut x|{
@@ -58,6 +62,7 @@ macro_rules! declare_macros_for_builtins {
         }
 
 
+        #[allow(unused_macros)]
         macro_rules! builtin_macro {
             ($n:expr, $f:expr) => {{
                 let s = this.sym($n);

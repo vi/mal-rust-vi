@@ -170,7 +170,6 @@ pub mod ast {
                     "false" => SAst::Bool(false),
                     _ => unreachable!(),
                 },
-                SimpleObj::StrLit(StrLit { span }) => SAst::StrLit(span.as_str().to_string()),
             }
         }
 
@@ -282,7 +281,6 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
             BuiltinMacro(x) => write!(f, "#builtin_macro_{}", id::<usize>((*x).into()),),
             UserFunction{..} => write!(f, "#fn"),
             EvalMeAgain{..} => write!(f, "#tco_thunk"),
-        };
-        Ok(())
+        }
     }
 }

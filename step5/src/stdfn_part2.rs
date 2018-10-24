@@ -44,7 +44,7 @@ impl Malvi {
                 | Ast::Square(..)
                 | Ast::Curly(..) 
                 => iftrue(),
-                Ast::Simple(SAst::StrLit(ref x)) => iftrue(),
+                Ast::Simple(SAst::StrLit(_)) => iftrue(),
                 Nil!() => iffalse(),
                 _ => bail!("Wrong type used in `if` conditional"),
             }
@@ -73,7 +73,7 @@ impl Malvi {
             (_,_) => bail!("Can only compare integers"),
         }));
 
-        builtin_func!("prn",|m,env,args:Vector<Rc<Ast>>| {
+        builtin_func!("prn",|m,_env,args:Vector<Rc<Ast>>| {
             let mut first = true;
             for x in args {
                 if !first {
@@ -86,7 +86,7 @@ impl Malvi {
             Ok(Nil!())
         });
 
-        builtin_func!("pr-str",|m,env,args:Vector<Rc<Ast>>| {
+        builtin_func!("pr-str",|m,_env,args:Vector<Rc<Ast>>| {
             let mut s = String::new();
             let mut first = true;
             use ::std::fmt::Write;
@@ -100,7 +100,7 @@ impl Malvi {
             Ok(StrLit!(s))
         });
 
-        builtin_func!("str",|m,env,args:Vector<Rc<Ast>>| {
+        builtin_func!("str",|m,_env,args:Vector<Rc<Ast>>| {
             let mut s = String::new();
             use ::std::fmt::Write;
             for x in args {
@@ -109,7 +109,7 @@ impl Malvi {
             Ok(StrLit!(s))
         });
 
-        builtin_func!("println",|m,env,args:Vector<Rc<Ast>>| {
+        builtin_func!("println",|m,_env,args:Vector<Rc<Ast>>| {
             let mut first = true;
             for x in args {
                 if !first {

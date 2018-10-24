@@ -1,7 +1,7 @@
 #![feature(try_blocks)]
 #![feature(convert_id)]
 #![feature(str_escape)]
-#![allow(unused)]
+#![allow(unused_imports)]
 
 extern crate pest;
 #[macro_use]

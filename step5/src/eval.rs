@@ -27,7 +27,7 @@ impl Malvi {
         self.resolve_sym_impl(&*env.borrow(), s).ok_or(format_err!("Symbol not bound"))
     }
 
-    pub(crate) fn eval_impl(&mut self, mut env: &BindingsHandle, mut a:&Ast) -> Result<Ast> {
+    pub(crate) fn eval_impl(&mut self, env: &BindingsHandle, a:&Ast) -> Result<Ast> {
         use ::std::borrow::Cow;
         let mut env = Cow::Borrowed(env);
         let mut a = Cow::Borrowed(a);

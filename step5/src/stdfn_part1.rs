@@ -17,7 +17,7 @@ impl Malvi {
         builtin_notimpl_macro!("splice-unquote");
         builtin_notimpl_macro!("deref");
 
-        builtin_macro!("quote", |m, _env, mut x : Vector<Rc<Ast>>| {
+        builtin_macro!("quote", |_, _env, mut x : Vector<Rc<Ast>>| {
             if x.len() != 1 {
                 bail!("`quote` must have exactly 1 argument")
             }
@@ -130,7 +130,7 @@ pub fn let_(m: &mut Malvi, env: &BindingsHandle, x: Vector<Rc<Ast>>) -> Result<A
                 if n.len() % 2 != 0 {
                     bail!("Odd number of elements in bindings list")
                 }
-                let mut new_bindings = Bindings {
+                let new_bindings = Bindings {
                     at_this_level: crate::im::HashMap::new(),
                     parent: Some(env.clone()),
                 };
@@ -165,7 +165,7 @@ pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> 
     */
     let func = args.pop_front().ok_or(format_err!("apply must have at least one argument"))?;    
     let mut env_override : Option<BindingsHandle> = None;
-    let mut func = match &*func {
+    let func = match &*func {
         Ast::Round(v) => v.clone(),
         Ast::UserFunction{
             is_macro: false,

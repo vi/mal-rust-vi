@@ -1,11 +1,10 @@
 #![feature(try_blocks)]
-#![allow(unused)]
 
 
 extern crate malvi_step5 as malvi;
 
 use std::io::{BufRead};
-use self::malvi::{Malvi,Mal,Ast};
+use self::malvi::{Malvi,Mal};
 
 fn main() -> malvi::Result<()> {
     let si = ::std::io::stdin();
