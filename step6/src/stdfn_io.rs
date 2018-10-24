@@ -29,6 +29,19 @@ impl Malvi {
         builtin_func0!("getcwd",|_:&mut Malvi,_| {
             Ok(StrLit!(format!("{:?}",::std::env::current_dir()?)))
         });
+
+
+        builtin_func0!("getcmdargs",|_:&mut Malvi,_| {
+            let mut q = vector![];
+            let mut first = true;
+            for i in ::std::env::args() {
+                if !first {
+                    q.push_back(Rc::new(StrLit!(i)));
+                };
+                first = false;
+            }
+            Ok(Ast::Round(q))
+        });
     }
 }
 
