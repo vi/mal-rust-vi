@@ -34,6 +34,18 @@ macro_rules! declare_macros_for_builtins {
         }
 
         #[allow(unused_macros)]
+        macro_rules! builtin_func0 {
+            ($n:expr, $f:expr) => {{
+                builtin_func!($n, |m,env,x|{
+                    if x.len() != 0 {
+                        bail!("This function has exactly 0 arguments");
+                    }
+                    $f(m,env)
+                });
+            }};
+        }
+
+        #[allow(unused_macros)]
         macro_rules! builtin_func1 {
             ($n:expr, $f:expr) => {{
                 builtin_func!($n, |m,env,mut x|{
