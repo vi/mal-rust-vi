@@ -1,7 +1,7 @@
 #![feature(try_blocks)]
 #![feature(convert_id)]
 #![feature(str_escape)]
-#![allow(unused_imports)]
+//#![allow(unused_imports)]
 
 extern crate pest;
 #[macro_use]
@@ -14,7 +14,6 @@ extern crate failure;
 extern crate slab_typesafe;
 #[macro_use]
 extern crate im_rc as im;
-#[macro_use]
 extern crate itertools;
 extern crate unescape;
 

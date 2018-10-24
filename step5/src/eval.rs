@@ -1,6 +1,5 @@
-use super::{Malvi,Ast,SAst,Result,Symbol,Bindings,BindingsHandle};
+use super::{Malvi,Ast,SAst,Result,Bindings,BindingsHandle};
 use ::std::rc::Rc;
-use ::std::cell::RefCell;
 use crate::im::HashMap;
 
 impl Malvi {

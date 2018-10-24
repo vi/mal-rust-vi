@@ -1,8 +1,6 @@
-use super::{Ast, Bindings, BindingsHandle, Malvi, Result, SAst};
-use std::cell::RefCell;
+use super::{Ast, BindingsHandle, Malvi, Result};
 use std::rc::Rc;
 use crate::im::Vector;
-use crate::itertools::Itertools;
 
 pub fn nimpl(_: &mut Malvi, _: &BindingsHandle, _: Vector<Rc<Ast>>) -> Result<Ast> {
     bail!("Not implemented")

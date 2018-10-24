@@ -1,8 +1,6 @@
-use super::{Ast, Bindings, BindingsHandle, Malvi, Result, SAst};
-use std::cell::RefCell;
+use super::{Ast, Malvi, Result, SAst};
 use std::rc::Rc;
 use crate::im::Vector;
-use crate::itertools::Itertools;
 
 impl Malvi {
     pub fn stdfn_part2(&mut self) {

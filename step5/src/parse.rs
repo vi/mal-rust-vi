@@ -2,7 +2,7 @@
 
 use std::rc::Rc;
 
-use super::{Ast, BoundAstRef, Malvi, Result, SAst};
+use super::{Ast, BoundAstRef, Malvi};
 use std::convert::identity as id;
 use crate::im::Vector;
 
