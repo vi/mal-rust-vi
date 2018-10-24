@@ -1,0 +1,16 @@
+[package]
+name = "malvi_step6"
+version = "0.1.0"
+authors = ["Vitaly _Vi Shukela <vi0oss@gmail.com>"]
+edition = "2018"
+workspace = ".."
+
+[dependencies]
+pest = "2.0.1"
+pest-deconstruct = "0.2.0"
+pest_derive = "2.0"
+failure = "0.1.2"
+slab_typesafe = "0.1.2"
+im-rc = "12.2.0"
+itertools = "0.7.8"
+unescape = "0.1.0"
