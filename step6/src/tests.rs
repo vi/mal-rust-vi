@@ -288,7 +288,7 @@ fn test24() {
 #[test]
 fn test25() {
     super::test_it (
-        &vec!["(load-file \"incB.mal\")"],
+        &vec!["(load-file \"src/incB.mal\")"],
         Some("\"incB.mal return string\""),
     );
 }
@@ -296,7 +296,7 @@ fn test25() {
 #[test]
 fn test26() {
     super::test_it (
-        &vec!["(load-file \"incB.mal\") (inc4 7)"],
+        &vec!["(load-file \"src/incB.mal\") (inc4 7)"],
         Some("11"),
     );
 }
@@ -304,7 +304,7 @@ fn test26() {
 #[test]
 fn test27() {
     super::test_it (
-        &vec!["(load-file \"incB.mal\") (inc5 7)"],
+        &vec!["(load-file \"src/incB.mal\") (inc5 7)"],
         Some("12"),
     );
 }
@@ -313,7 +313,7 @@ fn test27() {
 #[test]
 fn test28() {
     super::test_it (
-        &vec!["(load-file \"incC.mal\") mymap"],
+        &vec!["(load-file \"src/incC.mal\") mymap"],
         Some("{\"a\" 1}"),
     );
 }
