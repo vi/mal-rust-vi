@@ -57,4 +57,4 @@ spliceunquote = { "~@" ~ obj }
 deref = { "@" ~ obj }
 
 WHITESPACE = _{ " " | "," | "\n" }
-COMMENT = _{ ";" ~ ANY* ~ ("\n" | EOI) }
+COMMENT = _{ ";" ~ (!"\n" ~ ANY)* ~ ("\n" | EOI) }
