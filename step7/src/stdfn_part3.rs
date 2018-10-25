@@ -98,6 +98,21 @@ impl Malvi {
             }
             _ => bail!("cons does not support this list type")
         }));
+
+        builtin_func!("concat", |_,_,list_of_lists:Vector<Rc<Ast>>| Ok({
+            let mut result = vector![];
+            for i in list_of_lists {
+                match &*i {
+                    | Ast::Round(x)
+                    | Ast::Square(x)
+                    => {
+                        result.append(x.clone());
+                    },
+                    _ => bail!("concat support only lists"),
+                }
+            };
+            Ast::Round(result)
+        }));
     }
 }
 
