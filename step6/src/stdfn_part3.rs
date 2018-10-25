@@ -37,6 +37,13 @@ impl Malvi {
         builtin_func1!("atom", |_,_,arg:Rc<Ast>|Ok(
             Ast::Atom(Rc::new(::std::cell::RefCell::new(arg)))
         ));
+
+        builtin_func1!("atom?", |_,_,arg:Rc<Ast>|Ok(
+            match &*arg {
+                Ast::Atom(_) => True!(),
+                _ => False!(),
+            }
+        ));
     }
 }
 
