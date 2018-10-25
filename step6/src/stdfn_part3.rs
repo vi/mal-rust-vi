@@ -61,6 +61,21 @@ impl Malvi {
                 _ => bail!("Can reset! only an atom")
             }
         ));
+
+        builtin_func2!("swap!", |m,env,atom:Rc<Ast>, func:Rc<Ast>|Ok(
+            match &*atom {
+                Ast::Atom(x) => {
+                    let oldval = (*x.borrow()).clone();
+                    let newval = super::stdfn_part1::apply(m, env, vector![
+                        func,
+                        oldval,
+                    ])?;
+                    *x.borrow_mut() = Rc::new(newval.clone());
+                    newval
+                },
+                _ => bail!("Can swap! only an atom")
+            }
+        ));
     }
 }
 
