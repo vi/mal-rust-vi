@@ -690,12 +690,10 @@ fn test62() {
             (def! a 8)
             `[1 a 3]
         "],
-        Some("(1 a 3)"),
+        Some("[1 a 3]"),
     );
 }
 
-// ;; TODO: fix this
-// ;;;=>[1 a 3]
 // ; Testing splice-unquote with vectors
 #[test]
 fn test63() {
@@ -714,9 +712,7 @@ fn test64() {
             (def! c '(1 \"b\" \"d\"))
             `[1 ~@c 3]
         "],
-        Some("(1 1 \"b\" \"d\" 3)"),
+        Some("[1 1 \"b\" \"d\" 3]"),
     );
 }
 
-// ;; TODO: fix this
-// ;;;=>[1 1 "b" "d" 3]

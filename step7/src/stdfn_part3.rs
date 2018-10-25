@@ -86,15 +86,12 @@ impl Malvi {
         }));
 
         builtin_func2!("cons", |_,_,elem:Rc<Ast>, list:Rc<Ast>| Ok(match &*list{
-            Ast::Round(tail) => {
+            | Ast::Round(tail) 
+            | Ast::Square(tail) 
+            => {
                 let mut list = (*tail).clone();
                 list.insert(0, elem);
                 Ast::Round(list)
-            }
-            Ast::Square(tail) => {
-                let mut list = (*tail).clone();
-                list.push_front(elem);
-                Ast::Square(list)
             }
             _ => bail!("cons does not support this list type")
         }));
