@@ -155,6 +155,7 @@ pub fn let_(m: &mut Malvi, env: &BindingsHandle, x: Vector<Rc<Ast>>) -> Result<A
     }
 }
 
+/// Apply user-defined function. Does not currently support built-ins
 pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> Result<Ast> {
     /*
     eprint!("apply ");

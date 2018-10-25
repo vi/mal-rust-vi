@@ -77,7 +77,7 @@ impl Malvi {
                         oldval,
                     ];
                     applyargs.append(args);
-                    let newval = super::stdfn_part1::apply(m, env, applyargs)?;
+                    let newval = m.eval_impl(env, &Ast::Round(applyargs))?;
                     *x.borrow_mut() = Rc::new(newval.clone());
                     newval
                 },
