@@ -1,5 +1,6 @@
 use super::{Ast, Malvi, SAst};
 use std::rc::Rc;
+use crate::im::Vector;
 
 impl Malvi {
     pub fn stdfn_part3(&mut self) {
@@ -62,20 +63,27 @@ impl Malvi {
             }
         ));
 
-        builtin_func2!("swap!", |m,env,atom:Rc<Ast>, func:Rc<Ast>|Ok(
+        builtin_func!("swap!", |m,env,mut args:Vector<Rc<Ast>>|Ok({
+            if args.len() < 2 {
+                bail!("swap! has minimum 2 arguments");
+            };
+            let atom = args.pop_front().unwrap();
+            let func = args.pop_front().unwrap();
             match &*atom {
                 Ast::Atom(x) => {
                     let oldval = (*x.borrow()).clone();
-                    let newval = super::stdfn_part1::apply(m, env, vector![
+                    let mut applyargs = vector![
                         func,
                         oldval,
-                    ])?;
+                    ];
+                    applyargs.append(args);
+                    let newval = super::stdfn_part1::apply(m, env, applyargs)?;
                     *x.borrow_mut() = Rc::new(newval.clone());
                     newval
                 },
                 _ => bail!("Can swap! only an atom")
             }
-        ));
+        }));
     }
 }
 
