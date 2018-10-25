@@ -12,19 +12,6 @@ impl Malvi {
     pub fn stdfn_part1(&mut self) {
         declare_macros_for_builtins!(self);
 
-        builtin_notimpl_macro!("quasiquote");
-        builtin_notimpl_macro!("unquote");
-        builtin_notimpl_macro!("splice-unquote");
-        builtin_notimpl_macro!("deref");
-
-        builtin_macro!("quote", |_, _env, mut x : Vector<Rc<Ast>>| {
-            if x.len() != 1 {
-                bail!("`quote` must have exactly 1 argument")
-            }
-            let arg = x.pop_front().unwrap();
-            Ok((*arg).clone())
-        });
-
         builtin_macro!("fn*", |m,env,x| {
             let mut v = vector![Rc::new(Sym!(m.sym("fn*")))];
             v.append(x);

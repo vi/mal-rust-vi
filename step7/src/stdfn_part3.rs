@@ -113,6 +113,28 @@ impl Malvi {
             };
             Ast::Round(result)
         }));
+
+
+        builtin_notimpl_macro!("unquote");
+        builtin_notimpl_macro!("splice-unquote");
+        builtin_notimpl_macro!("deref");
+
+        builtin_macro!("quote", |_, _env, mut x : Vector<Rc<Ast>>| {
+            if x.len() != 1 {
+                bail!("`quote` must have exactly 1 argument")
+            }
+            let arg = x.pop_front().unwrap();
+            Ok((*arg).clone())
+        });
+
+        builtin_macro!("quasiquote", |_, _env, mut x : Vector<Rc<Ast>>| {
+            if x.len() != 1 {
+                bail!("`quasiquote` must have exactly 1 argument")
+            }
+            let arg = x.pop_front().unwrap();
+            Ok((*arg).clone())
+        });
+
     }
 }
 
