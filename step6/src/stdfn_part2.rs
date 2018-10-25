@@ -221,5 +221,10 @@ fn mal_eq(arg1: &Rc<Ast>, arg2: &Rc<Ast>) -> Result<bool> {
         (Ast::Simple(SAst::StrLit(x)),Ast::Simple(SAst::StrLit(y)))
         if x == y => true,
         (Ast::Simple(SAst::StrLit(_)),_) => false,
+
+        (Ast::Atom(x), Ast::Atom(y))
+        if x.as_ptr() == y.as_ptr() => true,
+
+        (Ast::Atom(_), _) => false,
     })
 }

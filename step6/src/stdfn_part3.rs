@@ -33,6 +33,10 @@ impl Malvi {
             let rootbind = m.root_bindings.clone();
             m.eval_impl(&rootbind, &*arg)
         });
+
+        builtin_func1!("atom", |_,_,arg:Rc<Ast>|Ok(
+            Ast::Atom(Rc::new(::std::cell::RefCell::new(arg)))
+        ));
     }
 }
 

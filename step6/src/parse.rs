@@ -281,6 +281,7 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
             BuiltinMacro(x) => write!(f, "#builtin_macro_{}", id::<usize>((*x).into()),),
             UserFunction{..} => write!(f, "#fn"),
             EvalMeAgain{..} => write!(f, "#tco_thunk"),
+            Atom(x) => write!(f, "(atom {})", BoundAstRef(&*x.borrow(), m, dm)),
         }
     }
 }
