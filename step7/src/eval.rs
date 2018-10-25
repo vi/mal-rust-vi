@@ -1,6 +1,7 @@
 use super::{Malvi,Ast,SAst,Result,Bindings,BindingsHandle};
 use ::std::rc::Rc;
 use crate::im::HashMap;
+use crate::im::Vector;
 
 impl Malvi {
 
@@ -125,46 +126,56 @@ impl Malvi {
         }
     }
 
-    pub fn quasiquote(&mut self, env: &BindingsHandle, a:&Ast)-> Result<Ast> {
+    pub fn quasiquote(&mut self, env: &BindingsHandle, a:&Ast)-> Result<Vector<Rc<Ast>>> {
         let uq = self.sym("unquote");
+        let suq = self.sym("splice-unquote");
         match a {
-            Ast::Round(inner) if inner.is_empty() => Ok(Ast::Round(vector![])),
+            Ast::Round(inner) if inner.is_empty() => Ok(vector![Rc::new(Ast::Round(vector![]))]),
             Ast::Round(inner) if inner[0].is_this_sym(uq) => {
                 let toeval = Ast::Round(inner.clone());
-                self.eval_impl(env, &toeval)
+                let v = self.eval_impl(env, &toeval)?;
+                Ok(vector![Rc::new(v)])
+            },
+            Ast::Round(inner) if inner[0].is_this_sym(suq) => {
+                let toeval = Ast::Round(inner.clone());
+                let v = self.eval_impl(env, &toeval)?;
+                match v {
+                    | Ast::Round(x)
+                    | Ast::Square(x)
+                    => {
+                        Ok(x)
+                    }
+                    _ => bail!("Can only splice-unquote [] or ()")
+                }
             },
             Ast::Round(inner) => {
-                Ok(Ast::Round(
-                    inner
-                    .iter()
-                    .map(|x|self.quasiquote(env, x).map(Rc::new))
-                    .collect::<Result<Vec<_>>>()?
-                    .into()
-                ))
+                let mut result = vector![];
+                for i in inner {
+                    let qq = self.quasiquote(env, i)?;
+                    result.append(qq);
+                };
+                Ok(vector![Rc::new(Ast::Round(result))])
             },
             Ast::Square(inner) => {
-                Ok(Ast::Square(
-                    inner
-                    .iter()
-                    .map(|x|self.quasiquote(env, x).map(Rc::new))
-                    .collect::<Result<Vec<_>>>()?
-                    .into()
-                ))
+                let mut result = vector![];
+                for i in inner {
+                    let qq = self.quasiquote(env, i)?;
+                    result.append(qq);
+                };
+                Ok(vector![Rc::new(Ast::Square(result))])
             },
             Ast::Curly(inner) => {
-                Ok(Ast::Curly(
-                    inner
-                    .iter()
-                    .map(|(k,v)| {
-                        try {
-                            let vv = self.quasiquote(env, v)?;
-                            (k.clone(), Rc::new(vv))
-                        }
-                    })
-                    .collect::<Result<HashMap<_,_>>>()?
-                ))
+                let mut result = crate::im::HashMap::new();
+                for (k,v) in inner {
+                    let mut qq = self.quasiquote(env, v)?;
+                    if qq.len() != 1 {
+                        bail!("Can't splice-unquote into a map");
+                    };
+                    result.insert(k.clone(), qq.pop_front().unwrap());
+                };
+                Ok(vector![Rc::new(Ast::Curly(result))])
             },
-            x => Ok(x.clone()),
+            x => Ok(vector![Rc::new(x.clone())]),
         }
     }
 }

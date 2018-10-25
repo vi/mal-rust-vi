@@ -115,10 +115,6 @@ impl Malvi {
         }));
 
 
-
-        builtin_notimpl_macro!("splice-unquote");
-        builtin_notimpl_macro!("deref");
-
         builtin_macro!("quote", |_, _env, mut x : Vector<Rc<Ast>>| {
             if x.len() != 1 {
                 bail!("`quote` must have exactly 1 argument")
@@ -132,7 +128,11 @@ impl Malvi {
                 bail!("`quasiquote` must have exactly 1 argument")
             }
             let arg = x.pop_front().unwrap();
-            m.quasiquote(env, &arg)
+            let mut ret = m.quasiquote(env, &arg)?;
+            if ret.len() != 1 {
+                bail!("Can't expand to multiple items at quasiquote position");
+            };
+            Ok( (*ret.pop_front().unwrap()).clone())
         });
 
         // The same as "id".
@@ -142,6 +142,12 @@ impl Malvi {
             bail!("unquote function must have exactly one argument")
         });
 
+        // The same as "id".
+        builtin_func!("splice-unquote", |_, _, x| if x.len() == 1 {
+            Ok((*x[0]).clone())
+        } else {
+            bail!("splice-unquote function must have exactly one argument")
+        });
     }
 }
 
