@@ -128,23 +128,53 @@ impl Malvi {
     pub fn quasiquote(&mut self, env: &BindingsHandle, a:&Ast)-> Result<Ast> {
         let uq = self.sym("unquote");
         match a {
+            Ast::Round(inner) if inner.is_empty() => Ok(Ast::Round(vector![])),
+            Ast::Round(inner) if inner[0].is_this_sym(uq) => {
+                let toeval = Ast::Round(inner.clone());
+                self.eval_impl(env, &toeval)
+            },
             Ast::Round(inner) => {
-                if inner.is_empty() {
-                    Ok(Ast::Round(vector![]))
-                } else {
-                    let head = (*inner[0]).clone();
-
-                    match head {
-                        | Ast::Simple(SAst::Symbol(x))
-                        if x == uq => {
-                            let toeval = Ast::Round(inner.clone());
-                            self.eval_impl(env, &toeval)
+                Ok(Ast::Round(
+                    inner
+                    .iter()
+                    .map(|x|self.quasiquote(env, x).map(Rc::new))
+                    .collect::<Result<Vec<_>>>()?
+                    .into()
+                ))
+            },
+            Ast::Square(inner) => {
+                Ok(Ast::Square(
+                    inner
+                    .iter()
+                    .map(|x|self.quasiquote(env, x).map(Rc::new))
+                    .collect::<Result<Vec<_>>>()?
+                    .into()
+                ))
+            },
+            Ast::Curly(inner) => {
+                Ok(Ast::Curly(
+                    inner
+                    .iter()
+                    .map(|(k,v)| {
+                        try {
+                            let vv = self.quasiquote(env, v)?;
+                            (k.clone(), Rc::new(vv))
                         }
-                        _ => Ok(Ast::Round(inner.clone()))
-                    }
-                }
+                    })
+                    .collect::<Result<HashMap<_,_>>>()?
+                ))
             },
             x => Ok(x.clone()),
+        }
+    }
+}
+
+impl Ast {
+    pub fn is_this_sym(&self, s: crate::Symbol) -> bool {
+        //eprintln!("is_this_sym {:?} {:?}", self, s);
+        match self {
+            Ast::Simple(SAst::Symbol(x)) if *x == s => true,
+            _ => false,
         }
     }
 }
