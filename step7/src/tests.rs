@@ -43,6 +43,7 @@ fn test03() {
 fn test04() {
     super::test_it (
         &vec!["
+            (def! a (list 2 3))
             (cons 1 a)
         "],
         Some("(1 2 3)"),
