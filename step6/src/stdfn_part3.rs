@@ -44,6 +44,13 @@ impl Malvi {
                 _ => False!(),
             }
         ));
+
+        builtin_func1!("deref", |_,_,arg:Rc<Ast>|Ok(
+            match &*arg {
+                Ast::Atom(x) => (**x.borrow()).clone(),
+                x => x.clone(),
+            }
+        ));
     }
 }
 
