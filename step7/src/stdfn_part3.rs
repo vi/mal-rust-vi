@@ -93,7 +93,7 @@ impl Malvi {
             }
             Ast::Square(tail) => {
                 let mut list = (*tail).clone();
-                list.insert(0, elem);
+                list.push_front(elem);
                 Ast::Square(list)
             }
             _ => bail!("cons does not support this list type")
@@ -115,7 +115,7 @@ impl Malvi {
         }));
 
 
-        builtin_notimpl_macro!("unquote");
+
         builtin_notimpl_macro!("splice-unquote");
         builtin_notimpl_macro!("deref");
 
@@ -133,6 +133,10 @@ impl Malvi {
             }
             let arg = x.pop_front().unwrap();
             Ok((*arg).clone())
+        });
+
+        builtin_macro!("unquote", |_, _, _| {
+            bail!("unquote is not valid outside of quasiquote")
         });
 
     }
