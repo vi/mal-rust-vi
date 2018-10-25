@@ -238,7 +238,7 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         use super::Ast::*;
         use super::SAst::*;
-        let BoundAstRef(a, env, dm) = self;
+        let BoundAstRef(a, m, dm) = self;
         let dm = *dm;
         match a {
             Simple(Int(x)) => write!(f, "{}", x),
@@ -246,18 +246,18 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
                 crate::DisplayMode::PrStr => write!(f, "\"{}\"", x.escape_default()),
                 crate::DisplayMode::Str => write!(f, "{}", x),
             },
-            Simple(Symbol(x)) => write!(f, "{}", env.sym2name[x]),
-            Simple(Kwident(x)) => write!(f, "{}", env.sym2name[x]),
+            Simple(Symbol(x)) => write!(f, "{}", m.sym2name[x]),
+            Simple(Kwident(x)) => write!(f, "{}", m.sym2name[x]),
             Simple(Nil) => write!(f, "nil"),
             Simple(Bool(x)) => write!(f, "{}", x),
             Round(x) => {
                 write!(f, "(");
-                writevec(f, env, x, dm);
+                writevec(f, m, x, dm);
                 write!(f, ")")
             }
             Square(x) => {
                 write!(f, "[");
-                writevec(f, env, x, dm);
+                writevec(f, m, x, dm);
                 write!(f, "]")
             }
             Curly(x) => {
@@ -270,8 +270,8 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
                     write!(
                         f,
                         "{} {}",
-                        BoundAstRef(&Ast::Simple(k.clone()), env, dm),
-                        BoundAstRef(v, env, dm),
+                        BoundAstRef(&Ast::Simple(k.clone()), m, dm),
+                        BoundAstRef(v, m, dm),
                     );
                     first = false;
                 }
