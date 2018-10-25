@@ -5,7 +5,7 @@ impl Malvi {
     pub fn stdfn_part3(&mut self) {
         declare_macros_for_builtins!(self);
 
-        builtin_func1!("read-string",|m:&mut Malvi,_env,arg:Rc<Ast>| {
+        builtin_func1!("read-string-impl",|m:&mut Malvi,_env,arg:Rc<Ast>| {
             use crate::Mal;
             match &*arg {
                 StrLit!(x) => {

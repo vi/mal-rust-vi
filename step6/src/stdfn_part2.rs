@@ -119,6 +119,35 @@ impl Malvi {
             println!();
             Ok(Nil!())
         });
+
+        builtin_func!("first-or-list", |_,_,mut args:Vector<Rc<Ast>>| {
+            match args.len() {
+                0 => Ok(Nil!()),
+                1 => {
+                    let ast = Rc::try_unwrap(args.pop_front().unwrap()).unwrap();
+                    Ok(ast)
+                },
+                _ => {
+                    Ok(Ast::Square(args))
+                },
+            }
+        });
+
+        builtin_func1!("last-or-something", |_,_,arg:Rc<Ast>| {
+            match &*arg {
+                | Ast::Round(args)
+                | Ast::Square(args)
+                => match args.len() {
+                    0 => Ok(Nil!()),
+                    _ => {
+                        let ast = (*args.clone().pop_back().unwrap()).clone();
+                        Ok(ast)
+                    },
+                }
+                y => Ok(y.clone()),
+            }
+            
+        });
     }
 }
 
