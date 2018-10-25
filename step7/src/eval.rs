@@ -124,4 +124,27 @@ impl Malvi {
             x => Ok(x.clone()),
         }
     }
+
+    pub fn quasiquote(&mut self, env: &BindingsHandle, a:&Ast)-> Result<Ast> {
+        let uq = self.sym("unquote");
+        match a {
+            Ast::Round(inner) => {
+                if inner.is_empty() {
+                    Ok(Ast::Round(vector![]))
+                } else {
+                    let head = (*inner[0]).clone();
+
+                    match head {
+                        | Ast::Simple(SAst::Symbol(x))
+                        if x == uq => {
+                            let toeval = Ast::Round(inner.clone());
+                            self.eval_impl(env, &toeval)
+                        }
+                        _ => Ok(Ast::Round(inner.clone()))
+                    }
+                }
+            },
+            x => Ok(x.clone()),
+        }
+    }
 }

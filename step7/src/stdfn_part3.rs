@@ -127,16 +127,19 @@ impl Malvi {
             Ok((*arg).clone())
         });
 
-        builtin_macro!("quasiquote", |_, _env, mut x : Vector<Rc<Ast>>| {
+        builtin_macro!("quasiquote", |m, env, mut x : Vector<Rc<Ast>>| {
             if x.len() != 1 {
                 bail!("`quasiquote` must have exactly 1 argument")
             }
             let arg = x.pop_front().unwrap();
-            Ok((*arg).clone())
+            m.quasiquote(env, &arg)
         });
 
-        builtin_macro!("unquote", |_, _, _| {
-            bail!("unquote is not valid outside of quasiquote")
+        // The same as "id".
+        builtin_func!("unquote", |_, _, x| if x.len() == 1 {
+            Ok((*x[0]).clone())
+        } else {
+            bail!("unquote function must have exactly one argument")
         });
 
     }
