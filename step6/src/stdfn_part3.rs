@@ -51,6 +51,16 @@ impl Malvi {
                 x => x.clone(),
             }
         ));
+
+        builtin_func2!("reset!", |_,_,atom:Rc<Ast>, val:Rc<Ast>|Ok(
+            match &*atom {
+                Ast::Atom(x) => {
+                    *x.borrow_mut() = val.clone();
+                    (*val).clone()
+                },
+                _ => bail!("Can reset! only an atom")
+            }
+        ));
     }
 }
 
