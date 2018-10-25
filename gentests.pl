@@ -30,7 +30,7 @@ while(<F>) {
     if (m!^\;\=\>(.*)!) {
         my $out = $1;
         print G "#[test]\n";
-        print G "fn test$ctr() {\n";
+        printf G "fn test%02d() {\n", $ctr;
         print G "    super::test_it (\n";
         print G "        &vec![\"\n";
         print G "            ".esc($in)."\n";
