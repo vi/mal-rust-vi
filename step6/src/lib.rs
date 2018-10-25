@@ -47,7 +47,7 @@ pub enum SAst {
     Symbol(Symbol),
     Bool(bool),
     Nil,
-    Atom(Symbol),
+    Kwident(Symbol),
     StrLit(String),
 }
 
@@ -73,6 +73,7 @@ pub enum Ast {
         env: BindingsHandle,
         obj: Rc<Ast>,
     },
+    
 }
 
 macro_rules! Int {

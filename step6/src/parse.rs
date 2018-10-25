@@ -38,8 +38,8 @@ pub mod ast {
     }
 
     #[derive(Debug, FromPest)]
-    #[pest(rule = "Rule::atom")]
-    pub struct Atom<'i> {
+    #[pest(rule = "Rule::kwident")]
+    pub struct Kwident<'i> {
         pub span: Span<'i>,
     }
 
@@ -127,7 +127,7 @@ pub mod ast {
         Int(Int<'i>),
         Symbol(Symbol<'i>),
         Keyword(Keyword<'i>),
-        Atom(Atom<'i>),
+        Kwident(Kwident<'i>),
         StrLit(StrLit<'i>),
     }
 
@@ -163,7 +163,7 @@ pub mod ast {
                     unescape::unescape(span.as_str()).expect("String literal unescape failed")
                 ),
                 SimpleObj::Symbol(Symbol { span }) => SAst::Symbol(self.sym(span.as_str())),
-                SimpleObj::Atom(Atom { span }) => SAst::Atom(self.sym(span.as_str())),
+                SimpleObj::Kwident(Kwident { span }) => SAst::Kwident(self.sym(span.as_str())),
                 SimpleObj::Keyword(Keyword { span }) => match span.as_str() {
                     "nil" => SAst::Nil,
                     "true" => SAst::Bool(true),
@@ -247,7 +247,7 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
                 crate::DisplayMode::Str => write!(f, "{}", x),
             },
             Simple(Symbol(x)) => write!(f, "{}", env.sym2name[x]),
-            Simple(Atom(x)) => write!(f, "{}", env.sym2name[x]),
+            Simple(Kwident(x)) => write!(f, "{}", env.sym2name[x]),
             Simple(Nil) => write!(f, "nil"),
             Simple(Bool(x)) => write!(f, "{}", x),
             Round(x) => {

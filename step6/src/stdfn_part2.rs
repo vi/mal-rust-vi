@@ -214,9 +214,9 @@ fn mal_eq(arg1: &Rc<Ast>, arg2: &Rc<Ast>) -> Result<bool> {
         if x == y => true,
         (Ast::Simple(SAst::Bool(_)),_) => false,
 
-        (Ast::Simple(SAst::Atom(x)),Ast::Simple(SAst::Atom(y)))
+        (Ast::Simple(SAst::Kwident(x)),Ast::Simple(SAst::Kwident(y)))
         if x == y => true,
-        (Ast::Simple(SAst::Atom(_)),_) => false,
+        (Ast::Simple(SAst::Kwident(_)),_) => false,
 
         (Ast::Simple(SAst::StrLit(x)),Ast::Simple(SAst::StrLit(y)))
         if x == y => true,

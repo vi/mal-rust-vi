@@ -6,7 +6,7 @@ obj_simple = {
     | "\"" ~ strlit ~ "\""
     | symbol
     | kw
-    | atom
+    | kwident
 }
 obj = {
 	obj_simple
@@ -48,7 +48,7 @@ ident_char = _{
     | "&"
 }
 kw = @{ ("true" | "false" | "nil") ~ !ident_char }
-atom = @{ ":" ~ symbol }
+kwident = @{ ":" ~ symbol }
 withmeta = { "^" ~ obj ~ obj }
 quote = { "'" ~ obj }
 quasiquote = { "`" ~ obj }
