@@ -125,7 +125,7 @@ fn test11() {
 #[test]
 fn test12() {
     super::test_it (
-        &vec!["(atom? a)"],
+        &vec!["(def! a (atom 2))  (atom? a)"],
         Some("true"),
     );
 }
@@ -141,7 +141,7 @@ fn test13() {
 #[test]
 fn test14() {
     super::test_it (
-        &vec!["(atom? 1) (deref a)"],
+        &vec!["(def! a (atom 2)) (atom? 1) (deref a)"],
         Some("2"),
     );
 }
@@ -149,7 +149,7 @@ fn test14() {
 #[test]
 fn test15() {
     super::test_it (
-        &vec!["(atom? 1) (reset! a 3)"],
+        &vec!["(def! a (atom 2)) (atom? 1) (reset! a 3)"],
         Some("3"),
     );
 }
@@ -157,7 +157,7 @@ fn test15() {
 #[test]
 fn test16() {
     super::test_it (
-        &vec!["(atom? 1) (reset! a 3) (deref a)"],
+        &vec!["(def! a (atom 2)) (atom? 1) (reset! a 3) (deref a)"],
         Some("3"),
     );
 }
@@ -166,6 +166,7 @@ fn test16() {
 fn test17() {
     super::test_it (
         &vec!["
+        (def! a (atom 2))
         (atom? 1)
         (reset! a 3) 
         (def! inc3 (fn* (a) (+ 3 a)))
@@ -179,6 +180,7 @@ fn test17() {
 fn test18() {
     super::test_it (
         &vec!["
+        (def! a (atom 2))
         (atom? 1)
         (reset! a 3) 
         (def! inc3 (fn* (a) (+ 3 a)))
@@ -193,6 +195,7 @@ fn test18() {
 fn test19() {
     super::test_it (
         &vec!["
+        (def! a (atom 2))
         (atom? 1)
         (reset! a 3) 
         (def! inc3 (fn* (a) (+ 3 a)))
@@ -207,6 +210,7 @@ fn test19() {
 fn test20() {
     super::test_it (
         &vec!["
+        (def! a (atom 2))
         (atom? 1)
         (reset! a 3) 
         (def! inc3 (fn* (a) (+ 3 a)))
@@ -222,6 +226,7 @@ fn test20() {
 fn test21() {
     super::test_it (
         &vec!["
+        (def! a (atom 2))
         (atom? 1)
         (reset! a 3) 
         (def! inc3 (fn* (a) (+ 3 a)))
@@ -238,6 +243,7 @@ fn test21() {
 fn test22() {
     super::test_it (
         &vec!["
+        (def! a (atom 2))
         (atom? 1)
         (reset! a 3) 
         (def! inc3 (fn* (a) (+ 3 a)))
