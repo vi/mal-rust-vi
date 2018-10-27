@@ -31,15 +31,25 @@ impl Malvi {
         use ::std::borrow::Cow;
         let mut env = Cow::Borrowed(env);
         let mut a = Cow::Borrowed(a);
+        let mut additional_iters = 0;
         loop {
             let ret = self.eval_impl_inner(env.as_ref(), a.as_ref())?;
             match ret {
-                Ast::EvalMeAgain{obj,env:newenv} => {
+                Ast::EvalMeAgain{obj,env:newenv,num_iters} => {
                     env = Cow::Owned(newenv);
                     a = Cow::Owned((*obj).clone());
+                    additional_iters += num_iters-1;
                     continue;
                 },
-                x => return Ok(x),
+                x => {
+                    if additional_iters == 0 {
+                        return Ok(x);
+                    } else {
+                        a = Cow::Owned(x);
+                        additional_iters -= 1;
+                        continue;
+                    }
+                },
             }
         }
     }

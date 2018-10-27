@@ -73,6 +73,8 @@ pub enum Ast {
     UserFunction(UserFunction),
     /// For TCO
     EvalMeAgain {
+        /// How many times to run eval. 2 for macros
+        num_iters: u32,
         env: BindingsHandle,
         obj: Rc<Ast>,
     },
