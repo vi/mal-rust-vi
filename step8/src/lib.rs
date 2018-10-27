@@ -1,6 +1,7 @@
 #![feature(try_blocks)]
 #![feature(convert_id)]
 #![feature(str_escape)]
+#![feature(bind_by_move_pattern_guards)]
 //#![allow(unused_imports)]
 
 extern crate pest;
@@ -51,7 +52,7 @@ pub enum SAst {
     StrLit(String),
 }
 
-#[derive(Debug,Clone,Eq,PartialEq)]
+#[derive(Debug,Clone)]
 pub struct UserFunction{
     is_macro: bool,
     func: Rc<Ast>,
@@ -59,7 +60,7 @@ pub struct UserFunction{
 }
 
 /// A node for high-level AST
-#[derive(Debug,Clone,Eq,PartialEq)]
+#[derive(Debug,Clone)]
 pub enum Ast {
     Simple(SAst),
     
@@ -119,7 +120,7 @@ pub trait Mal {
 type Func = Rc<Fn(&mut Malvi, &BindingsHandle, Vector<Rc<Ast>>) -> Result<Ast>>;
 
 pub type BindingsHandle = Rc<RefCell<Bindings>>;
-#[derive(Debug,Eq,PartialEq)]
+#[derive(Debug)]
 pub struct Bindings {
     at_this_level: HashMap<Symbol, Ast>,
     parent: Option<BindingsHandle>,

@@ -178,17 +178,23 @@ pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> 
     let func_signature = &func[0];
     let func_bindings = &func[1];
     let func_body = &func[2];
-    if **func_signature != Sym!(m.sym("fn*")) {
-        bail!("Cannot apply a malformed function. Well-formed function's first element must be `fn*`")
+    match &**func_signature {
+        Sym!(x) if *x == m.sym("fn*") => (),
+        _ => bail!("Cannot apply a malformed function. Well-formed function's first element must be `fn*`"),
     };
     let func_bindings = match &**func_bindings {
         Ast::Round(v) | Ast::Square(v) => v.clone(),
         _ => bail!("Cannot apply a malformed function. Well-formed function's second element must be () or []"),
     };
 
-    let amp = Rc::new(Ast::Simple(SAst::Symbol(m.sym("&"))));
+    let amp = m.sym("&");
     let (usual_bindings, rest_symbol) = {
-        if let Some(x) = func_bindings.index_of(&amp) {
+        if let Some((x,_)) = func_bindings.iter().enumerate().find(|(_,obj)|{
+            match &***obj {
+                Sym!(s) if *s == amp => true,
+                _ => false,
+            }  
+        }) {
             if x + 2 != func_bindings.len() {
                 bail!("`&` must be penultimate symbol in binding list")
             }
