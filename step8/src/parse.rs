@@ -283,6 +283,7 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
             UserFunction(crate::UserFunction{is_macro:true, ..}) => write!(f, "#macro"),
             EvalMeAgain{..} => write!(f, "#tco_thunk"),
             Atom(x) => write!(f, "(atom {})", BoundAstRef(&*x.borrow(), m, dm)),
+            BindingsHandle(..) => write!(f, "#bindings"),
         }
     }
 }

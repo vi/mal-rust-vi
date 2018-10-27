@@ -1,4 +1,4 @@
-use super::{Ast, Malvi, SAst, UserFunction};
+use super::{Ast, Malvi, SAst, UserFunction, BindingsHandle};
 use std::rc::Rc;
 use crate::im::Vector;
 
@@ -28,11 +28,6 @@ impl Malvi {
 
         builtin_func1!("eval",|m:&mut Malvi,env,arg:Rc<Ast>| {
             m.eval_impl(env, &*arg)
-        });
-
-        builtin_func1!("eval-in-root-env",|m:&mut Malvi,_env,arg:Rc<Ast>| {
-            let rootbind = m.root_bindings.clone();
-            m.eval_impl(&rootbind, &*arg)
         });
 
         builtin_func1!("atom", |_,_,arg:Rc<Ast>|Ok(
@@ -158,6 +153,17 @@ impl Malvi {
             },
             _ => bail!("into-macro does not support this type"),
         }));
+
+        builtin_func0!("current-environment",|_,env:&BindingsHandle|
+            Ok(Ast::BindingsHandle(env.clone())));
+
+        builtin_func2!("eval-in-environment", |m:&mut Malvi,_,theenv:Rc<Ast>,obj:Rc<Ast>| {
+            let bh = match &*theenv {
+                Ast::BindingsHandle(x) => x.clone(),
+                _ => bail!("First argument must be bindings")
+            };
+            m.eval_impl(&bh, &*obj)
+        });
     }
 }
 

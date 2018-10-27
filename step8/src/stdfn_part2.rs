@@ -226,5 +226,10 @@ fn mal_eq(arg1: &Rc<Ast>, arg2: &Rc<Ast>) -> Result<bool> {
         if x.as_ptr() == y.as_ptr() => true,
 
         (Ast::Atom(_), _) => false,
+
+
+        (Ast::BindingsHandle(x), Ast::BindingsHandle(y)) 
+        if x.as_ptr() == y.as_ptr() => true,
+        (Ast::BindingsHandle(..),_) => false,
     })
 }

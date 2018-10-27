@@ -79,6 +79,8 @@ pub enum Ast {
     },
 
     Atom(Rc<RefCell<Rc<Ast>>>),
+
+    BindingsHandle(BindingsHandle),
 }
 
 macro_rules! Int {
