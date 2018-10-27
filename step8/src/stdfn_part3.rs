@@ -1,4 +1,4 @@
-use super::{Ast, Malvi, SAst};
+use super::{Ast, Malvi, SAst, UserFunction};
 use std::rc::Rc;
 use crate::im::Vector;
 
@@ -149,12 +149,12 @@ impl Malvi {
 
         /// Convert user-defined function into a macro
         builtin_func1!("into-macro", |_,_,x:Rc<Ast>| Ok(match &*x {
-            Ast::UserFunction{func,bindings,is_macro:false} => {
-                Ast::UserFunction {
+            Ast::UserFunction(UserFunction{func,bindings,is_macro:false}) => {
+                Ast::UserFunction(UserFunction{
                     is_macro: true,
                     bindings: bindings.clone(),
                     func: func.clone(),
-                }
+                })
             },
             _ => bail!("into-macro does not support this type"),
         }));

@@ -51,6 +51,13 @@ pub enum SAst {
     StrLit(String),
 }
 
+#[derive(Debug,Clone,Eq,PartialEq)]
+pub struct UserFunction{
+    is_macro: bool,
+    func: Rc<Ast>,
+    bindings: BindingsHandle,
+}
+
 /// A node for high-level AST
 #[derive(Debug,Clone,Eq,PartialEq)]
 pub enum Ast {
@@ -63,11 +70,7 @@ pub enum Ast {
     BuiltinFunction(Builtin),
     BuiltinMacro(Builtin),
 
-    UserFunction{
-        is_macro: bool,
-        func: Rc<Ast>,
-        bindings: BindingsHandle,
-    },
+    UserFunction(UserFunction),
     /// For TCO
     EvalMeAgain {
         env: BindingsHandle,

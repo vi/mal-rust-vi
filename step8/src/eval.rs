@@ -79,15 +79,20 @@ impl Malvi {
                             apply_args.append(rest);
                             super::stdfn_part1::apply(self, env, apply_args)
                         },
-                        func@Ast::UserFunction{..} => {
+                        Ast::UserFunction(func) => {
+                            let is_macro = func.is_macro;
                             let mut apply_args = vector![
-                                Rc::new(func),
+                                Rc::new(Ast::UserFunction(func)),
                             ];
-                            let rest = rest
+                            let rest = if is_macro {
+                                rest
+                            } else {
+                                rest
                                 .iter()
                                 .map(|x|self.eval_impl(env, x).map(Rc::new))
                                 .collect::<Result<Vec<_>>>()?
-                                .into();
+                                .into()
+                            };
                             apply_args.append(rest);
                             super::stdfn_part1::apply(self, env, apply_args)
                         }

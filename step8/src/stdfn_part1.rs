@@ -1,4 +1,4 @@
-use super::{Ast, Bindings, BindingsHandle, Malvi, Result, SAst};
+use super::{Ast, Bindings, BindingsHandle, Malvi, Result, SAst, UserFunction};
 use std::cell::RefCell;
 use std::rc::Rc;
 use crate::im::Vector;
@@ -15,11 +15,11 @@ impl Malvi {
         builtin_macro!("fn*", |m,env,x| {
             let mut v = vector![Rc::new(Sym!(m.sym("fn*")))];
             v.append(x);
-            let userfunc = Ast::UserFunction{
+            let userfunc = Ast::UserFunction(UserFunction{
                 bindings: env.clone(),
                 is_macro: false,
                 func: Rc::new(Ast::Round(v)),
-            };
+            });
             Ok(userfunc)
         });
 
@@ -155,11 +155,11 @@ pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> 
     let mut env_override : Option<BindingsHandle> = None;
     let func = match &*func {
         Ast::Round(v) => v.clone(),
-        Ast::UserFunction{
-            is_macro: false,
+        Ast::UserFunction(UserFunction{
+            is_macro: _is_macro,
             func: vv,
             bindings,
-        } => match &**vv {
+        }) => match &**vv {
             Ast::Round(v) => {
                 env_override = Some(bindings.clone());
                 //eprintln!("bindings {:?} depth = {}", (&**bindings) as *const _, bindings.borrow().depth());
