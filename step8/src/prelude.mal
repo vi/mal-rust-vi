@@ -6,10 +6,9 @@
 
 (def! defmacro! 
     (into-macro (fn* [name func]
-        (eval-in-environment *ROOT* 
-            `(def! ~name 
-                (into-macro ~func)
-            )))))
+        (def-in-environment! *ROOT* name 
+            (into-macro (eval func))
+        ))))
 
 (def! load-file (fn* [x] (last-or-something (eval-in-environment *ROOT* (read-string-impl (slurp x))))))
 

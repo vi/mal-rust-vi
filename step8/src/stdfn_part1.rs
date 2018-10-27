@@ -85,9 +85,23 @@ impl Malvi {
                     env.borrow_mut().at_this_level.insert(*n, vv.clone());
                     Ok(vv)
                 }
-                _ => bail!("First argument of set! must be a symbol"),
+                _ => bail!("First argument of def! must be a symbol"),
             },
-            _ => bail!("set! must have exactly 2 arguments"),
+            _ => bail!("def! must have exactly 2 arguments"),
+        });
+
+        builtin_func!("def-in-environment!", |_, _, x| match x.len() {
+            3 => match (&*x[0], &*x[1], &*x[2]) {
+                (Ast::BindingsHandle(bh), Sym!(n), v) => {
+                    bh.borrow_mut().at_this_level.insert(*n, v.clone());
+                    Ok(v.clone())
+                }
+                _ => {
+                    eprintln!("{:?}", x);
+                    bail!("First two arguments of def-in-environment! must be bindings and symbol")
+                },
+            },
+            _ => bail!("def-in-environment! must have exactly 3 arguments"),
         });
 
         builtin_macro!("let*", let_);

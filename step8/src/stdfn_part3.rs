@@ -167,6 +167,14 @@ impl Malvi {
                 obj,
             })
         });
+
+        builtin_func1!("parent-environment",|_,_,x:Rc<Ast>|Ok(match&*x{
+            Ast::BindingsHandle(bh) => match &bh.borrow().parent {
+                Some(h) => Ast::BindingsHandle(h.clone()),
+                None => Nil!(),
+            },
+            _ => bail!("Argument must be a bindings handle"),
+        }));
     }
 }
 
