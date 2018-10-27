@@ -6,10 +6,14 @@
 
 (def! defmacro! 
     (into-macro (fn* [name func]
-        (def-in-environment! *ROOT* name 
+        (def-in-environment! (parent-environment (current-environment)) name 
             (into-macro (eval func))
         ))))
 
-(def! load-file (fn* [x] (last-or-something (eval-in-environment *ROOT* (read-string-impl (slurp x))))))
+(def! load-file (fn* [x] 
+    (last-or-something 
+        (eval-in-environment (parent-environment (current-environment)) 
+            (read-string-impl 
+                (slurp x))))))
 
 (def! *ARGV* (getcmdargs))
