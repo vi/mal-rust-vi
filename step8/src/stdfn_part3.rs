@@ -139,12 +139,25 @@ impl Malvi {
             bail!("unquote function must have exactly one argument")
         });
 
+
         // The same as "id".
         builtin_func!("splice-unquote", |_, _, x| if x.len() == 1 {
             Ok((*x[0]).clone())
         } else {
             bail!("splice-unquote function must have exactly one argument")
         });
+
+        /// Convert user-defined function into a macro
+        builtin_func1!("into-macro", |_,_,x:Rc<Ast>| Ok(match &*x {
+            Ast::UserFunction{func,bindings,is_macro:false} => {
+                Ast::UserFunction {
+                    is_macro: true,
+                    bindings: bindings.clone(),
+                    func: func.clone(),
+                }
+            },
+            _ => bail!("into-macro does not support this type"),
+        }));
     }
 }
 
