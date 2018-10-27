@@ -157,12 +157,15 @@ impl Malvi {
         builtin_func0!("current-environment",|_,env:&BindingsHandle|
             Ok(Ast::BindingsHandle(env.clone())));
 
-        builtin_func2!("eval-in-environment", |m:&mut Malvi,_,theenv:Rc<Ast>,obj:Rc<Ast>| {
+        builtin_func2!("eval-in-environment", |_,_,theenv:Rc<Ast>,obj:Rc<Ast>| {
             let bh = match &*theenv {
                 Ast::BindingsHandle(x) => x.clone(),
                 _ => bail!("First argument must be bindings")
             };
-            m.eval_impl(&bh, &*obj)
+            Ok(Ast::EvalMeAgain{
+                env: bh,
+                obj,
+            })
         });
     }
 }

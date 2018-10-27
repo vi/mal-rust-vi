@@ -153,14 +153,16 @@ pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> 
     */
     let func = args.pop_front().ok_or(format_err!("apply must have at least one argument"))?;    
     let mut env_override : Option<BindingsHandle> = None;
+    let mut macro_mode = false;
     let func = match &*func {
         Ast::Round(v) => v.clone(),
         Ast::UserFunction(UserFunction{
-            is_macro: _is_macro,
+            is_macro,
             func: vv,
             bindings,
         }) => match &**vv {
             Ast::Round(v) => {
+                macro_mode = *is_macro;
                 env_override = Some(bindings.clone());
                 //eprintln!("bindings {:?} depth = {}", (&**bindings) as *const _, bindings.borrow().depth());
                 v.clone()
@@ -234,9 +236,22 @@ pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> 
         assert!(rest_args.is_empty());
     }
     let bh = Rc::new(RefCell::new(new_bindings));
-
-    Ok(Ast::EvalMeAgain {
-        obj: func_body.clone(),
-        env: bh,
-    })
+    
+    if macro_mode {
+        let eib = m.sym("eval-in-environment");
+        let macro_expanded = m.eval_impl(&bh, &func_body)?;
+        Ok(Ast::EvalMeAgain{
+            obj: Rc::new(Ast::Round(vector![
+                Rc::new(Sym!(eib)),
+                Rc::new(Ast::BindingsHandle(env.clone())),
+                Rc::new(macro_expanded),
+            ])),
+            env: env.clone(),
+        })
+    } else {
+        Ok(Ast::EvalMeAgain {
+            obj: func_body.clone(),
+            env: bh,
+        })
+    }
 }
