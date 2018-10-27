@@ -2,6 +2,13 @@
 
 (def! read-string (fn* [x] (first-or-list (read-string-impl x))))
 
+(def! defmacro! 
+    (into-macro (fn* [name func]
+        (eval-in-root-env 
+            `(def! ~name 
+                (into-macro ~func)
+            )))))
+
 (def! load-file (fn* [x] (last-or-something (eval-in-root-env (read-string-impl (slurp x))))))
 
 (def! *ARGV* (getcmdargs))
