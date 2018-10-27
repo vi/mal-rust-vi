@@ -103,7 +103,6 @@ impl Malvi {
                 m.eval_impl(env, &obj)?;
             };
             Ok(Ast::EvalMeAgain{
-                num_iters: 1,
                 env: env.clone(),
                 obj: tail,
             })
@@ -154,16 +153,14 @@ pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> 
     */
     let func = args.pop_front().ok_or(format_err!("apply must have at least one argument"))?;    
     let mut env_override : Option<BindingsHandle> = None;
-    let mut macro_mode = false;
     let func = match &*func {
         Ast::Round(v) => v.clone(),
         Ast::UserFunction(UserFunction{
-            is_macro,
+            is_macro: _is_macro,
             func: vv,
             bindings,
         }) => match &**vv {
             Ast::Round(v) => {
-                macro_mode = *is_macro;
                 env_override = Some(bindings.clone());
                 //eprintln!("bindings {:?} depth = {}", (&**bindings) as *const _, bindings.borrow().depth());
                 v.clone()
@@ -239,7 +236,6 @@ pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> 
     let bh = Rc::new(RefCell::new(new_bindings));
 
     Ok(Ast::EvalMeAgain {
-        num_iters: if macro_mode { 2 } else { 1 },
         obj: func_body.clone(),
         env: bh,
     })

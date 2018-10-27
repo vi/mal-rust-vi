@@ -32,8 +32,8 @@ impl Malvi {
             let cond = x.pop_front().unwrap();
             let iftrue = x.pop_front().unwrap();
             let iffalse = x.pop_front().unwrap_or(Rc::new(Nil!()));
-            let iftrue = ||Ok(Ast::EvalMeAgain{obj:iftrue, env:env.clone(), num_iters: 1});
-            let iffalse = ||Ok(Ast::EvalMeAgain{obj:iffalse, env:env.clone(),num_iters: 1});
+            let iftrue = ||Ok(Ast::EvalMeAgain{obj:iftrue, env:env.clone()});
+            let iffalse = ||Ok(Ast::EvalMeAgain{obj:iffalse, env:env.clone()});
             match m.eval_impl(env,&cond)? {
                 True!() => iftrue(),
                 False!() => iffalse(),
