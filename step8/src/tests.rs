@@ -398,11 +398,11 @@ fn test36() {
 #[test]
 fn test37() {
     super::test_it (
-        &vec!["
-            (def! x \"x\")
-            (def! x (nth [1 2] 2))
-            x
-        "],
+        &vec![
+            "(def! x \"x\")",
+            "(def! x (nth [1 2] 2))",
+            "x"
+        ],
         Some("\"x\""),
     );
 }
