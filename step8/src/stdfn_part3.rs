@@ -154,6 +154,48 @@ impl Malvi {
             _ => bail!("into-macro does not support this type"),
         }));
 
+        /// Convert user-defined macro into a function
+        builtin_func1!("into-fn", |_,_,x:Rc<Ast>| Ok(match &*x {
+            Ast::UserFunction(UserFunction{func,bindings,is_macro:true}) => {
+                Ast::UserFunction(UserFunction{
+                    is_macro: false,
+                    bindings: bindings.clone(),
+                    func: func.clone(),
+                })
+            },
+            _ => bail!("into-fn does not support this type"),
+        }));
+
+        /*
+        builtin_macro!("macroexpand", |_,env,mut x:Vector<Rc<Ast>>| {
+            if x.len() != 1 {
+                bail!("macroexpand requires 1 argument");
+            };
+            let obj = x.pop_front().unwrap();
+            let mut v = match &*obj {
+                Ast::Round(x) => x.clone(),
+                _ => bail!("macroexpand's agument must be round brackets"),
+            };
+            if v.len() < 1 {
+                bail!("macroexpand's argument must be non-empty")
+            };
+            let head = v.pop_front().unwrap();
+            let f = match &*head {
+                Ast::UserFunction(userfn) if userfn.is_macro == true => {
+                    let mut f = userfn.clone();
+                    f.is_macro = false;
+                    f
+                },
+                _ => bail!("macroexapand's argument first element must be a macro")
+            };
+            v.push_front(Rc::new(Ast::UserFunction(f)));
+            Ok(Ast::EvalMeAgain{
+                env: env.clone(),
+                obj: Rc::new(Ast::Round(v)),
+            })
+        });
+        */
+
         builtin_func0!("current-environment",|_,env:&BindingsHandle|
             Ok(Ast::BindingsHandle(env.clone())));
 
@@ -174,6 +216,35 @@ impl Malvi {
                 None => Nil!(),
             },
             _ => bail!("Argument must be a bindings handle"),
+        }));
+
+        builtin_func1!("first", |_,_,x:Rc<Ast>| Ok(match &*x {
+            | Ast::Round(x)
+            | Ast::Square(x)
+            => if let Some(y) = x.get(0) {
+                (**y).clone()
+            } else {
+                Nil!()
+            },
+            _ => bail!("first does not support this type"),
+        }));
+
+        builtin_func1!("rest", |_,_,x:Rc<Ast>| Ok(match &*x {
+            Ast::Round(x) => if x.len() > 0 {
+                    let mut v = (*x).clone();
+                    let _ = v.pop_front();
+                    Ast::Round(v)
+                } else {
+                    Ast::Round(vector![])
+                },
+            Ast::Square(x) => if x.len() > 0 {
+                    let mut v = (*x).clone();
+                    let _ = v.pop_front();
+                    Ast::Square(v)
+                } else {
+                    Ast::Square(vector![])
+                },
+            _ => bail!("rest does not support this type"),
         }));
     }
 }
