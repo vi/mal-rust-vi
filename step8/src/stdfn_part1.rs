@@ -253,12 +253,17 @@ pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>, mac
     
     if macro_mode && !macroexpand_mode {
         let eib = m.sym("eval-in-environment");
+        let quo = m.sym("quote");
         let macro_expanded = m.eval_impl(&bh, &func_body)?;
         Ok(Ast::EvalMeAgain{
             obj: Rc::new(Ast::Round(vector![
                 Rc::new(Sym!(eib)),
+                // We are doing the eval for this
                 Rc::new(Ast::BindingsHandle(env.clone())),
-                Rc::new(macro_expanded),
+                Rc::new(Ast::Round(vector![
+                    Rc::new(Sym!(quo)),
+                    Rc::new(macro_expanded),
+                ])),
             ])),
             env: env.clone(),
         })
