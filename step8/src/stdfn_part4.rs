@@ -13,24 +13,21 @@ impl Malvi {
             } else {
                 Nil!()
             },
+            Nil!() => Nil!(),
             _ => bail!("first does not support this type"),
         }));
 
         builtin_func1!("rest", |_,_,x:Rc<Ast>| Ok(match &*x {
-            Ast::Round(x) => if x.len() > 0 {
+            | Ast::Round(x) 
+            | Ast::Square(x) 
+            => if x.len() > 0 {
                     let mut v = (*x).clone();
                     let _ = v.pop_front();
                     Ast::Round(v)
                 } else {
                     Ast::Round(vector![])
                 },
-            Ast::Square(x) => if x.len() > 0 {
-                    let mut v = (*x).clone();
-                    let _ = v.pop_front();
-                    Ast::Square(v)
-                } else {
-                    Ast::Square(vector![])
-                },
+            Nil!() => Ast::Round(vector![]),
             _ => bail!("rest does not support this type"),
         }));
 
