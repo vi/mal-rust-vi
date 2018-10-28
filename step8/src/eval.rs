@@ -96,7 +96,12 @@ impl Malvi {
                             apply_args.append(rest);
                             super::stdfn_part1::apply(self, env, apply_args, false)
                         }
-                        _ => bail!("this cannot be called"),
+                        _ => {
+                            bail!(
+                                "{} cannot be called",
+                                crate::BoundAstRef(&name, self, crate::DisplayMode::PrStr),
+                            )
+                        },
                     }
                 }
             },
