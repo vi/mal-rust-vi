@@ -139,11 +139,11 @@ fn test11() {
 #[test]
 fn test12() {
     super::test_it (
-        &vec!["
-            (def! x \"x\")
-            (def! x (nth (list 1 2) 2))
-            x
-        "],
+        &vec![
+            "(def! x \"x\")",
+            "(def! x (nth (list 1 2) 2))",
+            "x",
+        ],
         Some("\"x\""),
     );
 }
