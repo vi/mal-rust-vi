@@ -1,7 +1,5 @@
 (def! *ROOT* (current-environment))
 
-(def! not (fn* [x] (if x false true)))
-
 (def! read-string (fn* [x] (first-or-list (read-string-impl x))))
 
 (def! defmacro! 
@@ -18,6 +16,7 @@
 
 (def! *ARGV* (getcmdargs))
 
+;; From now on, copied from core.mal
 
 (def! inc (fn* (a) (+ a 1)))
 
@@ -91,7 +90,8 @@
           (if (list? form)
             `(~(first form) ~x ~@(rest form))
             (list form x))
-          `(-> (-> ~x ~form) ~@more))))))
+          `(-> (-> ~x ~form) ~@more))
+      ))))
 
 (defmacro! ->>
   (fn* (x & xs)
