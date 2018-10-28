@@ -77,7 +77,7 @@ impl Malvi {
                                 .collect::<Result<Vec<_>>>()?
                                 .into();
                             apply_args.append(rest);
-                            super::stdfn_part1::apply(self, env, apply_args)
+                            super::stdfn_part1::apply(self, env, apply_args, false)
                         },
                         Ast::UserFunction(func) => {
                             let is_macro = func.is_macro;
@@ -94,7 +94,7 @@ impl Malvi {
                                 .into()
                             };
                             apply_args.append(rest);
-                            super::stdfn_part1::apply(self, env, apply_args)
+                            super::stdfn_part1::apply(self, env, apply_args, false)
                         }
                         _ => bail!("this cannot be called"),
                     }

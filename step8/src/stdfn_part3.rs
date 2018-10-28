@@ -166,8 +166,7 @@ impl Malvi {
             _ => bail!("into-fn does not support this type"),
         }));
 
-        /*
-        builtin_macro!("macroexpand", |_,env,mut x:Vector<Rc<Ast>>| {
+        builtin_macro!("macroexpand", |m,env,mut x:Vector<Rc<Ast>>| {
             if x.len() != 1 {
                 bail!("macroexpand requires 1 argument");
             };
@@ -177,24 +176,14 @@ impl Malvi {
                 _ => bail!("macroexpand's agument must be round brackets"),
             };
             if v.len() < 1 {
-                bail!("macroexpand's argument must be non-empty")
+                bail!("macroexpand's argument cannot be empty");
             };
+            // Extract, evaluate and re-insert first element
             let head = v.pop_front().unwrap();
-            let f = match &*head {
-                Ast::UserFunction(userfn) if userfn.is_macro == true => {
-                    let mut f = userfn.clone();
-                    f.is_macro = false;
-                    f
-                },
-                _ => bail!("macroexapand's argument first element must be a macro")
-            };
-            v.push_front(Rc::new(Ast::UserFunction(f)));
-            Ok(Ast::EvalMeAgain{
-                env: env.clone(),
-                obj: Rc::new(Ast::Round(v)),
-            })
+            let newhead = m.eval_impl(env, &*head)?;
+            v.push_front(Rc::new(newhead));
+            super::stdfn_part1::apply(m, env, v, true)
         });
-        */
 
         builtin_func0!("current-environment",|_,env:&BindingsHandle|
             Ok(Ast::BindingsHandle(env.clone())));

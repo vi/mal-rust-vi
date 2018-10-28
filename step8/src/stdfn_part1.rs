@@ -106,7 +106,7 @@ impl Malvi {
 
         builtin_macro!("let*", let_);
 
-        builtin_func!("apply", apply);
+        builtin_func!("apply", |m,env,x| apply(m,env,x,false));
 
         builtin_macro!("do", |m, env, mut x|{
             let tail = match x.pop_back() {
@@ -157,7 +157,7 @@ pub fn let_(m: &mut Malvi, env: &BindingsHandle, x: Vector<Rc<Ast>>) -> Result<A
 }
 
 /// Apply user-defined function. Does not currently support built-ins
-pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> Result<Ast> {
+pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>, macroexpand_mode: bool) -> Result<Ast> {
     /*
     eprint!("apply ");
     for x in &args {
@@ -251,7 +251,7 @@ pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>) -> 
     }
     let bh = Rc::new(RefCell::new(new_bindings));
     
-    if macro_mode {
+    if macro_mode && !macroexpand_mode {
         let eib = m.sym("eval-in-environment");
         let macro_expanded = m.eval_impl(&bh, &func_body)?;
         Ok(Ast::EvalMeAgain{

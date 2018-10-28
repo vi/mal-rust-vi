@@ -10,14 +10,6 @@
             (into-macro (eval func))
         ))))
 
-(defmacro! macroexpand
-    (fn* [x]
-        ``(
-            ~(into-fn (eval (first x)))
-            ~@(rest x)
-        )
-))
-
 (def! load-file (fn* [x] 
     (last-or-something 
         (eval-in-environment (parent-environment (current-environment)) 
