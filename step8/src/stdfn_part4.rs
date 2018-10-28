@@ -55,6 +55,10 @@ impl Malvi {
                 },
                 _ => bail!("nth first argument invalid type"),
         }}));
+
+        builtin_func0!("gensym",|m:&mut Malvi,_| {
+            Ok(Sym!(m.gensym()))
+        });
     }
 }
 

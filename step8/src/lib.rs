@@ -154,6 +154,10 @@ impl Malvi {
             s
         }
     }
+    pub fn gensym(&mut self) -> Symbol {
+        let s = self.sym2name.insert("#gensym".to_string());
+        s
+    }
 
     pub fn new() -> Self { 
         let mut this = Malvi{
