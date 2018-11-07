@@ -136,6 +136,11 @@ impl Malvi {
             _ => False!(),
         }));
 
+        builtin_func1!("keyword?",|_,_,arg:Rc<Ast>| Ok(match &*arg {
+            Kwident!(_) => True!(),
+            _ => False!(),
+        }));
+
         builtin_func1!("nil?",|_,_,arg:Rc<Ast>| Ok(match &*arg {
             Nil!() => True!(),
             _ => False!(),

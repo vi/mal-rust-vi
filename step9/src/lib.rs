@@ -89,6 +89,9 @@ macro_rules! Int {
 macro_rules! Sym {
     ($($x:tt)*) => {Ast::Simple(SAst::Symbol($($x)*))};
 }
+macro_rules! Kwident {
+    ($($x:tt)*) => {Ast::Simple(SAst::Kwident($($x)*))};
+}
 macro_rules! True {
     () => {Ast::Simple(SAst::Bool(true))};
 }
