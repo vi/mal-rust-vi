@@ -26,7 +26,7 @@
 
 (def! apply (fn* [func & args] 
   (if (empty? args) (throw "Can't apply nothing")
-    (eval `(~func ~@(all-but-last args) ~@(last args)))
+    (eval `(~(into-macro func) ~@(all-but-last args) ~@(last args)))
   )
 ))
 

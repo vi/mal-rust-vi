@@ -151,6 +151,7 @@ impl Malvi {
                     func: func.clone(),
                 })
             },
+            Ast::BuiltinFunction(x) => Ast::BuiltinMacro(*x),
             _ => bail!("into-macro does not support this type"),
         }));
 
