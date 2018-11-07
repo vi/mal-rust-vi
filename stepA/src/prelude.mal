@@ -1,3 +1,5 @@
+(def! *host-language* "Rust")
+
 (def! *ROOT* (current-environment))
 
 (def! read-string (fn* [x] (first-or-list (read-string-impl x))))
