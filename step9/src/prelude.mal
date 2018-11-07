@@ -24,6 +24,12 @@
       (map func (rest list)))
 )))
 
+(def! apply (fn* [func & args] 
+  (if (empty? args) (throw "Can't apply nothing")
+    (eval `(~func ~@(all-but-last args) ~@(last args)))
+  )
+))
+
 ;; From now on, copied from core.mal
 
 (def! inc (fn* (a) (+ a 1)))

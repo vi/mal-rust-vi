@@ -106,7 +106,7 @@ impl Malvi {
 
         builtin_macro!("let*", let_);
 
-        builtin_func!("apply", |m,env,x| apply(m,env,x,false));
+        builtin_func!("apply_user_fn", |m,env,x| apply(m,env,x,false));
 
         builtin_macro!("do", |m, env, mut x|{
             let tail = match x.pop_back() {

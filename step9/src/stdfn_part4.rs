@@ -18,6 +18,18 @@ impl Malvi {
             _ => bail!("first does not support this type"),
         }));
 
+        builtin_func1!("last", |_,_,x:Rc<Ast>| Ok(match &*x {
+            | Ast::Round(x)
+            | Ast::Square(x)
+            => if let Some(y) = x.clone().pop_back() {
+                (*y).clone()
+            } else {
+                Nil!()
+            },
+            Nil!() => Nil!(),
+            _ => bail!("last does not support this type"),
+        }));
+
         builtin_func1!("rest", |_,_,x:Rc<Ast>| Ok(match &*x {
             | Ast::Round(x) 
             | Ast::Square(x) 
@@ -30,6 +42,20 @@ impl Malvi {
                 },
             Nil!() => Ast::Round(vector![]),
             _ => bail!("rest does not support this type"),
+        }));
+
+        builtin_func1!("all-but-last", |_,_,x:Rc<Ast>| Ok(match &*x {
+            | Ast::Round(x) 
+            | Ast::Square(x) 
+            => if x.len() > 0 {
+                    let mut v = (*x).clone();
+                    let _ = v.pop_back();
+                    Ast::Round(v)
+                } else {
+                    Ast::Round(vector![])
+                },
+            Nil!() => Ast::Round(vector![]),
+            _ => bail!("all-but-last does not support this type"),
         }));
 
         builtin_func2!("nth", |_,_,list:Rc<Ast>,idx:Rc<Ast>| Ok({
