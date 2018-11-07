@@ -150,6 +150,11 @@ impl Malvi {
             False!() => True!(),
             _ => False!(),
         }));
+
+        builtin_func1!("symbol",|m:&mut Malvi,_,arg:Rc<Ast>| Ok(match &*arg {
+            StrLit!(x) => Sym!(m.sym(x)),
+            _ => bail!("symbol function requires string argument")
+        }));
     }
 }
 
