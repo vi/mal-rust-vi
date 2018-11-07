@@ -30,6 +30,10 @@
   )
 ))
 
+(def! vector (fn* [& args] 
+  `[~@args]
+))
+
 ;; From now on, copied from core.mal
 
 (def! inc (fn* (a) (+ a 1)))
