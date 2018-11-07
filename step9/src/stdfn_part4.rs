@@ -189,19 +189,87 @@ impl Malvi {
                 bail!("hash-map function must have even number of arguments")
             };
             let mut q = HashMap::new();
-            use crate::itertools::Itertools;
-            for mut x in &args.iter().chunks(2) {
-                let k = x.next().unwrap();
-                let v = x.next().unwrap();
-                match &**k {
-                    Ast::Simple(key) => {
-                        q.insert(key.clone(), v.clone());
-                    },
-                    _ => bail!("hash-map: Unmappable type encountered"),
-                };
-            };
+            populate_map_from_args(&mut q, &args)?;
             Ast::Curly(q)
-        }))
+        }));
+
+        builtin_func!("assoc",|_,_,mut args:Vector<Rc<Ast>>|Ok({
+            if args.is_empty() {
+                bail!("assoc function must have at least 1 argument")
+            };
+            let obj = args.pop_front().unwrap();
+            match &*obj {
+                Ast::Curly(x) => {
+                    if args.len() % 2 != 0 {
+                        bail!("assoc function for a map must have odd number of arguments")
+                    };
+                    let mut q = x.clone();
+                    populate_map_from_args(&mut q, &args)?;
+                    Ast::Curly(q)
+                },
+                Ast::Round(x) => {
+                    let mut q = x.clone();
+                    q.append(args.clone());
+                    Ast::Round(q)
+                },
+                Ast::Square(x) => {
+                    let mut q = x.clone();
+                    q.append(args.clone());
+                    Ast::Square(q)
+                },
+                _ => bail!("assoc function must have list, vector or map for the first argument")
+            }
+        }));
+
+        builtin_func!("dissoc",|_,_,mut args:Vector<Rc<Ast>>|Ok({
+            if args.is_empty() {
+                bail!("assoc function must have at least 1 argument")
+            };
+            let obj = args.pop_front().unwrap();
+            match &*obj {
+                Ast::Curly(x) => {
+                    let mut q = x.clone();
+                    for k in args {
+                        match &*k {
+                            Ast::Simple(key) => {
+                                q.remove(&key);
+                            },
+                            _ => bail!("dissoc: unmappable type encountered")
+                        }
+                    }
+                    Ast::Curly(q)
+                },
+                _ => bail!("dissoc function must have a map for the first argument")
+            }
+        }));
+
+        builtin_func2!("get",|_,_,map:Rc<Ast>,k:Rc<Ast>|Ok({
+            match &*map {
+                Ast::Curly(m) => {
+                    match &*k {
+                        Ast::Simple(key) => {
+                            m.get(key).map(|x|(**x).clone()).unwrap_or(Nil!())
+                        },
+                        _ => bail!("get encountered unmappable argument")
+                    }
+                },
+                _ => bail!("get function requires map as the first argument")
+            }
+        }));
     }
 }
 
+fn populate_map_from_args(q: &mut HashMap<SAst,Rc<Ast>>, args: &Vector<Rc<Ast>>) -> crate::Result<()> {
+    use crate::itertools::Itertools;
+    for mut x in &args.iter().chunks(2) {
+        let k = x.next().unwrap();
+        let v = x.next().unwrap();
+        match &**k {
+            Ast::Simple(key) => {
+                q.insert(key.clone(), v.clone());
+            },
+            _ => bail!("hash-map: Unmappable type encountered"),
+        };
+    };
+    Ok(())
+}
