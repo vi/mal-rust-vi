@@ -253,9 +253,27 @@ impl Malvi {
                         _ => bail!("get encountered unmappable argument")
                     }
                 },
+                Nil!() => Nil!(),
                 _ => bail!("get function requires map as the first argument")
             }
         }));
+
+
+        builtin_func2!("contains?",|_,_,map:Rc<Ast>,k:Rc<Ast>|Ok({
+            match &*map {
+                Ast::Curly(m) => {
+                    match &*k {
+                        Ast::Simple(key) => {
+                            m.get(key).map(|_|True!()).unwrap_or(False!())
+                        },
+                        _ => bail!("contains? encountered unmappable argument")
+                    }
+                },
+                Nil!() => Nil!(),
+                _ => bail!("contains? function requires map as the first argument")
+            }
+        }));
+
     }
 }
 
