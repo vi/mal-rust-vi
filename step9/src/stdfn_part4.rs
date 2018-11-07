@@ -274,6 +274,33 @@ impl Malvi {
             }
         }));
 
+        builtin_func1!("keys",|_,_,map:Rc<Ast>|Ok({
+            match &*map {
+                Ast::Curly(m) => {
+                   let mut q = vector![];
+                   for x in m.keys() {
+                       q.push_back(Rc::new(Ast::Simple(x.clone())));
+                   }
+                   Ast::Round(q)
+                },
+                Nil!() => Nil!(),
+                _ => bail!("contains? function requires map as the first argument")
+            }
+        }));
+
+        builtin_func1!("vals",|_,_,map:Rc<Ast>|Ok({
+            match &*map {
+                Ast::Curly(m) => {
+                   let mut q = vector![];
+                   for x in m.values() {
+                       q.push_back(x.clone());
+                   }
+                   Ast::Round(q)
+                },
+                Nil!() => Nil!(),
+                _ => bail!("contains? function requires map as the first argument")
+            }
+        }));
     }
 }
 
