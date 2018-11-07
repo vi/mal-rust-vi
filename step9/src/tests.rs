@@ -993,7 +993,7 @@ fn test091() {
     super::test_it (
         &vec!["
             (def! s (str {:abc \"val1\" :def \"val2\"}))
-            (or (= s \"{:abc val1 :def val2}\") (= s \"{:def val2 :abc val1}\"))
+            (or (= s \"{:abc val1, :def val2}\") (= s \"{:def val2, :abc val1}\"))
         "],
         Some("true"),
     );
@@ -1004,7 +1004,7 @@ fn test092() {
     super::test_it (
         &vec!["
             (def! p (pr-str {:abc \"val1\" :def \"val2\"}))
-            (or (= p \"{:abc \\\"val1\\\" :def \\\"val2\\\"}\") (= p \"{:def \\\"val2\\\" :abc \\\"val1\\\"}\"))
+            (or (= p \"{:abc \\\"val1\\\", :def \\\"val2\\\"}\") (= p \"{:def \\\"val2\\\", :abc \\\"val1\\\"}\"))
         "],
         Some("true"),
     );
