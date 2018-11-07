@@ -16,6 +16,14 @@
 
 (def! *ARGV* (getcmdargs))
 
+(def! map (fn* [func list]
+  (if (empty? list)
+    ()
+    (cons
+      (func (first list))
+      (map func (rest list)))
+)))
+
 ;; From now on, copied from core.mal
 
 (def! inc (fn* (a) (+ a 1)))
