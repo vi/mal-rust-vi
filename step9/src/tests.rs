@@ -896,6 +896,7 @@ fn test081() {
 fn test082() {
     super::test_it (
         &vec!["
+            (def! hm4 (assoc {:a 1 :b 2} :a 3 :c 1))
             (get hm4 :a)
         "],
         Some("3"),
@@ -906,6 +907,7 @@ fn test082() {
 fn test083() {
     super::test_it (
         &vec!["
+            (def! hm4 (assoc {:a 1 :b 2} :a 3 :c 1))
             (get hm4 :b)
         "],
         Some("2"),
@@ -916,6 +918,7 @@ fn test083() {
 fn test084() {
     super::test_it (
         &vec!["
+            (def! hm4 (assoc {:a 1 :b 2} :a 3 :c 1))
             (get hm4 :c)
         "],
         Some("1"),
@@ -989,6 +992,7 @@ fn test090() {
 fn test091() {
     super::test_it (
         &vec!["
+            (def! s (str {:abc \"val1\" :def \"val2\"}))
             (or (= s \"{:abc val1 :def val2}\") (= s \"{:def val2 :abc val1}\"))
         "],
         Some("true"),
@@ -999,6 +1003,7 @@ fn test091() {
 fn test092() {
     super::test_it (
         &vec!["
+            (def! p (pr-str {:abc \"val1\" :def \"val2\"}))
             (or (= p \"{:abc \\\"val1\\\" :def \\\"val2\\\"}\") (= p \"{:def \\\"val2\\\" :abc \\\"val1\\\"}\"))
         "],
         Some("true"),
