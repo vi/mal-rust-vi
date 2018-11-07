@@ -165,6 +165,10 @@ impl Malvi {
             StrLit!(x) => Sym!(m.sym(x)),
             _ => bail!("symbol function requires string argument")
         }));
+        builtin_func1!("keyword",|m:&mut Malvi,_,arg:Rc<Ast>| Ok(match &*arg {
+            StrLit!(x) => Kwident!(m.sym(&format!(":{}", x))),
+            _ => bail!("keyword function requires string argument")
+        }));
     }
 }
 
