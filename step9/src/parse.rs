@@ -3,8 +3,8 @@
 use std::rc::Rc;
 
 use super::{Ast, BoundAstRef, Malvi};
-use std::convert::identity as id;
 use crate::im::Vector;
+use std::convert::identity as id;
 
 pub mod parser {
     #[derive(Parser)]
@@ -160,7 +160,7 @@ pub mod ast {
             match x {
                 SimpleObj::Int(Int { value, .. }) => SAst::Int(*value),
                 SimpleObj::StrLit(StrLit { span }) => SAst::StrLit(
-                    unescape::unescape(span.as_str()).expect("String literal unescape failed")
+                    unescape::unescape(span.as_str()).expect("String literal unescape failed"),
                 ),
                 SimpleObj::Symbol(Symbol { span }) => SAst::Symbol(self.sym(span.as_str())),
                 SimpleObj::Kwident(Kwident { span }) => SAst::Kwident(self.sym(span.as_str())),
@@ -194,12 +194,12 @@ pub mod ast {
             match x {
                 Obj::Simple(xx) => Ast::Simple(self.read_impl_simple(xx)),
 
-                sugar!(A Quote x)      => sugar!(B x "quote"),
+                sugar!(A Quote x) => sugar!(B x "quote"),
                 sugar!(A Quasiquote x) => sugar!(B x "quasiquote"),
-                sugar!(A Unquote x)    => sugar!(B x "unquote"),
+                sugar!(A Unquote x) => sugar!(B x "unquote"),
                 sugar!(A Spliceunquote x) => sugar!(B x "splice-unquote"),
-                sugar!(A Deref x)      => sugar!(B x "deref"),
-                
+                sugar!(A Deref x) => sugar!(B x "deref"),
+
                 Obj::Round(Round { items, .. }) => {
                     Ast::Round(items.iter().map(|x| Rc::new(self.read_impl(x))).collect())
                 }
@@ -223,15 +223,21 @@ pub mod ast {
 
 }
 
-fn writevec(f: &mut std::fmt::Formatter<'_>, m: &Malvi, v: &Vector<Rc<Ast>>, dm : crate::DisplayMode) {
+fn writevec(
+    f: &mut std::fmt::Formatter<'_>,
+    m: &Malvi,
+    v: &Vector<Rc<Ast>>,
+    dm: crate::DisplayMode,
+) -> std::result::Result<(), std::fmt::Error> {
     let mut firsttime = true;
     for i in v {
         if !firsttime {
-            write!(f, " ");
+            write!(f, " ")?;
         }
-        write!(f, "{}", BoundAstRef(&*i, m, dm));
+        write!(f, "{}", BoundAstRef(&*i, m, dm))?;
         firsttime = false;
-    }
+    };
+    Ok(())
 }
 
 impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
@@ -251,37 +257,39 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
             Simple(Nil) => write!(f, "nil"),
             Simple(Bool(x)) => write!(f, "{}", x),
             Round(x) => {
-                write!(f, "(");
-                writevec(f, m, x, dm);
+                write!(f, "(")?;
+                writevec(f, m, x, dm)?;
                 write!(f, ")")
             }
             Square(x) => {
-                write!(f, "[");
-                writevec(f, m, x, dm);
+                let _ = write!(f, "[")?;
+                writevec(f, m, x, dm)?;
                 write!(f, "]")
             }
             Curly(x) => {
-                write!(f, "{{");
+                let _ = write!(f, "{{");
                 let mut first = true;
                 for (k, v) in x {
                     if !first {
-                        write!(f, ", ");
+                        let _ = write!(f, ", ");
                     };
                     write!(
                         f,
                         "{} {}",
                         BoundAstRef(&Ast::Simple(k.clone()), m, dm),
                         BoundAstRef(v, m, dm),
-                    );
+                    )?;
                     first = false;
                 }
                 write!(f, "}}")
             }
             BuiltinFunction(x) => write!(f, "#builtin_fn_{}", id::<usize>((*x).into()),),
             BuiltinMacro(x) => write!(f, "#builtin_macro_{}", id::<usize>((*x).into()),),
-            UserFunction(crate::UserFunction{is_macro:false, ..}) => write!(f, "#fn"),
-            UserFunction(crate::UserFunction{is_macro:true, ..}) => write!(f, "#macro"),
-            EvalMeAgain{..} => write!(f, "#tco_thunk"),
+            UserFunction(crate::UserFunction {
+                is_macro: false, ..
+            }) => write!(f, "#fn"),
+            UserFunction(crate::UserFunction { is_macro: true, .. }) => write!(f, "#macro"),
+            EvalMeAgain { .. } => write!(f, "#tco_thunk"),
             Atom(x) => write!(f, "(atom {})", BoundAstRef(&*x.borrow(), m, dm)),
             BindingsHandle(..) => write!(f, "#bindings"),
         }

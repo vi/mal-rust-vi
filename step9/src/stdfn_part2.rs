@@ -90,9 +90,9 @@ impl Malvi {
             use ::std::fmt::Write;
             for x in args {
                 if !first {
-                    write!(s, " ");
+                    write!(s, " ")?;
                 };
-                write!(s, "{}", super::BoundAstRef(&*x, m, crate::DisplayMode::PrStr));
+                write!(s, "{}", super::BoundAstRef(&*x, m, crate::DisplayMode::PrStr))?;
                 first = false;
             }
             Ok(StrLit!(s))
@@ -102,7 +102,7 @@ impl Malvi {
             let mut s = String::new();
             use ::std::fmt::Write;
             for x in args {
-                write!(s, "{}", super::BoundAstRef(&*x, m, crate::DisplayMode::Str));
+                write!(s, "{}", super::BoundAstRef(&*x, m, crate::DisplayMode::Str))?;
             };
             Ok(StrLit!(s))
         });
