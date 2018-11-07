@@ -160,6 +160,14 @@ impl Malvi {
             Ast::Square(_) => True!(),
             _ => False!(),
         }));
+        builtin_func1!("vector?",|_,_,arg:Rc<Ast>| Ok(match &*arg {
+            Ast::Square(_) => True!(),
+            _ => False!(),
+        }));
+        builtin_func1!("map?",|_,_,arg:Rc<Ast>| Ok(match &*arg {
+            Ast::Curly(_) => True!(),
+            _ => False!(),
+        }));
 
         builtin_func1!("symbol",|m:&mut Malvi,_,arg:Rc<Ast>| Ok(match &*arg {
             StrLit!(x) => Sym!(m.sym(x)),
