@@ -1070,6 +1070,8 @@ fn test096() {
 fn test097() {
     super::test_it (
         &vec!["
+            (def! hm1 (hash-map))
+            (def! hm2 (assoc hm1 \"a\" 1))
             (def! hm3 (assoc hm2 \"b\" 2))
             (count (keys hm3))
         "],
@@ -1081,6 +1083,8 @@ fn test097() {
 fn test098() {
     super::test_it (
         &vec!["
+            (def! hm1 (hash-map))
+            (def! hm2 (assoc hm1 \"a\" 1))
             (def! hm3 (assoc hm2 \"b\" 2))
             (count (vals hm3))
         "],
@@ -1092,6 +1096,8 @@ fn test098() {
 fn test099() {
     super::test_it (
         &vec!["
+            (def! hm1 (hash-map))
+            (def! hm2 (assoc hm1 \"a\" 1))
             (def! hm3 (assoc hm2 \"b\" 2))
             (dissoc hm3 \"a\")
         "],
@@ -1103,6 +1109,8 @@ fn test099() {
 fn test100() {
     super::test_it (
         &vec!["
+            (def! hm1 (hash-map))
+            (def! hm2 (assoc hm1 \"a\" 1))
             (def! hm3 (assoc hm2 \"b\" 2))
             (dissoc hm3 \"a\" \"b\")
         "],
@@ -1114,6 +1122,8 @@ fn test100() {
 fn test101() {
     super::test_it (
         &vec!["
+            (def! hm1 (hash-map))
+            (def! hm2 (assoc hm1 \"a\" 1))
             (def! hm3 (assoc hm2 \"b\" 2))
             (dissoc hm3 \"a\" \"b\" \"c\")
         "],
@@ -1125,6 +1135,8 @@ fn test101() {
 fn test102() {
     super::test_it (
         &vec!["
+            (def! hm1 (hash-map))
+            (def! hm2 (assoc hm1 \"a\" 1))
             (def! hm3 (assoc hm2 \"b\" 2))
             (dissoc hm3 \"a\" \"b\")
             (dissoc hm3 \"a\" \"b\" \"c\")
