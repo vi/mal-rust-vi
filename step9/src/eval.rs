@@ -96,6 +96,19 @@ impl Malvi {
                             apply_args.append(rest);
                             super::stdfn_part1::apply(self, env, apply_args, false)
                         }
+                        Ast::Simple(SAst::Kwident(..)) => {
+                            if rest.len() != 1 {
+                                bail!("Keyword-apply must have one argument")
+                            };
+                            Ok(Ast::EvalMeAgain{
+                                env: env.clone(),
+                                obj: Rc::new(Ast::Round(vector![
+                                    Rc::new(Ast::Simple(SAst::Symbol(self.sym("get")))),
+                                    rest[0].clone(),
+                                    Rc::new(name.clone()),
+                                ])),
+                            })
+                        },
                         _ => {
                             bail!(
                                 "{} cannot be called",
