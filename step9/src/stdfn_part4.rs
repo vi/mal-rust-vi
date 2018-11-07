@@ -95,6 +95,15 @@ impl Malvi {
                 }
             }
         });
+
+        builtin_func1!("throw",|_,_,arg:Rc<Ast>| {
+            match &*arg {
+                StrLit!(x) => {
+                    bail!("{}", x)
+                },
+                _ => bail!("throw's argument must be a string")
+            }
+        });
     }
 }
 
