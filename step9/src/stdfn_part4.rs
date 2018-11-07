@@ -1,6 +1,7 @@
 use super::{Ast, Malvi, SAst};
 use std::rc::Rc;
 use crate::im::Vector;
+use crate::im::HashMap;
 
 impl Malvi {
     pub fn stdfn_part4(&mut self) {
@@ -182,6 +183,25 @@ impl Malvi {
             },
             _ => bail!("keyword function requires string argument")
         }));
+
+        builtin_func!("hash-map", |_,_,args:Vector<Rc<Ast>>|Ok({
+            if args.len() % 2 != 0 {
+                bail!("hash-map function must have even number of arguments")
+            };
+            let mut q = HashMap::new();
+            use crate::itertools::Itertools;
+            for mut x in &args.iter().chunks(2) {
+                let k = x.next().unwrap();
+                let v = x.next().unwrap();
+                match &**k {
+                    Ast::Simple(key) => {
+                        q.insert(key.clone(), v.clone());
+                    },
+                    _ => bail!("hash-map: Unmappable type encountered"),
+                };
+            };
+            Ast::Curly(q)
+        }))
     }
 }
 
