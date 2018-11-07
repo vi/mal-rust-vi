@@ -1,5 +1,6 @@
 use super::{Ast, Malvi, SAst};
 use std::rc::Rc;
+use crate::im::Vector;
 
 impl Malvi {
     pub fn stdfn_part4(&mut self) {
@@ -55,6 +56,44 @@ impl Malvi {
 
         builtin_func0!("gensym",|m:&mut Malvi,_| {
             Ok(Sym!(m.gensym()))
+        });
+
+        builtin_macro!("try*", |m,env,mut args:Vector<Rc<Ast>>| {
+            if args.len() != 2 {
+                bail!("try* must have exactly two arguments");
+            };
+            let code = args.pop_front().unwrap();
+            let catch_ = args.pop_front().unwrap();
+            let mut catch_ = match &*catch_ {
+                Ast::Round(x) => (*x).clone(),
+                _ => bail!("Second argument of try* must be round brackets")
+            };
+            if catch_.len() != 3 {
+                bail!("Second argument of try* must be a list of 3 elements")
+            };
+            let catchsign = catch_.pop_front().unwrap();
+            let catchbind = catch_.pop_front().unwrap();
+            let catchcode = catch_.pop_front().unwrap();
+            match &*catchsign {
+                Sym!(x)  if *x == m.sym("catch*") => {},
+                _ => bail!("First element of the second argument of try* must be catch*"),
+            }
+            let catchbind = match &*catchbind {
+                Sym!(x) => x,
+                _ => bail!("Second element of the second argument of try* must be a symbol"),
+            };
+            match m.eval_impl(env,&*code) {
+                Ok(x) => Ok(x),
+                Err(e) => {
+                    let newenv = crate::Bindings::inherit(env.clone());
+                    let excstr = StrLit!(format!("{}", e));
+                    newenv.borrow_mut().at_this_level.insert(*catchbind, excstr);
+                    Ok(Ast::EvalMeAgain{
+                        env: newenv,
+                        obj: catchcode,
+                    })
+                }
+            }
         });
     }
 }

@@ -126,6 +126,17 @@ pub struct Bindings {
     parent: Option<BindingsHandle>,
 }
 
+impl Bindings {
+    pub fn inherit(parent: BindingsHandle) -> BindingsHandle {
+        Rc::new(RefCell::new(
+            Bindings {
+                at_this_level: HashMap::new(),
+                parent: Some(parent),
+            }
+        ))
+    }
+}
+
 pub struct Malvi {
     sym2name: Slab<Symbol, String>,
     name2sym: StdHashMap<String, Symbol>,
