@@ -104,6 +104,26 @@ impl Malvi {
                 _ => bail!("throw's argument must be a string")
             }
         });
+
+        builtin_func1!("symbol?",|_,_,arg:Rc<Ast>| Ok(match &*arg {
+            Sym!(_) => True!(),
+            _ => False!(),
+        }));
+
+        builtin_func1!("nil?",|_,_,arg:Rc<Ast>| Ok(match &*arg {
+            Nil!() => True!(),
+            _ => False!(),
+        }));
+
+        builtin_func1!("true?",|_,_,arg:Rc<Ast>| Ok(match &*arg {
+            True!()  => True!(),
+            _ => False!(),
+        }));
+
+        builtin_func1!("false?",|_,_,arg:Rc<Ast>| Ok(match &*arg {
+            False!() => True!(),
+            _ => False!(),
+        }));
     }
 }
 
