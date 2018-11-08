@@ -42,6 +42,15 @@ impl Malvi {
             }
             Ok(Ast::Round(q))
         });
+
+        builtin_func1!("readline", nometa |m:&mut Malvi,_,prompt:Rc<Ast>| Ok({
+            print!("{}", crate::BoundAstRef(&*prompt, m, crate::DisplayMode::Str));
+            use ::std::io::Write;
+            ::std::io::stdout().flush()?;
+            let mut s = String::new();
+            ::std::io::stdin().read_line(&mut s)?;
+            StrLit!(s)
+        }));
     }
 }
 
