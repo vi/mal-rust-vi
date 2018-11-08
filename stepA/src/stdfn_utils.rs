@@ -23,9 +23,21 @@ macro_rules! declare_macros_for_builtins {
         }
         #[allow(unused_macros)]
         macro_rules! builtin_func {
-            ($n:expr, $f:expr) => {{
+            ($n:expr, withmeta $f:expr) => {{
                 let s = this.sym($n);
                 let b = this.builtins.insert(Rc::new($f));
+                this.root_bindings
+                    .borrow_mut()
+                    .at_this_level
+                    .insert(s, Ast::BuiltinFunction(b));
+            }};
+            ($n:expr, $f:expr) => {{
+                let s = this.sym($n);
+                let b = this.builtins.insert(Rc::new(
+                    |m, env:&$crate::BindingsHandle, x:$crate::im::Vector<Rc<Ast>>|{
+                        let x : $crate::im::Vector<Rc<Ast>> = x.into_iter().map(|y|y.nometa()).collect();
+                        $f(m,env,x)
+                }));
                 this.root_bindings
                     .borrow_mut()
                     .at_this_level
@@ -36,7 +48,7 @@ macro_rules! declare_macros_for_builtins {
         #[allow(unused_macros)]
         macro_rules! builtin_func0 {
             ($n:expr, $f:expr) => {{
-                builtin_func!($n, |m,env:&$crate::BindingsHandle,x|{
+                builtin_func!($n, |m,env:&$crate::BindingsHandle,x:$crate::im::Vector<Rc<Ast>>|{
                     if x.len() != 0 {
                         bail!("This function has exactly 0 arguments");
                     }
@@ -48,7 +60,7 @@ macro_rules! declare_macros_for_builtins {
         #[allow(unused_macros)]
         macro_rules! builtin_func1 {
             ($n:expr, $f:expr) => {{
-                builtin_func!($n, |m,env,mut x|{
+                builtin_func!($n, |m,env,mut x:$crate::im::Vector<Rc<Ast>>|{
                     if x.len() != 1 {
                         bail!("This function has exactly 1 argument");
                     }
@@ -60,7 +72,7 @@ macro_rules! declare_macros_for_builtins {
         #[allow(unused_macros)]
         macro_rules! builtin_func2 {
             ($n:expr, $f:expr) => {{
-                builtin_func!($n, |m,env,mut x|{
+                builtin_func!($n, |m,env,mut x:$crate::im::Vector<Rc<Ast>>|{
                     if x.len() != 2 {
                         bail!("This function has exactly 2 arguments");
                     }
@@ -74,9 +86,20 @@ macro_rules! declare_macros_for_builtins {
 
         #[allow(unused_macros)]
         macro_rules! builtin_macro {
-            ($n:expr, $f:expr) => {{
+            ($n:expr, withmeta $f:expr) => {{
                 let s = this.sym($n);
                 let b = this.builtins.insert(Rc::new($f));
+                this.root_bindings
+                    .borrow_mut()
+                    .at_this_level
+                    .insert(s, Ast::BuiltinMacro(b));
+            }};
+            ($n:expr, $f:expr) => {{
+                let s = this.sym($n);
+                let b = this.builtins.insert(Rc::new(|m, env:&$crate::BindingsHandle, x:$crate::im::Vector<Rc<Ast>>|{
+                        let x : $crate::im::Vector<Rc<Ast>> = x.into_iter().map(|y|y.nometa()).collect();
+                        $f(m,env,x)
+                }));
                 this.root_bindings
                     .borrow_mut()
                     .at_this_level

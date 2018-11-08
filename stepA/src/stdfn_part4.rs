@@ -85,7 +85,7 @@ impl Malvi {
             Ok(Sym!(m.gensym()))
         });
 
-        builtin_macro!("try*", |m,env,mut args:Vector<Rc<Ast>>| {
+        builtin_macro!("try*", |m:&mut Malvi,env,mut args:Vector<Rc<Ast>>| {
             if args.len() != 2 {
                 bail!("try* must have exactly two arguments");
             };

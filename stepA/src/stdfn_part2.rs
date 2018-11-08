@@ -1,4 +1,4 @@
-use super::{Ast, Malvi, Result, SAst};
+use super::{Ast, Malvi, Result, SAst,BindingsHandle};
 use std::rc::Rc;
 use crate::im::Vector;
 
@@ -25,7 +25,7 @@ impl Malvi {
             Ast::Curly(x) => Ast::Simple(SAst::Bool(x.is_empty())),
             _ => bail!("Can't check emptiness of this"),
         }));
-        builtin_macro!("if", |m,env,mut x:Vector<Rc<Ast>>| {
+        builtin_macro!("if", |m:&mut Malvi,env:&BindingsHandle,mut x:Vector<Rc<Ast>>| {
             if x.len() != 3 && x.len() != 2 {
                 bail!("`if` has exactly two or three arguments");
             }

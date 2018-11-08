@@ -58,7 +58,7 @@ impl Malvi {
             }
         ));
 
-        builtin_func!("swap!", |m,env,mut args:Vector<Rc<Ast>>|Ok({
+        builtin_func!("swap!", |m:&mut Malvi,env,mut args:Vector<Rc<Ast>>|Ok({
             if args.len() < 2 {
                 bail!("swap! has minimum 2 arguments");
             };
@@ -115,7 +115,7 @@ impl Malvi {
             Ok((*arg).clone())
         });
 
-        builtin_macro!("quasiquote", |m, env, mut x : Vector<Rc<Ast>>| {
+        builtin_macro!("quasiquote", |m:&mut Malvi, env, mut x : Vector<Rc<Ast>>| {
             if x.len() != 1 {
                 bail!("`quasiquote` must have exactly 1 argument")
             }
@@ -128,7 +128,7 @@ impl Malvi {
         });
 
         // The same as "id".
-        builtin_func!("unquote", |_, _, x| if x.len() == 1 {
+        builtin_func!("unquote", |_, _, x:Vector<Rc<Ast>>| if x.len() == 1 {
             Ok((*x[0]).clone())
         } else {
             bail!("unquote function must have exactly one argument")
@@ -136,7 +136,7 @@ impl Malvi {
 
 
         // The same as "id".
-        builtin_func!("splice-unquote", |_, _, x| if x.len() == 1 {
+        builtin_func!("splice-unquote", |_, _, x:Vector<Rc<Ast>>| if x.len() == 1 {
             Ok((*x[0]).clone())
         } else {
             bail!("splice-unquote function must have exactly one argument")
@@ -167,7 +167,7 @@ impl Malvi {
             _ => bail!("into-fn does not support this type"),
         }));
 
-        builtin_macro!("macroexpand", |m,env,mut x:Vector<Rc<Ast>>| {
+        builtin_macro!("macroexpand", |m:&mut Malvi,env:&BindingsHandle,mut x:Vector<Rc<Ast>>| {
             if x.len() != 1 {
                 bail!("macroexpand requires 1 argument");
             };
