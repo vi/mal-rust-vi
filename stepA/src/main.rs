@@ -1,5 +1,5 @@
 #![feature(try_blocks)]
-
+#![allow(non_snake_case)]
 
 extern crate malvi_stepA as malvi;
 
