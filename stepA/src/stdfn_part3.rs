@@ -69,9 +69,17 @@ impl Malvi {
                     let oldval = (*x.borrow()).clone();
                     let mut applyargs = vector![
                         func,
-                        oldval,
+                        Rc::new(Ast::Round(vector![
+                            Rc::new(Sym!(m.sym("quote"))),
+                            oldval,
+                        ])),
                     ];
-                    applyargs.append(args);
+                    for x in args {
+                        applyargs.push_back(Rc::new(Ast::Round(vector![
+                            Rc::new(Sym!(m.sym("quote"))),
+                            x,
+                        ])));
+                    };
                     let newval = m.eval_impl(env, &Ast::Round(applyargs))?;
                     *x.borrow_mut() = Rc::new(newval.clone());
                     newval
