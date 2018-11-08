@@ -485,6 +485,7 @@ fn test40() {
 fn test41() {
     super::test_it (
         &vec!["
+            (def! add1 (fn* (x) (+ x 1)))
             (macro? add1)
         "],
         Some("false"),
