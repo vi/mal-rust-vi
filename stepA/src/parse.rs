@@ -250,6 +250,7 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
             Simple(Int(x)) => write!(f, "{}", x),
             Simple(StrLit(x)) => match dm {
                 crate::DisplayMode::PrStr => write!(f, "\"{}\"", x.escape_default()),
+                crate::DisplayMode::WithMeta => write!(f, "\"{}\"", x.escape_default()),
                 crate::DisplayMode::Str => write!(f, "{}", x),
             },
             Simple(Symbol(x)) => write!(f, "{}", m.sym2name[x]),
@@ -292,6 +293,20 @@ impl<'a, 'b> ::std::fmt::Display for BoundAstRef<'a, 'b> {
             EvalMeAgain { .. } => write!(f, "#tco_thunk"),
             Atom(x) => write!(f, "(atom {})", BoundAstRef(&*x.borrow(), m, dm)),
             BindingsHandle(..) => write!(f, "#bindings"),
+            WithMeta{obj, meta} => {
+                match dm {
+                    crate::DisplayMode::WithMeta => write!(
+                        f,
+                        "^{} {}",
+                        BoundAstRef(meta, m, dm),
+                        BoundAstRef(obj, m, dm),
+                    ),
+                    _ => write!(  f,
+                        "{}",
+                        BoundAstRef(obj, m, dm),
+                    ),
+                }
+            }
         }
     }
 }

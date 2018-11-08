@@ -2,7 +2,9 @@
 #![feature(convert_id)]
 #![feature(str_escape)]
 #![feature(bind_by_move_pattern_guards)]
+#![feature(arbitrary_self_types)]
 //#![allow(unused_imports)]
+#![allow(non_snake_case)]
 
 extern crate pest;
 #[macro_use]
@@ -81,6 +83,42 @@ pub enum Ast {
     Atom(Rc<RefCell<Rc<Ast>>>),
 
     BindingsHandle(BindingsHandle),
+
+    WithMeta{
+        obj:  Rc<Ast>, 
+        meta: Rc<Ast>,
+    },
+}
+
+impl Ast {
+    fn nometa(self: Rc<Ast>) -> Rc<Ast> {
+        let justreturn = match &*self {
+            Ast::WithMeta{..} => false,
+            _ => true,
+        };
+        if justreturn {
+            return self
+        } else {
+            match &*self { 
+                Ast::WithMeta{obj,..} => obj.clone(),
+                _ => unreachable!(),
+            }
+        }
+    }
+    fn nometa2(self: &Ast) -> ::std::borrow::Cow<Ast> {
+        let justreturn = match self {
+            Ast::WithMeta{..} => false,
+            _ => true,
+        };
+        if justreturn {
+            return ::std::borrow::Cow::Borrowed(self)
+        } else {
+            match self { 
+                Ast::WithMeta{obj,..} => ::std::borrow::Cow::Owned((**obj).clone()),
+                _ => unreachable!(),
+            }
+        }
+    }
 }
 
 macro_rules! Int {
@@ -109,6 +147,7 @@ macro_rules! StrLit {
 pub enum DisplayMode {
     PrStr,
     Str,
+    WithMeta,
 }
 
 /// For `Display`ing.
@@ -155,6 +194,7 @@ pub mod stdfn_part1;
 pub mod stdfn_part2;
 pub mod stdfn_part3;
 pub mod stdfn_part4;
+pub mod stdfn_part5;
 pub mod stdfn_io;
 pub mod eval;
 
@@ -187,6 +227,7 @@ impl Malvi {
         this.stdfn_part2();
         this.stdfn_part3();
         this.stdfn_part4();
+        this.stdfn_part5();
         this.stdfn_io();
 
         let prelude = include_str!("prelude.mal");

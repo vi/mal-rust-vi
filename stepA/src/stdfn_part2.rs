@@ -161,6 +161,8 @@ fn mal_eq(arg1: &Rc<Ast>, arg2: &Rc<Ast>) -> Result<bool> {
         (_, Ast::BuiltinMacro(..)) => bail!("Can't compare macros"),
         (Ast::EvalMeAgain{..},_) => bail!("Can't compare TCO thunks"),
         (_, Ast::EvalMeAgain{..}) => bail!("Can't compare TCO thunks"),
+
+        (Ast::WithMeta{..}, _) => unreachable!(),
         
         (Int!(x),Int!(y)) if x==y   => true,
         (Int!(_),_) => false,
