@@ -12,7 +12,7 @@ impl Malvi {
     pub fn stdfn_part1(&mut self) {
         declare_macros_for_builtins!(self);
 
-        builtin_macro!("fn*", |m:&mut Malvi,env:&BindingsHandle,x:Vector<Rc<Ast>>| {
+        builtin_macro!("fn*", withmeta |m:&mut Malvi,env:&BindingsHandle,x:Vector<Rc<Ast>>| {
             let mut v = vector![Rc::new(Sym!(m.sym("fn*")))];
             v.append(x);
             let userfunc = Ast::UserFunction(UserFunction{
@@ -23,19 +23,13 @@ impl Malvi {
             Ok(userfunc)
         });
 
-        builtin_macro!("with-meta", |_, _, x:Vector<Rc<Ast>>| if x.len() == 2 {
-            Ok((*x[0]).clone())
-        } else {
-            bail!("with-meta macro must have exactly two arguments")
-        });
-
-        builtin_func!("id", |_, _, x:Vector<Rc<Ast>>| if x.len() == 1 {
+        builtin_func!("id", withmeta |_, _, x:Vector<Rc<Ast>>| if x.len() == 1 {
             Ok((*x[0]).clone())
         } else {
             bail!("id funciton must have exactly one argument")
         });
 
-        builtin_func!("+", |_, _, x:Vector<Rc<Ast>>| {
+        builtin_func!("+", nometa |_, _, x:Vector<Rc<Ast>>| {
             let mut sum = 0;
             for i in x {
                 match *i {
@@ -46,7 +40,7 @@ impl Malvi {
             Ok(Int!(sum))
         });
 
-        builtin_func!("-", |_, _, x:Vector<Rc<Ast>>| match x.len() {
+        builtin_func!("-", nometa |_, _, x:Vector<Rc<Ast>>| match x.len() {
             1 => match *x[0] {
                 Int!(n) => Ok(Int!(-n)),
                 _ => bail!("- does not support this type"),
@@ -58,7 +52,7 @@ impl Malvi {
             _ => bail!("- must have exactly 1 or 2 arguments"),
         });
 
-        builtin_func!("*", |_, _, x:Vector<Rc<Ast>>| {
+        builtin_func!("*", nometa |_, _, x:Vector<Rc<Ast>>| {
             let mut prod = 1;
             for i in x {
                 match *i {
@@ -69,7 +63,7 @@ impl Malvi {
             Ok(Int!(prod))
         });
 
-        builtin_func!("/", |_, _, x:Vector<Rc<Ast>>| match x.len() {
+        builtin_func!("/", nometa |_, _, x:Vector<Rc<Ast>>| match x.len() {
             2 => match (&*x[0], &*x[1]) {
                 (Int!(_), Int!(0)) => bail!("division by zero"),
                 (Int!(n), Int!(v)) => Ok(Int!(n / v)),
@@ -78,8 +72,8 @@ impl Malvi {
             _ => bail!("/ must have exactly 2 arguments"),
         });
 
-        builtin_macro!("def!", |m:&mut Malvi, env: &BindingsHandle, x:Vector<Rc<Ast>>| match x.len() {
-            2 => match (&*x[0], &*x[1]) {
+        builtin_macro!("def!", withmeta |m:&mut Malvi, env: &BindingsHandle, x:Vector<Rc<Ast>>| match x.len() {
+            2 => match (&*(x[0].clone().nometa()), &*x[1]) {
                 (Sym!(n), v) => {
                     let vv = m.eval_impl(env, &v)?;
                     env.borrow_mut().at_this_level.insert(*n, vv.clone());
@@ -90,8 +84,8 @@ impl Malvi {
             _ => bail!("def! must have exactly 2 arguments"),
         });
 
-        builtin_func!("def-in-environment!", |_, _, x:Vector<Rc<Ast>>| match x.len() {
-            3 => match (&*x[0], &*x[1], &*x[2]) {
+        builtin_func!("def-in-environment!", withmeta |_, _, x:Vector<Rc<Ast>>| match x.len() {
+            3 => match (&*(x[0].clone().nometa()), &*(x[1].clone().nometa()), &*x[2]) {
                 (Ast::BindingsHandle(bh), Sym!(n), v) => {
                     bh.borrow_mut().at_this_level.insert(*n, v.clone());
                     Ok(v.clone())
@@ -104,11 +98,11 @@ impl Malvi {
             _ => bail!("def-in-environment! must have exactly 3 arguments"),
         });
 
-        builtin_macro!("let*", let_);
+        builtin_macro!("let*", withmeta let_);
 
-        builtin_func!("apply_user_fn", |m:&mut Malvi,env: &BindingsHandle,x:Vector<Rc<Ast>>| apply(m,env,x,false));
+        builtin_func!("apply_user_fn", nometa |m:&mut Malvi,env: &BindingsHandle,x:Vector<Rc<Ast>>| apply(m,env,x,false));
 
-        builtin_macro!("do", |m:&mut Malvi,env: &BindingsHandle, mut x:Vector<Rc<Ast>>|{
+        builtin_macro!("do", nometa |m:&mut Malvi,env: &BindingsHandle, mut x:Vector<Rc<Ast>>|{
             let tail = match x.pop_back() {
                 Some(x) => x,
                 None => return Ok(Nil!()),
@@ -168,7 +162,7 @@ pub fn apply(m: &mut Malvi, env: &BindingsHandle, mut args: Vector<Rc<Ast>>, mac
     let func = args.pop_front().ok_or(format_err!("apply must have at least one argument"))?;    
     let mut env_override : Option<BindingsHandle> = None;
     let mut macro_mode = false;
-    let func = match &*func {
+    let func = match &*(func.nometa()) {
         Ast::Round(v) => v.clone(),
         Ast::UserFunction(UserFunction{
             is_macro,

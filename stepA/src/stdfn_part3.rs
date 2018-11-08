@@ -6,7 +6,7 @@ impl Malvi {
     pub fn stdfn_part3(&mut self) {
         declare_macros_for_builtins!(self);
 
-        builtin_func1!("read-string-impl",|m:&mut Malvi,_env,arg:Rc<Ast>| {
+        builtin_func1!("read-string-impl", nometa |m:&mut Malvi,_env,arg:Rc<Ast>| {
             use crate::Mal;
             match &*arg {
                 StrLit!(x) => {
@@ -26,30 +26,30 @@ impl Malvi {
             }
         });
 
-        builtin_func1!("eval",|m:&mut Malvi,env,arg:Rc<Ast>| {
+        builtin_func1!("eval",nometa |m:&mut Malvi,env,arg:Rc<Ast>| {
             m.eval_impl(env, &*arg)
         });
 
-        builtin_func1!("atom", |_,_,arg:Rc<Ast>|Ok(
+        builtin_func1!("atom", withmeta |_,_,arg:Rc<Ast>|Ok(
             Ast::Atom(Rc::new(::std::cell::RefCell::new(arg)))
         ));
 
-        builtin_func1!("atom?", |_,_,arg:Rc<Ast>|Ok(
+        builtin_func1!("atom?", nometa |_,_,arg:Rc<Ast>|Ok(
             match &*arg {
                 Ast::Atom(_) => True!(),
                 _ => False!(),
             }
         ));
 
-        builtin_func1!("deref", |_,_,arg:Rc<Ast>|Ok(
+        builtin_func1!("deref", nometa |_,_,arg:Rc<Ast>|Ok(
             match &*arg {
                 Ast::Atom(x) => (**x.borrow()).clone(),
                 x => x.clone(),
             }
         ));
 
-        builtin_func2!("reset!", |_,_,atom:Rc<Ast>, val:Rc<Ast>|Ok(
-            match &*atom {
+        builtin_func2!("reset!", withmeta |_,_,atom:Rc<Ast>, val:Rc<Ast>|Ok(
+            match &*(atom.nometa()) {
                 Ast::Atom(x) => {
                     *x.borrow_mut() = val.clone();
                     (*val).clone()
@@ -58,12 +58,12 @@ impl Malvi {
             }
         ));
 
-        builtin_func!("swap!", |m:&mut Malvi,env,mut args:Vector<Rc<Ast>>|Ok({
+        builtin_func!("swap!", withmeta |m:&mut Malvi,env,mut args:Vector<Rc<Ast>>|Ok({
             if args.len() < 2 {
                 bail!("swap! has minimum 2 arguments");
             };
-            let atom = args.pop_front().unwrap();
-            let func = args.pop_front().unwrap();
+            let atom = args.pop_front().unwrap().nometa();
+            let func = args.pop_front().unwrap().nometa();
             match &*atom {
                 Ast::Atom(x) => {
                     let oldval = (*x.borrow()).clone();
@@ -80,7 +80,7 @@ impl Malvi {
             }
         }));
 
-        builtin_func2!("cons", |_,_,elem:Rc<Ast>, list:Rc<Ast>| Ok(match &*list{
+        builtin_func2!("cons", withmeta |_,_,elem:Rc<Ast>, list:Rc<Ast>| Ok(match &*list{
             | Ast::Round(tail) 
             | Ast::Square(tail) 
             => {
@@ -91,7 +91,7 @@ impl Malvi {
             _ => bail!("cons does not support this list type")
         }));
 
-        builtin_func!("concat", |_,_,list_of_lists:Vector<Rc<Ast>>| Ok({
+        builtin_func!("concat", nometa |_,_,list_of_lists:Vector<Rc<Ast>>| Ok({
             let mut result = vector![];
             for i in list_of_lists {
                 match &*i {
@@ -107,7 +107,7 @@ impl Malvi {
         }));
 
 
-        builtin_macro!("quote", |_, _env, mut x : Vector<Rc<Ast>>| {
+        builtin_macro!("quote", withmeta |_, _env, mut x : Vector<Rc<Ast>>| {
             if x.len() != 1 {
                 bail!("`quote` must have exactly 1 argument")
             }
@@ -115,7 +115,7 @@ impl Malvi {
             Ok((*arg).clone())
         });
 
-        builtin_macro!("quasiquote", |m:&mut Malvi, env, mut x : Vector<Rc<Ast>>| {
+        builtin_macro!("quasiquote", withmeta |m:&mut Malvi, env, mut x : Vector<Rc<Ast>>| {
             if x.len() != 1 {
                 bail!("`quasiquote` must have exactly 1 argument")
             }
@@ -128,7 +128,7 @@ impl Malvi {
         });
 
         // The same as "id".
-        builtin_func!("unquote", |_, _, x:Vector<Rc<Ast>>| if x.len() == 1 {
+        builtin_func!("unquote", withmeta |_, _, x:Vector<Rc<Ast>>| if x.len() == 1 {
             Ok((*x[0]).clone())
         } else {
             bail!("unquote function must have exactly one argument")
@@ -136,14 +136,14 @@ impl Malvi {
 
 
         // The same as "id".
-        builtin_func!("splice-unquote", |_, _, x:Vector<Rc<Ast>>| if x.len() == 1 {
+        builtin_func!("splice-unquote", withmeta |_, _, x:Vector<Rc<Ast>>| if x.len() == 1 {
             Ok((*x[0]).clone())
         } else {
             bail!("splice-unquote function must have exactly one argument")
         });
 
         /// Convert user-defined function into a macro
-        builtin_func1!("into-macro", |_,_,x:Rc<Ast>| Ok(match &*x {
+        builtin_func1!("into-macro", nometa |_,_,x:Rc<Ast>| Ok(match &*x {
             Ast::UserFunction(UserFunction{func,bindings,is_macro:false}) => {
                 Ast::UserFunction(UserFunction{
                     is_macro: true,
@@ -156,7 +156,7 @@ impl Malvi {
         }));
 
         /// Convert user-defined macro into a function
-        builtin_func1!("into-fn", |_,_,x:Rc<Ast>| Ok(match &*x {
+        builtin_func1!("into-fn", nometa |_,_,x:Rc<Ast>| Ok(match &*x {
             Ast::UserFunction(UserFunction{func,bindings,is_macro:true}) => {
                 Ast::UserFunction(UserFunction{
                     is_macro: false,
@@ -167,7 +167,7 @@ impl Malvi {
             _ => bail!("into-fn does not support this type"),
         }));
 
-        builtin_macro!("macroexpand", |m:&mut Malvi,env:&BindingsHandle,mut x:Vector<Rc<Ast>>| {
+        builtin_macro!("macroexpand", nometa |m:&mut Malvi,env:&BindingsHandle,mut x:Vector<Rc<Ast>>| {
             if x.len() != 1 {
                 bail!("macroexpand requires 1 argument");
             };
@@ -189,7 +189,7 @@ impl Malvi {
         builtin_func0!("current-environment",|_,env:&BindingsHandle|
             Ok(Ast::BindingsHandle(env.clone())));
 
-        builtin_func2!("eval-in-environment", |_,_,theenv:Rc<Ast>,obj:Rc<Ast>| {
+        builtin_func2!("eval-in-environment", nometa |_,_,theenv:Rc<Ast>,obj:Rc<Ast>| {
             let bh = match &*theenv {
                 Ast::BindingsHandle(x) => x.clone(),
                 _ => bail!("First argument must be bindings")
@@ -200,7 +200,7 @@ impl Malvi {
             })
         });
 
-        builtin_func1!("parent-environment",|_,_,x:Rc<Ast>|Ok(match&*x{
+        builtin_func1!("parent-environment",nometa |_,_,x:Rc<Ast>|Ok(match&*x{
             Ast::BindingsHandle(bh) => match &bh.borrow().parent {
                 Some(h) => Ast::BindingsHandle(h.clone()),
                 None => Nil!(),

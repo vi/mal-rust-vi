@@ -6,30 +6,30 @@ impl Malvi {
     pub fn stdfn_part2(&mut self) {
         declare_macros_for_builtins!(self);
 
-        builtin_func!("list", |_,_,x|Ok(Ast::Round(x)));
+        builtin_func!("list", withmeta |_,_,x|Ok(Ast::Round(x)));
         
-        builtin_func1!("list?", |_,_,x:Rc<Ast>|Ok(match *x {
+        builtin_func1!("list?", nometa |_,_,x:Rc<Ast>|Ok(match *x {
             Ast::Round(..) => True!(),
             _ => False!(),
         }));
-        builtin_func1!("count", |_,_,x:Rc<Ast>|Ok(match &*x {
+        builtin_func1!("count", nometa |_,_,x:Rc<Ast>|Ok(match &*x {
             Ast::Round(x) => Int!(x.len() as i64),
             Ast::Square(x) => Int!(x.len() as i64),
             Ast::Curly(x) => Int!(x.len() as i64),
             Nil!() => Int!(0),
             _ => bail!("Can't count elements of this"),
         }));
-        builtin_func1!("empty?", |_,_,x:Rc<Ast>|Ok(match &*x {
+        builtin_func1!("empty?", nometa |_,_,x:Rc<Ast>|Ok(match &*x {
             Ast::Round(x) => Ast::Simple(SAst::Bool(x.is_empty())),
             Ast::Square(x) =>Ast::Simple(SAst::Bool(x.is_empty())),
             Ast::Curly(x) => Ast::Simple(SAst::Bool(x.is_empty())),
             _ => bail!("Can't check emptiness of this"),
         }));
-        builtin_macro!("if", |m:&mut Malvi,env:&BindingsHandle,mut x:Vector<Rc<Ast>>| {
+        builtin_macro!("if", withmeta |m:&mut Malvi,env:&BindingsHandle,mut x:Vector<Rc<Ast>>| {
             if x.len() != 3 && x.len() != 2 {
                 bail!("`if` has exactly two or three arguments");
             }
-            let cond = x.pop_front().unwrap();
+            let cond = x.pop_front().unwrap().nometa();
             let iftrue = x.pop_front().unwrap();
             let iffalse = x.pop_front().unwrap_or(Rc::new(Nil!()));
             let iftrue = ||Ok(Ast::EvalMeAgain{obj:iftrue, env:env.clone()});
@@ -47,31 +47,31 @@ impl Malvi {
                 _ => bail!("Wrong type used in `if` conditional"),
             }
         });
-        builtin_func2!("=", |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>|
+        builtin_func2!("=", nometa |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>|
             Ok(Ast::Simple(SAst::Bool(mal_eq(&arg1, &arg2)?))));
 
-        builtin_func2!(">", |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>| Ok(match (&*arg1,&*arg2){
+        builtin_func2!(">", nometa |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>| Ok(match (&*arg1,&*arg2){
             (Int!(x),Int!(y)) if x>y   => True!(),
             (Int!(_),Int!(_)) => False!(),
             (_,_) => bail!("Can only compare integers"),
         }));
-        builtin_func2!(">=", |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>| Ok(match (&*arg1,&*arg2){
+        builtin_func2!(">=", nometa |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>| Ok(match (&*arg1,&*arg2){
             (Int!(x),Int!(y)) if x>=y   => True!(),
             (Int!(_),Int!(_)) => False!(),
             (_,_) => bail!("Can only compare integers"),
         }));
-        builtin_func2!("<", |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>| Ok(match (&*arg1,&*arg2){
+        builtin_func2!("<", nometa |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>| Ok(match (&*arg1,&*arg2){
             (Int!(x),Int!(y)) if x<y   => True!(),
             (Int!(_),Int!(_)) => False!(),
             (_,_) => bail!("Can only compare integers"),
         }));
-        builtin_func2!("<=", |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>| Ok(match (&*arg1,&*arg2){
+        builtin_func2!("<=", nometa |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>| Ok(match (&*arg1,&*arg2){
             (Int!(x),Int!(y)) if x<=y   => True!(),
             (Int!(_),Int!(_)) => False!(),
             (_,_) => bail!("Can only compare integers"),
         }));
 
-        builtin_func!("prn",|m,_env,args:Vector<Rc<Ast>>| {
+        builtin_func!("prn",nometa |m,_env,args:Vector<Rc<Ast>>| {
             let mut first = true;
             for x in args {
                 if !first {
@@ -84,7 +84,7 @@ impl Malvi {
             Ok(Nil!())
         });
 
-        builtin_func!("pr-str",|m,_env,args:Vector<Rc<Ast>>| {
+        builtin_func!("pr-str",nometa |m,_env,args:Vector<Rc<Ast>>| {
             let mut s = String::new();
             let mut first = true;
             use ::std::fmt::Write;
@@ -98,7 +98,21 @@ impl Malvi {
             Ok(StrLit!(s))
         });
 
-        builtin_func!("str",|m,_env,args:Vector<Rc<Ast>>| {
+        builtin_func!("pr-meta-str",withmeta |m,_env,args:Vector<Rc<Ast>>| {
+            let mut s = String::new();
+            let mut first = true;
+            use ::std::fmt::Write;
+            for x in args {
+                if !first {
+                    write!(s, " ")?;
+                };
+                write!(s, "{}", super::BoundAstRef(&*x, m, crate::DisplayMode::WithMeta))?;
+                first = false;
+            }
+            Ok(StrLit!(s))
+        });
+
+        builtin_func!("str",nometa |m,_env,args:Vector<Rc<Ast>>| {
             let mut s = String::new();
             use ::std::fmt::Write;
             for x in args {
@@ -107,7 +121,7 @@ impl Malvi {
             Ok(StrLit!(s))
         });
 
-        builtin_func!("println",|m,_env,args:Vector<Rc<Ast>>| {
+        builtin_func!("println",nometa |m,_env,args:Vector<Rc<Ast>>| {
             let mut first = true;
             for x in args {
                 if !first {
@@ -120,7 +134,7 @@ impl Malvi {
             Ok(Nil!())
         });
 
-        builtin_func!("first-or-list", |_,_,mut args:Vector<Rc<Ast>>| {
+        builtin_func!("first-or-list", nometa |_,_,mut args:Vector<Rc<Ast>>| {
             match args.len() {
                 0 => Ok(Nil!()),
                 1 => {
@@ -133,7 +147,7 @@ impl Malvi {
             }
         });
 
-        builtin_func1!("last-or-something", |_,_,arg:Rc<Ast>| {
+        builtin_func1!("last-or-something", nometa |_,_,arg:Rc<Ast>| {
             match &*arg {
                 | Ast::Round(args)
                 | Ast::Square(args)

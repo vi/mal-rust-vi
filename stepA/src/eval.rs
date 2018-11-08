@@ -52,7 +52,7 @@ impl Malvi {
                 } else {
                     let mut rest = inner.clone();
                     let name = rest.pop_front().unwrap();
-                    let name = self.eval_impl(env, &*name)?;
+                    let name = self.eval_impl(env, &*name)?.nometa2().into_owned();
                     match name {
                         Ast::BuiltinFunction(ff) => {
                             let fnn = self.builtins[ff].clone();
@@ -112,7 +112,7 @@ impl Malvi {
                         _ => {
                             bail!(
                                 "{} cannot be called",
-                                crate::BoundAstRef(&name, self, crate::DisplayMode::PrStr),
+                                crate::BoundAstRef(&name, self, crate::DisplayMode::WithMeta),
                             )
                         },
                     }

@@ -7,7 +7,7 @@ impl Malvi {
     pub fn stdfn_part4(&mut self) {
         declare_macros_for_builtins!(self);
 
-        builtin_func1!("first", |_,_,x:Rc<Ast>| Ok(match &*x {
+        builtin_func1!("first", nometa |_,_,x:Rc<Ast>| Ok(match &*x {
             | Ast::Round(x)
             | Ast::Square(x)
             => if let Some(y) = x.get(0) {
@@ -19,7 +19,7 @@ impl Malvi {
             _ => bail!("first does not support this type"),
         }));
 
-        builtin_func1!("last", |_,_,x:Rc<Ast>| Ok(match &*x {
+        builtin_func1!("last", nometa |_,_,x:Rc<Ast>| Ok(match &*x {
             | Ast::Round(x)
             | Ast::Square(x)
             => if let Some(y) = x.clone().pop_back() {
@@ -31,7 +31,7 @@ impl Malvi {
             _ => bail!("last does not support this type"),
         }));
 
-        builtin_func1!("rest", |_,_,x:Rc<Ast>| Ok(match &*x {
+        builtin_func1!("rest", nometa |_,_,x:Rc<Ast>| Ok(match &*x {
             | Ast::Round(x) 
             | Ast::Square(x) 
             => if x.len() > 0 {
@@ -45,7 +45,7 @@ impl Malvi {
             _ => bail!("rest does not support this type"),
         }));
 
-        builtin_func1!("all-but-last", |_,_,x:Rc<Ast>| Ok(match &*x {
+        builtin_func1!("all-but-last", nometa |_,_,x:Rc<Ast>| Ok(match &*x {
             | Ast::Round(x) 
             | Ast::Square(x) 
             => if x.len() > 0 {
@@ -59,7 +59,7 @@ impl Malvi {
             _ => bail!("all-but-last does not support this type"),
         }));
 
-        builtin_func2!("nth", |_,_,list:Rc<Ast>,idx:Rc<Ast>| Ok({
+        builtin_func2!("nth", nometa |_,_,list:Rc<Ast>,idx:Rc<Ast>| Ok({
             let mut idx = match &*idx {
                 Int!(n) => *n,
                 _ => bail!("Second argument of nth must be an int")
@@ -85,7 +85,7 @@ impl Malvi {
             Ok(Sym!(m.gensym()))
         });
 
-        builtin_macro!("try*", |m:&mut Malvi,env,mut args:Vector<Rc<Ast>>| {
+        builtin_macro!("try*", nometa |m:&mut Malvi,env,mut args:Vector<Rc<Ast>>| {
             if args.len() != 2 {
                 bail!("try* must have exactly two arguments");
             };
@@ -123,7 +123,7 @@ impl Malvi {
             }
         });
 
-        builtin_func1!("throw",|_,_,arg:Rc<Ast>| {
+        builtin_func1!("throw",nometa |_,_,arg:Rc<Ast>| {
             match &*arg {
                 StrLit!(x) => {
                     bail!("{}", x)
@@ -132,50 +132,50 @@ impl Malvi {
             }
         });
 
-        builtin_func1!("symbol?",|_,_,arg:Rc<Ast>| Ok(match &*arg {
+        builtin_func1!("symbol?", nometa |_,_,arg:Rc<Ast>| Ok(match &*arg {
             Sym!(_) => True!(),
             _ => False!(),
         }));
 
-        builtin_func1!("keyword?",|_,_,arg:Rc<Ast>| Ok(match &*arg {
+        builtin_func1!("keyword?",nometa |_,_,arg:Rc<Ast>| Ok(match &*arg {
             Kwident!(_) => True!(),
             _ => False!(),
         }));
 
-        builtin_func1!("nil?",|_,_,arg:Rc<Ast>| Ok(match &*arg {
+        builtin_func1!("nil?",nometa |_,_,arg:Rc<Ast>| Ok(match &*arg {
             Nil!() => True!(),
             _ => False!(),
         }));
 
-        builtin_func1!("true?",|_,_,arg:Rc<Ast>| Ok(match &*arg {
+        builtin_func1!("true?",nometa |_,_,arg:Rc<Ast>| Ok(match &*arg {
             True!()  => True!(),
             _ => False!(),
         }));
 
-        builtin_func1!("false?",|_,_,arg:Rc<Ast>| Ok(match &*arg {
+        builtin_func1!("false?",nometa |_,_,arg:Rc<Ast>| Ok(match &*arg {
             False!() => True!(),
             _ => False!(),
         }));
-        builtin_func1!("sequential?",|_,_,arg:Rc<Ast>| Ok(match &*arg {
+        builtin_func1!("sequential?",nometa |_,_,arg:Rc<Ast>| Ok(match &*arg {
             Ast::Round(_) => True!(),
             Ast::Square(_) => True!(),
             _ => False!(),
         }));
-        builtin_func1!("vector?",|_,_,arg:Rc<Ast>| Ok(match &*arg {
+        builtin_func1!("vector?",nometa |_,_,arg:Rc<Ast>| Ok(match &*arg {
             Ast::Square(_) => True!(),
             _ => False!(),
         }));
-        builtin_func1!("map?",|_,_,arg:Rc<Ast>| Ok(match &*arg {
+        builtin_func1!("map?",nometa |_,_,arg:Rc<Ast>| Ok(match &*arg {
             Ast::Curly(_) => True!(),
             _ => False!(),
         }));
 
-        builtin_func1!("symbol",|m:&mut Malvi,_,arg:Rc<Ast>| Ok(match &*arg {
+        builtin_func1!("symbol",nometa |m:&mut Malvi,_,arg:Rc<Ast>| Ok(match &*arg {
             StrLit!(x) => Sym!(m.sym(x)),
             Sym!(x) => Sym!(*x),
             _ => bail!("symbol function requires string argument")
         }));
-        builtin_func1!("keyword",|m:&mut Malvi,_,arg:Rc<Ast>| Ok(match &*arg {
+        builtin_func1!("keyword",nometa |m:&mut Malvi,_,arg:Rc<Ast>| Ok(match &*arg {
             StrLit!(x) => Kwident!(m.sym(&format!(":{}", x))),
             Kwident!(x) => Kwident!(*x),
             Sym!(x) => {
@@ -184,7 +184,7 @@ impl Malvi {
             _ => bail!("keyword function requires string argument")
         }));
 
-        builtin_func!("hash-map", |_,_,args:Vector<Rc<Ast>>|Ok({
+        builtin_func!("hash-map", withmeta |_,_,args:Vector<Rc<Ast>>|Ok({
             if args.len() % 2 != 0 {
                 bail!("hash-map function must have even number of arguments")
             };
@@ -193,11 +193,11 @@ impl Malvi {
             Ast::Curly(q)
         }));
 
-        builtin_func!("assoc",|_,_,mut args:Vector<Rc<Ast>>|Ok({
+        builtin_func!("assoc",withmeta |_,_,mut args:Vector<Rc<Ast>>|Ok({
             if args.is_empty() {
                 bail!("assoc function must have at least 1 argument")
             };
-            let obj = args.pop_front().unwrap();
+            let obj = args.pop_front().unwrap().nometa();
             match &*obj {
                 Ast::Curly(x) => {
                     if args.len() % 2 != 0 {
@@ -221,7 +221,7 @@ impl Malvi {
             }
         }));
 
-        builtin_func!("dissoc",|_,_,mut args:Vector<Rc<Ast>>|Ok({
+        builtin_func!("dissoc",nometa |_,_,mut args:Vector<Rc<Ast>>|Ok({
             if args.is_empty() {
                 bail!("assoc function must have at least 1 argument")
             };
@@ -243,7 +243,7 @@ impl Malvi {
             }
         }));
 
-        builtin_func2!("get",|_,_,map:Rc<Ast>,k:Rc<Ast>|Ok({
+        builtin_func2!("get",nometa |_,_,map:Rc<Ast>,k:Rc<Ast>|Ok({
             match &*map {
                 Ast::Curly(m) => {
                     match &*k {
@@ -259,7 +259,7 @@ impl Malvi {
         }));
 
 
-        builtin_func2!("contains?",|_,_,map:Rc<Ast>,k:Rc<Ast>|Ok({
+        builtin_func2!("contains?",nometa |_,_,map:Rc<Ast>,k:Rc<Ast>|Ok({
             match &*map {
                 Ast::Curly(m) => {
                     match &*k {
@@ -274,7 +274,7 @@ impl Malvi {
             }
         }));
 
-        builtin_func1!("keys",|_,_,map:Rc<Ast>|Ok({
+        builtin_func1!("keys",nometa |_,_,map:Rc<Ast>|Ok({
             match &*map {
                 Ast::Curly(m) => {
                    let mut q = vector![];
@@ -288,7 +288,7 @@ impl Malvi {
             }
         }));
 
-        builtin_func1!("vals",|_,_,map:Rc<Ast>|Ok({
+        builtin_func1!("vals",nometa |_,_,map:Rc<Ast>|Ok({
             match &*map {
                 Ast::Curly(m) => {
                    let mut q = vector![];
@@ -307,9 +307,9 @@ impl Malvi {
 fn populate_map_from_args(q: &mut HashMap<SAst,Rc<Ast>>, args: &Vector<Rc<Ast>>) -> crate::Result<()> {
     use crate::itertools::Itertools;
     for mut x in &args.iter().chunks(2) {
-        let k = x.next().unwrap();
+        let k = x.next().unwrap().clone().nometa();
         let v = x.next().unwrap();
-        match &**k {
+        match &*k {
             Ast::Simple(key) => {
                 q.insert(key.clone(), v.clone());
             },

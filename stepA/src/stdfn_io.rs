@@ -5,7 +5,7 @@ impl Malvi {
     pub fn stdfn_io(&mut self) {
         declare_macros_for_builtins!(self);
 
-        builtin_func1!("slurp",|_:&mut Malvi,_,arg:Rc<Ast>| {
+        builtin_func1!("slurp",nometa |_:&mut Malvi,_,arg:Rc<Ast>| {
             match &*arg {
                 StrLit!(x) => {
                     let content = ::std::fs::read(x)?;
@@ -16,7 +16,7 @@ impl Malvi {
             }
         });
 
-        builtin_func1!("getenv",|_:&mut Malvi,_,arg:Rc<Ast>| {
+        builtin_func1!("getenv",nometa |_:&mut Malvi,_,arg:Rc<Ast>| {
             match &*arg {
                 StrLit!(x) => {
                     let data = ::std::env::var(x)?;
