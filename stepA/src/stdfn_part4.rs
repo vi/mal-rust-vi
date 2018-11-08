@@ -169,6 +169,24 @@ impl Malvi {
             Ast::Curly(_) => True!(),
             _ => False!(),
         }));
+        builtin_func1!("string?",nometa |_,_,arg:Rc<Ast>| Ok(match &*arg {
+            StrLit!(_) => True!(),
+            _ => False!(),
+        }));
+        builtin_func1!("number?",nometa |_,_,arg:Rc<Ast>| Ok(match &*arg {
+            Int!(_) => True!(),
+            _ => False!(),
+        }));
+        builtin_func1!("fn?",nometa |_,_,arg:Rc<Ast>| Ok(match &*arg {
+            Ast::UserFunction(x) if !x.is_macro => True!(),
+            Ast::BuiltinFunction(_) => True!(),
+            _ => False!(),
+        }));
+        builtin_func1!("macro?",nometa |_,_,arg:Rc<Ast>| Ok(match &*arg {
+            Ast::UserFunction(x) if x.is_macro => True!(),
+            Ast::BuiltinMacro(_) => True!(),
+            _ => False!(),
+        }));
 
         builtin_func1!("symbol",nometa |m:&mut Malvi,_,arg:Rc<Ast>| Ok(match &*arg {
             StrLit!(x) => Sym!(m.sym(x)),
