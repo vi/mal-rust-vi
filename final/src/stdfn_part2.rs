@@ -44,7 +44,15 @@ impl Malvi {
                 => iftrue(),
                 Ast::Simple(SAst::StrLit(_)) => iftrue(),
                 Nil!() => iffalse(),
-                _ => bail!("Wrong type used in `if` conditional"),
+                | Ast::UserFunction{..}
+                | Ast::BuiltinFunction(..)
+                | Ast::BuiltinMacro(..)
+                => iftrue(),
+                Ast::Atom(..) => iftrue(),
+                x => bail!(
+                    "Wrong object {} used in `if` conditional",
+                    crate::BoundAstRef(&x, m, crate::DisplayMode::WithMeta),
+                ),
             }
         });
         builtin_func2!("=", nometa |_,_,arg1:Rc<Ast>,arg2:Rc<Ast>|
