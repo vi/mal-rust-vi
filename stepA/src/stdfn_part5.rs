@@ -27,5 +27,35 @@ impl Malvi {
             }
         }));
 
+        builtin_func1!("seq",nometa |_,_,arg:Rc<Ast>|Ok({
+            match &*arg {
+                Ast::Round(x) | Ast::Square(x)=> {
+                    Ast::Round(x.clone())
+                },
+                Ast::Curly(m) => {
+                    let mut x = vector![];
+                    for (k,v) in m {
+                        x.push_back(Rc::new(Ast::Round(vector![
+                            Rc::new(Ast::Simple(k.clone())),
+                            v.clone(),
+                        ])));
+                    }
+                    Ast::Round(x)
+                },
+                StrLit!(s) => {
+                    let mut x = vector![];
+                    for c in s.chars() {
+                        x.push_back(Rc::new(
+                            StrLit!(format!("{}", c))
+                        ));
+                    }
+                    Ast::Round(x)
+                },
+                Nil!() => {
+                    Ast::Round(vector![])
+                },
+                _ => bail!("seq function may not be used on this object")
+            }
+        }));
     }
 }
