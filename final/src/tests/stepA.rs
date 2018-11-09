@@ -907,9 +907,9 @@ fn test81() {
     crate::test_it (
         &vec!["
             (def! start-time (time-ms))
-            (let* [sumdown (fn* (N) (if (> N 0) (+ N (sumdown (- N 1))) 0))] (sumdown 10)) ; Waste some time
+            (let* [sumdown (fn* (N) (if (> N 0) (+ N (sumdown (- N 1))) 0))] (sumdown 100)) ; Waste some time
         "],
-        Some("55"),
+        Some("5050"),
     );
 }
 
@@ -918,7 +918,7 @@ fn test82() {
     crate::test_it (
         &vec!["
             (def! start-time (time-ms))
-            (let* [sumdown (fn* (N) (if (> N 0) (+ N (sumdown (- N 1))) 0))] (sumdown 10)) ; Waste some time
+            (let* [sumdown (fn* (N) (if (> N 0) (+ N (sumdown (- N 1))) 0))] (sumdown 100)) ; Waste some time
             (> (time-ms) start-time)
         "],
         Some("true"),
