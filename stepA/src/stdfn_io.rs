@@ -51,6 +51,16 @@ impl Malvi {
             ::std::io::stdin().read_line(&mut s)?;
             StrLit!(s)
         }));
+
+        builtin_func0!("time-ms", |_,_| Ok({
+            let d = ::std::time::SystemTime::now().duration_since(::std::time::UNIX_EPOCH)?;
+            use std::convert::TryInto;
+            let e = ||format_err!("time overflow");
+            let mut val :i64 = d.as_secs().try_into()?;
+            val = val.checked_mul(1000).ok_or_else(e)?;
+            val = val.checked_add(d.subsec_millis() as i64).ok_or_else(e)?;
+            Int!(val)
+        }));
     }
 }
 

@@ -3,7 +3,7 @@
 #![feature(str_escape)]
 #![feature(bind_by_move_pattern_guards)]
 #![feature(arbitrary_self_types)]
-#![feature(macro_at_most_once_rep)] 
+#![feature(try_from)]
 //#![allow(unused_imports)]
 #![allow(non_snake_case)]
 
