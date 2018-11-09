@@ -158,6 +158,13 @@ pub trait Mal {
     fn read(&mut self, x:&str) -> Result<Vector<Rc<Ast>>>;
     fn eval(&mut self,  a:&Ast)-> Result<Ast>;
     fn print(&self, a:&Ast) -> Result<String>;
+    fn init_cmdargs(&mut self, args : impl IntoIterator<Item=String>);
+    fn easy_eval(&mut self, x:&str) -> Result<()> {
+        for expr in self.read(x)? {
+            let _ = self.eval(&expr)?;
+        }
+        Ok(())
+    }
 }
 
 type Func = Rc<Fn(&mut Malvi, &BindingsHandle, Vector<Rc<Ast>>) -> Result<Ast>>;
@@ -234,9 +241,7 @@ impl Malvi {
         this.stdfn_io();
 
         let prelude = include_str!("prelude.mal");
-        for x in this.read(prelude).expect("error parsing prelude") {
-            this.eval(&x).expect("error evaluating prelude");
-        }
+        this.easy_eval(prelude).expect("error executing prelude");
         this
     }
 }
@@ -258,6 +263,9 @@ impl Mal for Malvi {
     }
     fn print(&self, a:&Ast) -> Result<String> {
         Ok(format!("{}", BoundAstRef(a,self, DisplayMode::PrStr)))
+    }
+    fn init_cmdargs(&mut self, args : impl IntoIterator<Item=String>) {
+        self.init_cmdargs_impl(args)
     }
 }
 

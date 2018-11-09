@@ -2,6 +2,25 @@ use super::{Ast, Malvi, SAst};
 use std::rc::Rc;
 
 impl Malvi {
+    pub fn init_cmdargs_impl(&mut self, args : impl IntoIterator<Item=String>) {
+        declare_macros_for_builtins!(self);
+        let args : Rc<Vec<String>> = Rc::new(args.into_iter().collect());
+        builtin_func!("getcmdargs",withmeta move |_:&mut Malvi,_,_| {
+            let args = args.clone();
+            let mut q = vector![];
+            let mut first = true;
+            for i in &*args {
+                if !first {
+                    q.push_back(Rc::new(StrLit!(i.clone())));
+                };
+                first = false;
+            }
+            Ok(Ast::Round(q))
+        });
+
+        easy_eval!("(def! *ARGV* (getcmdargs))");
+    }
+
     pub fn stdfn_io(&mut self) {
         declare_macros_for_builtins!(self);
 
@@ -14,6 +33,12 @@ impl Malvi {
                 },
                 _ => bail!("String argument required")
             }
+        });
+
+        // Stub for tests
+        builtin_func!("getcmdargs",withmeta move |_,_,_| {
+            let q = vector![];
+            Ok(Ast::Round(q))
         });
 
         builtin_func1!("getenv",nometa |_:&mut Malvi,_,arg:Rc<Ast>| {
@@ -31,17 +56,6 @@ impl Malvi {
         });
 
 
-        builtin_func0!("getcmdargs",|_:&mut Malvi,_| {
-            let mut q = vector![];
-            let mut first = true;
-            for i in ::std::env::args() {
-                if !first {
-                    q.push_back(Rc::new(StrLit!(i)));
-                };
-                first = false;
-            }
-            Ok(Ast::Round(q))
-        });
 
         builtin_func1!("readline", nometa |m:&mut Malvi,_,prompt:Rc<Ast>| Ok({
             print!("{}", crate::BoundAstRef(&*prompt, m, crate::DisplayMode::Str));

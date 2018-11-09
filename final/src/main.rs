@@ -65,6 +65,7 @@ fn main() -> malvi::Result<()> {
                 return Ok(())
             }
             let na = args.next().unwrap();
+            m.init_cmdargs(args);
             let s = ::std::fs::read_to_string(na)?;
             for x in m.read(&s)? {
                 let _ = m.eval(&x)?;
@@ -73,6 +74,7 @@ fn main() -> malvi::Result<()> {
             return Ok(())
         }
 
+        m.init_cmdargs(args);
         let s = ::std::fs::read_to_string(fa)?;
         for x in m.read(&s)? {
             if tracemode {
