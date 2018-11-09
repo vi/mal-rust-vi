@@ -662,7 +662,7 @@ fn test58() {
         &vec!["
             (seq \"\")
         "],
-        Some("nil"),
+        Some("()"),
     );
 }
 
@@ -672,7 +672,7 @@ fn test59() {
         &vec!["
             (seq '())
         "],
-        Some("nil"),
+        Some("()"),
     );
 }
 
@@ -682,7 +682,7 @@ fn test60() {
         &vec!["
             (seq [])
         "],
-        Some("nil"),
+        Some("()"),
     );
 }
 
@@ -692,7 +692,7 @@ fn test61() {
         &vec!["
             (seq nil)
         "],
-        Some("nil"),
+        Some("()"),
     );
 }
 
