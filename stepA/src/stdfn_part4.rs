@@ -261,6 +261,28 @@ impl Malvi {
             }
         }));
 
+        builtin_func!("conj",withmeta |_,_,mut args:Vector<Rc<Ast>>|Ok({
+            if args.is_empty() {
+                bail!("assoc function must have at least 1 argument")
+            };
+            let obj = args.pop_front().unwrap().nometa();
+            match &*obj {
+                Ast::Round(x) => {
+                    let mut q = x.clone();
+                    for i in args {
+                        q.push_front(i);
+                    }
+                    Ast::Round(q)
+                },
+                Ast::Square(x) => {
+                    let mut q = x.clone();
+                    q.append(args.clone());
+                    Ast::Square(q)
+                },
+                _ => bail!("conj function must have vector or map for the first argument")
+            }
+        }));
+
         builtin_func2!("get",nometa |_,_,map:Rc<Ast>,k:Rc<Ast>|Ok({
             match &*map {
                 Ast::Curly(m) => {
