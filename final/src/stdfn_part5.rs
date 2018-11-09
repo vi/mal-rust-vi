@@ -57,5 +57,13 @@ impl Malvi {
                 _ => bail!("seq function may not be used on this object")
             }
         }));
+
+        builtin_func1!("trace-mode",nometa |m:&mut Malvi,_,arg:Rc<Ast>|Ok({
+            match &*arg {
+                True!() => {m.trace_mode = true; Nil!() },
+                False!() => {m.trace_mode = false; Nil!() },
+                _ => bail!("boolean argument required")
+            }
+        }));
     }
 }

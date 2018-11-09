@@ -185,6 +185,7 @@ pub struct Malvi {
     name2sym: StdHashMap<String, Symbol>,
     root_bindings: BindingsHandle,
     builtins: Slab<Builtin, Func>,
+    trace_mode: bool,
 }
 
 
@@ -223,6 +224,7 @@ impl Malvi {
             sym2name: Slab::with_capacity(10),
             name2sym: StdHashMap::with_capacity(10),
             builtins: Slab::with_capacity(10),
+            trace_mode: false,
         };
         this.stdfn_part1();
         this.stdfn_part2();

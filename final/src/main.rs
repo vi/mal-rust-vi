@@ -31,6 +31,12 @@ fn interactive_mode<T:Mal>(m:&mut T) -> malvi::Result<()> {
 fn main() -> malvi::Result<()> {
     let mut m = Malvi::new();
 
+    let tracemode = ::std::env::var("MAL_TRACE").is_ok();
+    if tracemode {
+        let cmd = m.read("(trace-mode true)")?.pop_front().unwrap();
+        let _ = m.eval(&*cmd)?;
+    }
+
     let mut args = ::std::env::args();
 
     if args.len() <= 1 {
@@ -69,7 +75,19 @@ fn main() -> malvi::Result<()> {
 
         let s = ::std::fs::read_to_string(fa)?;
         for x in m.read(&s)? {
-            let _ = m.eval(&x)?;
+            if tracemode {
+                eprintln!(
+                    "top-level line: {}", 
+                    malvi::BoundAstRef(&x,&m,malvi::DisplayMode::WithMeta),
+                );
+            }
+            let res = m.eval(&x)?;
+            if tracemode {
+                eprintln!(
+                    "top-level result: {}",
+                    malvi::BoundAstRef(&res,&m,malvi::DisplayMode::WithMeta),
+                )
+            }
         }
     }
 

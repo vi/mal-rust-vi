@@ -44,7 +44,14 @@ impl Malvi {
         }
     }
     fn eval_impl_inner(&mut self, env: &BindingsHandle, a:&Ast)-> Result<Ast> {
-        //eprintln!("eval {} with bindings {:?}", super::BoundAstRef(a,self,crate::DisplayMode::PrStr),&*env.borrow() as *const Bindings);
+        if self.trace_mode {
+            eprintln!(
+                "eval {} with bindings {:?}",
+                super::BoundAstRef(a,self,crate::DisplayMode::WithMeta),
+                &*env.borrow() as *const Bindings
+            );
+        }
+
         match a {
             Ast::Round(inner) => {
                 if inner.is_empty() {
