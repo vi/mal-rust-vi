@@ -26,12 +26,6 @@
       (map func (rest list)))
 )))
 
-(def! apply (fn* [func & args] 
-  (if (empty? args) (throw "Can't apply nothing")
-    (eval `(~(into-macro func) ~@(all-but-last args) ~@(last args)))
-  )
-))
-
 (def! vector (fn* [& args] 
   `[~@args]
 ))

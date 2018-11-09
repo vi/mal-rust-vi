@@ -1,6 +1,6 @@
 #![allow(unused_imports)]
 
-use super::{Ast, Malvi, SAst};
+use super::{Ast, Malvi, SAst, BindingsHandle};
 use std::rc::Rc;
 use crate::im::Vector;
 use crate::im::HashMap;
@@ -63,6 +63,41 @@ impl Malvi {
                 True!() => {m.trace_mode = true; Nil!() },
                 False!() => {m.trace_mode = false; Nil!() },
                 _ => bail!("boolean argument required")
+            }
+        }));
+
+        builtin_func!("apply", withmeta |
+                        m:&mut Malvi,
+                        env:&BindingsHandle,
+                        mut args:Vector<Rc<Ast>>
+                        |Ok({
+            if args.len() < 2 {
+                bail!("apply must have at least two arguments")
+            }
+            let func = args.pop_front().unwrap().nometa();
+            let list = args.pop_back().unwrap().nometa();
+            match &*list {
+                | Ast::Round(x)
+                | Ast::Square(x)
+                => {
+                    args.append((*x).clone())
+                }
+                _ => bail!("Last argument of apply must be a list")
+            };
+            match &*func {
+                Ast::UserFunction(uf) => {
+                    if uf.is_macro {
+                        bail!("Can't use apply on a macro")
+                    }
+                    args.push_front(func);
+                    super::stdfn_part1::apply(m, env, args, false)?
+                },
+                Ast::BuiltinFunction(bf) => {
+                    let bf = m.builtins[bf].clone();
+                    bf(m, env, args)?
+                }
+                Ast::BuiltinMacro(..) => bail!("Can't use apply on a built-in macro"),
+                _ => bail!("This thing can't be first to apply"),
             }
         }));
     }
